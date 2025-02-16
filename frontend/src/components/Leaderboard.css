@@ -1,0 +1,76 @@
+.leaderboard {
+  width: 370px;
+  background-color: rgba(254, 255, 253, 1);
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 0 4px rgba(142, 224, 0, 0.2);
+  border: 1px solid rgba(231, 232, 230, 0.3);
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.leaderboard-header h2 {
+  color: rgba(25, 42, 12, 1);
+  font-size: 16px;
+  margin: 0;
+}
+
+.view-all {
+  color: rgba(75, 75, 75, 0.8);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.leaderboard-item.active {
+  background-color: rgba(137, 226, 25, 0.1);
+}
+
+.rank {
+  width: 30px;
+  color: rgba(92, 92, 92, 1);
+  font-size: 14px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.name {
+  color: rgba(92, 92, 92, 1);
+  font-size: 14px;
+}
+
+.points {
+  color: rgba(87, 87, 87, 1);
+  font-size: 14px;
+} 

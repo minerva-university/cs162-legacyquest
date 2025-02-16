@@ -1,0 +1,64 @@
+.gamified-progress {
+  width: 370px;
+  background-color: rgba(254, 255, 253, 1);
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 0 4px rgba(142, 224, 0, 0.2);
+  border: 1px solid rgba(231, 232, 230, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-circle-container {
+  margin-bottom: 40px;
+}
+
+.progress-circle {
+  width: 270px;
+  height: 270px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-background,
+.circle-progress {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform: rotate(-90deg);
+}
+
+.circle-background {
+  background: rgba(206, 172, 103, 0.3);
+}
+
+.circle-progress {
+  background: conic-gradient(#D98F41 0%, transparent 0%);
+  transition: background 0.3s ease;
+}
+
+.progress-percentage {
+  font-size: 82px;
+  font-weight: normal;
+  color: #000;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-message {
+  font-size: 20px;
+  color: rgb(116, 116, 116);
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.highlight {
+  color: rgb(217, 143, 65);
+  font-weight: 500;
+} 

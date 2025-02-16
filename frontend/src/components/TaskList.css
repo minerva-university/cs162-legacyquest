@@ -1,0 +1,98 @@
+.task-list {
+  width: 370px;
+  background-color: rgba(254, 255, 253, 1);
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 0 4px rgba(142, 224, 0, 0.2);
+  border: 1px solid rgba(231, 232, 230, 0.3);
+}
+
+.task-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.task-list-header h2 {
+  color: rgba(25, 42, 12, 1);
+  font-size: 16px;
+  margin: 0;
+}
+
+.go-to-course {
+  color: rgba(75, 75, 75, 0.8);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 23px;
+}
+
+.progress-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.progress-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-icon.checkpoint {
+  background-color: rgba(230, 246, 255, 1);
+}
+
+.progress-icon.level {
+  background-color: rgba(212, 255, 181, 1);
+}
+
+.progress-icon.lesson {
+  background-color: rgba(230, 246, 255, 1);
+}
+
+.progress-number {
+  color: rgba(205, 121, 0, 1);
+  font-weight: bold;
+}
+
+.progress-details {
+  flex: 1;
+}
+
+.progress-details span {
+  color: rgba(92, 92, 92, 1);
+  font-size: 14px;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  width: 201px;
+  height: 15px;
+  background-color: rgba(119, 119, 119, 0.05);
+  border-radius: 5px;
+  margin: 5px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(to right, rgba(255, 150, 0, 1), rgba(255, 200, 0, 1));
+}
+
+.progress-ratio {
+  text-align: right;
+  color: rgba(87, 87, 87, 1);
+  font-size: 14px;
+} 
