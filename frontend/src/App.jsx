@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardPage from './pages/DashboardPage';
 import ThemeTestPage from './pages/ThemeTestPage';
 import LoginPage from './pages/SignUpPage';
+import AdminPage from './pages/AdminPage';
 
 const theme = createTheme({
   typography:{
@@ -42,6 +43,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path='/' element={<DashboardPage />} />
+            <Route path='/admin' element={<AdminPage />} />
             <Route path='/sign-up' element={<LoginPage />} />
             <Route path='/theme-test' element={<ThemeTestPage />} />
             <Route path='*' element={<Navigate to='/' />} />

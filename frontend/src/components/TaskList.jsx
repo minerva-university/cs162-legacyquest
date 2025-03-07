@@ -1,4 +1,4 @@
-import { List, Paper, Typography } from '@mui/material';
+import { List, Stack, Typography } from '@mui/material';
 import TaskListDisplay from './TaskListDisplay';
 
 export default function TaskList() {
@@ -12,13 +12,13 @@ export default function TaskList() {
   ]
 
   return (
-      <Paper sx={{width: 1, borderRadius: 2, minWidth: '200px'}}>
+      <Stack sx={{width: 1, minWidth: '200px'}}>
         <List>
           <Typography variant='h6' sx={{px: 3, py: 1, fontWeight: 800}}>Task List</Typography>
           {tasks.map((task, index) => (
             <TaskListDisplay key={index} taskName={task.name} currentProgress={task.currentProgress} targetProgress={task.targetProgress} />
           ))}
         </List>
-      </Paper>
+      </Stack>
   );
 }
