@@ -1,5 +1,6 @@
 import { Container, Card, Box, Stack, Typography } from '@mui/material';
 import LegacyRankingList from './LegacyRankingList';
+import TaskCentral from './TaskCentral';
 
 export default function AdminContent() {
   const taskData = [
@@ -12,21 +13,19 @@ export default function AdminContent() {
   ];
 
   return (
-    <Container sx={{mx: 'auto', py: 6}} maxWidth='lg'>
+    <Container sx={{mx: 'auto', py: 4}} maxWidth='lg'>
       {/* Horizontal Stack */}
       <Stack direction='row' spacing={2} sx={{justifyContent: 'space-between'}}>
-
-        <Card sx={{flexGrow: 4, minWidth: '250px', p: 4}}>
-          <Typography variant='h6' sx={{fontWeight: 800}}>Task Central</Typography>
-          {/* Use the above dummy data to implement Task Central below */}
-          
-        </Card>
-        
+        {/* Task Central */}
+        <Box sx={{flexGrow: 3, justifyContent: 'center', alignItems: 'center'}}>
+          <TaskCentral />
+        </Box>
 
         {/* Legacy ranking*/}
-        <Box sx={{flexGrow: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Box sx={{justifyContent: 'center', alignItems: 'center'}}>
           <LegacyRankingList />
         </Box>
+        
       </Stack>
     </Container>
   );

@@ -1,7 +1,9 @@
-import { List, Paper, Typography } from '@mui/material';
-import LegacyListDisplay from './LegacyListDisplay';
+import { Stack, List, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import ListedLegacy from './ListedLegacy';
 
-export default function LegacyRankingList() {
+export default function LegacyRankingList({highlightedLegacy}) {
+  const theme = useTheme();
   const legacyRanking = [
     {name: 'AAA', points: 999},
     {name: 'BBB', points: 888},
@@ -14,13 +16,18 @@ export default function LegacyRankingList() {
   ];
 
   return (
-      <Paper sx={{width: 1, borderRadius: 2}}>
+      <Stack sx={{width: 0.8, minWidth: '300px', borderRadius: 2, px: 4, py: 2, boxShadow: `0 0 6px ${theme.palette.shadowGreen}`}}>
         <List>
-          <Typography variant='h6' sx={{px: 3, py: 1, fontWeight: 800}}>Legacy Ranking</Typography>
+          <Typography variant='h6' sx={{px: 3, py: 1, fontWeight: 800, mb: 2}}>Legacy Ranking</Typography>
           {legacyRanking.map((legacy, index) => (
-            <LegacyListDisplay key={index} legacyRanking={index+1} legacyName={legacy.name} legacyScore={legacy.points} />
+            <ListedLegacy
+            key={index}
+            legacyRanking={index+1}
+            legacyName={legacy.name}
+            legacyScore={legacy.points}
+            isHighlighted={highlightedLegacy === legacy.name} />
             ))}
         </List>
-      </Paper>
+      </Stack>
   );
 }

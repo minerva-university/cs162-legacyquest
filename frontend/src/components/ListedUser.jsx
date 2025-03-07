@@ -1,6 +1,6 @@
 import { Avatar, ListItem, Stack, Typography, Box } from '@mui/material';
 
-export default function UserListDisplay({userName, userXP}) {
+export default function ListedUser({userName, userXP}) {
   return (
     <ListItem sx={{px: 2, py: 0.5}}>
       <Stack spacing={1} direction='row' sx={{alignItems: 'center', width: 1}}>
