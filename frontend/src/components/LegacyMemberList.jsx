@@ -1,7 +1,9 @@
-import { List, ListItemText, Paper, Typography } from '@mui/material';
-import UserListDisplay from './UserListDisplay';
+import { List, Stack, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import ListedUser from './ListedUser';
 
 export default function LegacyMemberList() {
+  const theme = useTheme();
   const legacyMembers = [
     {name: '111', xp: 999},
     {name: '222', xp: 888},
@@ -14,13 +16,13 @@ export default function LegacyMemberList() {
   ]
 
   return (
-      <Paper sx={{width: 1, borderRadius: 2}}>
+      <Stack sx={{width: 1, borderRadius: 2, boxShadow: `0 0 6px ${theme.palette.shadowGreen}`}}>
         <List>
           <Typography variant='h6' sx={{px: 3, py: 1, fontWeight: 800}}>Legacy Members</Typography>
           {legacyMembers.map((member, index) => (
-            <UserListDisplay key={index} userName={member.name} userXP={member.xp} />
+            <ListedUser key={index} userName={member.name} userXP={member.xp} />
           ))}
         </List>
-      </Paper>
+      </Stack>
   );
 }

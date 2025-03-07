@@ -1,6 +1,6 @@
 import { Box, Divider, Stack } from '@mui/material';
-import AdminProfile from '../components/AdminProfile';
 import AdminContent from '../components/AdminContent';
+import UserProfile from '../components/UserProfile';
 
 export default function AdminPage() {
   return(
@@ -12,7 +12,7 @@ export default function AdminPage() {
 
       {/* User Profile on the right */}
       <Box sx={{flexGrow: 1}}>
-        <AdminProfile />
+        <UserProfile isAdmin={true} />
       </Box>
   </Stack>
   )
