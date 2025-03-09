@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardPage from './pages/DashboardPage';
 import ThemeTestPage from './pages/ThemeTestPage';
 import LoginPage from './pages/SignUpPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import { AuthProvider } from '../../backend/AuthContext';
+import ProtectedRoute from '../../backend/ProtectedRoute';
 
 const theme = createTheme({
   typography:{
@@ -39,14 +42,38 @@ function App() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <BrowserRouter>
-          <Routes>
-            <Route path='/' element={<DashboardPage />} />
-            <Route path='/sign-up' element={<LoginPage />} />
-            <Route path='/theme-test' element={<ThemeTestPage />} />
-            <Route path='*' element={<Navigate to='/' />} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path='/sign-up' element={<LoginPage />} />
+              <Route path='/theme-test' element={<ThemeTestPage />} />
+              
+              {/* Protected routes */}
+              <Route 
+                path='/' 
+                element={
+                  <ProtectedRoute requiredRole="user">
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Admin routes */}
+              <Route 
+                path='/admin' 
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Fallback route */}
+              <Route path='*' element={<Navigate to='/sign-up' />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </ThemeProvider>
     </>
   )
