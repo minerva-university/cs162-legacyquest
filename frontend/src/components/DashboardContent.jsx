@@ -1,20 +1,31 @@
-import { Container, Typography, Box, Stack } from '@mui/material';
+import { Container, Stack, Typography, useTheme } from '@mui/material';
 import LegacyRankingList from './LegacyRankingList';
 import WelcomeCard from './WelcomeCard';
-import TaskTracker from './TaskTracker';
+import CircleProgressTracker from './CircleProgressTracker';
+import TaskList from './TaskList';
 
 export default function DashboardContent() {
+  const theme = useTheme();
+
   return (
-    <Container sx={{mx: 'auto'}} maxWidth='lg'>
-      <Typography variant='h1' sx={{fontFamily: 'Potta One, cursive', color: '#CC6A02', fontWeight: 500, mt: 6}}>LEGACY</Typography>
-      <Stack direction={{xs: 'column', lg: 'row'}} spacing={{xs: 2, lg: 4}} sx={{justifyContent: 'space-between'}}>
-        <Box sx={{flexGrow: 1}}>
+    <Container sx={{mx: 'auto', py: 4}} maxWidth='lg'>
+      {/* Horizontal Stack */}
+      <Stack direction='row' spacing={12} sx={{justifyContent: 'space-between'}}>
+        {/* Task Tracker */}
+        <Stack sx={{flexGrow: 3, borderRadius: 2, minWidth: '250px', p: 4, boxShadow: `0 0 6px ${theme.palette.shadowGreen}`}}>
+          <Typography variant='h6' sx={{fontWeight: 800, mb: 4}}>Task List</Typography>
+          <Stack spacing={4} sx={{ justifyContent: 'center', alignItems: 'center'}}>
+            <CircleProgressTracker taskProgress={82} />
+            <TaskList />
+          </Stack>
+        </Stack>
+
+        {/* Welcome Card and legacy ranking*/}
+        <Stack sx={{flexGrow: 1, alignItems: 'center'}}>
           <WelcomeCard taskCompletedPercentage={50}/>
-          <TaskTracker />
-        </Box>
-        <Box sx={{flexGrow: 1, minWidth: '250px'}}>
-          <LegacyRankingList />
-        </Box>
+          <LegacyRankingList highlightedLegacy={'DDD'} />
+        </Stack>
+
       </Stack>
     </Container>
   );
