@@ -1,4 +1,4 @@
-import { Container, Card, Box, Stack, Typography } from '@mui/material';
+import { Container, Card, Box, Stack, Typography, Paper } from '@mui/material';
 import LegacyRankingList from './LegacyRankingList';
 import TaskCentral from './TaskCentral';
 
@@ -13,20 +13,39 @@ export default function AdminContent() {
   ];
 
   return (
-    <Container sx={{mx: 'auto', py: 4}} maxWidth='lg'>
-      {/* Horizontal Stack */}
-      <Stack direction='row' spacing={2} sx={{justifyContent: 'space-between'}}>
-        {/* Task Central */}
-        <Box sx={{flexGrow: 3, justifyContent: 'center', alignItems: 'center'}}>
-          <TaskCentral />
-        </Box>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'row',
+      width: '100%',
+      height: '100%',
+      p: 2,
+      gap: 3
+    }}>
+      {/* Task Central */}
+      <Paper 
+        elevation={1} 
+        sx={{
+          width: '58%',
+          borderRadius: 1,
+          overflow: 'hidden',
+          bgcolor: 'white'
+        }}
+      >
+        <TaskCentral />
+      </Paper>
 
-        {/* Legacy ranking*/}
-        <Box sx={{justifyContent: 'center', alignItems: 'center'}}>
-          <LegacyRankingList />
-        </Box>
-        
-      </Stack>
-    </Container>
+      {/* Legacy ranking*/}
+      <Paper 
+        elevation={1} 
+        sx={{
+          width: '42%',
+          borderRadius: 1,
+          overflow: 'hidden',
+          bgcolor: 'white'
+        }}
+      >
+        <LegacyRankingList />
+      </Paper>
+    </Box>
   );
 }
