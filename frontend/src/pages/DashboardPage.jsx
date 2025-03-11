@@ -1,7 +1,7 @@
 import { Box, Divider, Stack } from '@mui/material';
 import UserProfile from '../components/UserProfile';
 import DashboardContent from '../components/DashboardContent';
-import { useAuth } from '../../../backend/AuthContext';
+import { useAuth } from '../backend/AuthContext';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 

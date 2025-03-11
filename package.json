@@ -1,0 +1,10 @@
+{
+  "name": "cs162-legacyquest",
+  "version": "1.0.0",
+  "description": "Legacy Dashboard for Minerva University",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview"
+  }
+} 

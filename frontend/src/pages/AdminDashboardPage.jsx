@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Button, Container, Paper, Stack, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { logoutUser } from '../../../backend/authService';
-import { useAuth } from '../../../backend/AuthContext';
+import { logoutUser } from '../backend/authService';
+import { useAuth } from '../backend/AuthContext';
 
 export default function AdminDashboardPage() {
   const { currentUser, isAdmin } = useAuth();

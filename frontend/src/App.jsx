@@ -5,8 +5,8 @@ import DashboardPage from './pages/DashboardPage';
 import ThemeTestPage from './pages/ThemeTestPage';
 import LoginPage from './pages/SignUpPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
-import { AuthProvider } from '../../backend/AuthContext';
-import ProtectedRoute from '../../backend/ProtectedRoute';
+import { AuthProvider } from './backend/AuthContext';
+import ProtectedRoute from './backend/ProtectedRoute';
 
 const theme = createTheme({
   typography:{

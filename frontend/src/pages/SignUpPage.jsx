@@ -7,8 +7,8 @@ import GoogleIcon from '@mui/icons-material/Google';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LockIcon from '@mui/icons-material/Lock';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { loginWithEmailAndPassword, signInWithGoogle, registerWithEmailAndPassword } from '../../../backend/authService';
-import { useAuth } from '../../../backend/AuthContext';
+import { loginWithEmailAndPassword, signInWithGoogle, registerWithEmailAndPassword } from '../backend/authService';
+import { useAuth } from '../backend/AuthContext';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');

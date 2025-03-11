@@ -3,7 +3,7 @@ import { Avatar, Stack, Container, Typography, Paper, Button, ButtonGroup, Toolt
 import LegacyMemberList from './LegacyMemberList';
 import { Assignment, Logout, AdminPanelSettings, Person } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { logoutUser } from '../../../backend/authService';
+import { logoutUser } from '../backend/authService';
 
 export default function UserProfile({ email = 'user@uni.minerva.edu', role = 'user' }) {
   const [loading, setLoading] = useState(false);
