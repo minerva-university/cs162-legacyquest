@@ -5,14 +5,14 @@ import ListedUser from './ListedUser';
 export default function LegacyMemberList() {
   const theme = useTheme();
   const legacyMembers = [
-    {name: '111', xp: 999},
-    {name: '222', xp: 888},
-    {name: '333', xp: 777},
-    {name: '444', xp: 666},
-    {name: '555', xp: 555},
-    {name: '666', xp: 444},
-    {name: '777', xp: 333},
-    {name: '888', xp: 222},
+    {name: 'Albert', xp: 999},
+    {name: 'Bob', xp: 888},
+    {name: 'Cindy', xp: 777},
+    {name: 'Davis', xp: 666},
+    {name: 'Edward', xp: 555},
+    {name: 'Frank', xp: 444},
+    {name: 'Grace', xp: 333},
+    {name: 'Howard', xp: 222},
   ]
 
   return (

@@ -12,7 +12,7 @@ export default function UserProfile({isAdmin}) {
   }
 
   return (
-    <Container sx={{m:0, px: 1, minWidth: '240px'}}>
+    <Container sx={{m:0, px: 1, minWidth: '300px'}}>
       <Stack sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyItems: 'stretch', gap: 2}}>
         {/* User Avatar and username*/}
         <Avatar

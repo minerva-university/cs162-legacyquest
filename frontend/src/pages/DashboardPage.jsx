@@ -9,7 +9,7 @@ export default function DashboardPage() {
         <DashboardContent />
       </Box>
       <Divider orientation='vertical' flexItem sx={{borderWidth: 1}}/>
-      <Box sx={{flexGrow: 1}}>
+      <Box sx={{flexGrow: 0.5}}>
         <UserProfile isAdmin={false}/>
       </Box>
     </Stack>
