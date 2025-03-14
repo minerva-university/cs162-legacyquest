@@ -11,7 +11,7 @@ export default function AdminPage() {
       <Divider orientation='vertical' flexItem sx={{borderWidth: 1}}/>
 
       {/* User Profile on the right */}
-      <Box sx={{flexGrow: 1}}>
+      <Box sx={{flexGrow: 0.5}}>
         <UserProfile isAdmin={true} />
       </Box>
   </Stack>
