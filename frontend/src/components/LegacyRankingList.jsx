@@ -5,14 +5,14 @@ import ListedLegacy from './ListedLegacy';
 export default function LegacyRankingList({highlightedLegacy}) {
   const theme = useTheme();
   const legacyRanking = [
-    {name: 'AAA', points: 999},
-    {name: 'BBB', points: 888},
-    {name: 'CCC', points: 777},
-    {name: 'DDD', points: 666},
-    {name: 'EEE', points: 555},
-    {name: 'FFF', points: 444},
-    {name: 'GGG', points: 333},
-    {name: 'HHH', points: 222},
+    {name: 'Octagon', points: 999},
+    {name: 'Tower', points: 888},
+    {name: 'Bridge', points: 777},
+    {name: 'Hunter', points: 666},
+    {name: 'Chronicle', points: 555},
+    {name: 'Pyramid', points: 444},
+    {name: 'Vista', points: 333},
+    {name: 'Cable', points: 222},
   ];
 
   return (
