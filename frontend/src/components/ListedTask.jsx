@@ -13,7 +13,7 @@ export default function ListedTask({taskName, currentProgress, targetProgress}) 
         <ListItem sx={{px: 2, py: 1, cursor: 'pointer', borderRadius: 2, overflow: 'hidden', '&:hover': {
               backgroundColor: 'rgba(0, 0, 0, 0.04)'
             }}} 
-          onClick={() => setOpenDialog(true)} button>
+          onClick={() => setOpenDialog(true)}>
 
           <Stack spacing={2} direction='row' sx={{alignItems: 'center', width: 1}}>
             {/* Task Avatar */}
@@ -38,7 +38,7 @@ export default function ListedTask({taskName, currentProgress, targetProgress}) 
         </ListItem>
       </Tooltip>
 
-      <UploadEvidence open={openDialog} onClose={() => setOpenDialog(false)}/>
+      <UploadEvidence open={openDialog} onClose={() => setOpenDialog(false)} taskName={taskName}/>
     </>
   )
 }
