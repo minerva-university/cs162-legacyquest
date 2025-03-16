@@ -5,6 +5,8 @@ import DashboardPage from './pages/DashboardPage';
 import ThemeTestPage from './pages/ThemeTestPage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
+import { AuthProvider } from '../backend/AuthContext.jsx';
+import ProtectedRoute from '../backend/ProtectedRoutes.jsx';
 
 const theme = createTheme({
   palette: {
@@ -25,15 +27,31 @@ function App() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <BrowserRouter>
-          <Routes>
-            <Route path='/dashboard' element={<DashboardPage />} />
-            <Route path='/admin' element={<AdminPage />} />
-            <Route path='/login' element={<LoginPage />} />
-            <Route path='/theme-test' element={<ThemeTestPage />} />
-            <Route path='*' element={<Navigate to='/login' />} />
-          </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route 
+                path='/dashboard' 
+                element={
+                  <ProtectedRoute requiredRole="user" redirectPath="/login">
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path='/admin' 
+                element={
+                  <ProtectedRoute requiredRole="admin" redirectPath="/login">
+                    <AdminPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path='/login' element={<LoginPage />} />
+              <Route path='/theme-test' element={<ThemeTestPage />} />
+              <Route path='*' element={<Navigate to='/login' />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
       </ThemeProvider>
     </>
   )
