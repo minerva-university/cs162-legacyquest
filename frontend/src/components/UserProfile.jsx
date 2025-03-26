@@ -51,6 +51,7 @@ export default function UserProfile({isAdmin}) {
     console.log("No photo found, using default"); // Debugging log
     return 'https://mui.com/static/images/avatar/1.jpg';
   };
+
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -59,6 +60,16 @@ export default function UserProfile({isAdmin}) {
       console.error("Logout error:", error);
     }
   };
+
+  const getLegacyName = () => {
+    // get a student's legacy name. E.g., 'VISTA'
+    return 'Vista';
+  }
+
+  const getCohort = () => {
+    // get a student's cohort name. E.g., 'M24'
+    return 'M24';
+  }
 
   return (
     <Container sx={{m:0, px: 1, minWidth: '300px'}}>
@@ -84,8 +95,8 @@ export default function UserProfile({isAdmin}) {
           :
           // If user is student, show StudentInfo and LegacyMemberList components
           <>
-            <StudentInfo legacyName='VISTA' cohortName='M24' />
-            <LegacyMemberList />
+            <StudentInfo legacyName={getLegacyName()} cohortName={getCohort()} />
+            <LegacyMemberList legacyName={getLegacyName()}/>
           </>
         }
 
