@@ -8,6 +8,7 @@ import { auth } from './firebase';
 // List of admin emails
 const ADMIN_EMAILS = [
   'admin@uni.minerva.edu',
+  // 'yuan@uni.minerva.edu'
 ];
 
 /**
