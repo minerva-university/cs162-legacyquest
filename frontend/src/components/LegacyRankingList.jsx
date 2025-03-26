@@ -8,13 +8,14 @@ export default function LegacyRankingList({highlightedLegacy}) {
   const [isLoading, setIsLoading] = useState(true);
   const [legacies, setLegacies] = useState([]);
   
+  // TODO: check whether to leave icons or not
   const getLegacyIcon = (legacyName) => {
     const defaultIcon = 'https://mui.com/static/images/avatar/1.jpg';
 
     return defaultIcon;
   }
 
-  // Simulate fetching legacy ranking data from the server
+  // TODO: link to DB to fetch legacy ranking data from the server
   const fetchLegacyRanking = async () => {
     // Fake delay
     await new Promise(resolve => setTimeout(resolve, 1000));

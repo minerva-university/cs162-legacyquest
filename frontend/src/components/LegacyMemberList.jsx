@@ -11,13 +11,15 @@ export default function LegacyMemberList({legacyName}) {
   const [nonLocalMembers, setNonLocalMembers] = useState([]);
   const theme = useTheme();
 
+  // TODO: Implement a function connected to DB to get user's location
   const getUserLocation = () => {
     return 'San Francisco';
   }
 
-  // I recommend storing user's location somewhere in the app state, like in a cookie or session storage
+  // TODO: store user's location somewhere in the app state, like in a cookie or session storage
   const userLocation = getUserLocation();
 
+  // TODO: connect with DB in this format
   // Simulate retrieving data from the server
   const fetchLegacyMembers = async () => {
     // A fake delay
