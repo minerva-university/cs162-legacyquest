@@ -20,7 +20,7 @@ export default function LegacyMemberList({legacyName}) {
       try {
         // Fetch data in parallel
         const [fetchedMembers, userLocation] = await Promise.all([
-          LegacyApi.fetchLegacyMembers(),
+          LegacyApi.getLegacyMembers(),
           UserApi.getUserLocation()
         ]);
         

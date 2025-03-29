@@ -20,7 +20,7 @@ export default function LegacyRankingList({highlightedLegacy}) {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await LegacyApi.fetchLegacyRanking();
+        const data = await LegacyApi.getLegacyRanking();
         setLegacies(data);
       } catch (error) {
         console.error("Error fetching legacies:", error);

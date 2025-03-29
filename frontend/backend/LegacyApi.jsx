@@ -13,7 +13,7 @@ const LegacyApi = {
   // - location (string): The location of the member
   // - avatarUrl (string): The URL of the member's avatar image
   // The data doesn't need to be sorted.
-  fetchLegacyMembers: async () => {
+  getLegacyMembers: async () => {
     // A fake delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
@@ -47,7 +47,7 @@ const LegacyApi = {
   // - name (string): The name of the legacy
   // - points (number): The points of the legacy
   // The data is sorted in descending order by points.
-  fetchLegacyRanking: async () => {
+  getLegacyRanking: async () => {
     // Fake delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
