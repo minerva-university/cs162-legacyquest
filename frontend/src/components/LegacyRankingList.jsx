@@ -2,6 +2,7 @@ import { Stack, List, Typography, Box, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ListedLegacy from './ListedLegacy';
 import { useState, useEffect } from 'react';
+import LegacyApi from '../../backend/LegacyApi.jsx';
 
 export default function LegacyRankingList({highlightedLegacy}) {
   const theme = useTheme();
@@ -14,41 +15,12 @@ export default function LegacyRankingList({highlightedLegacy}) {
     return defaultIcon;
   }
 
-  // Simulate fetching legacy ranking data from the server
-  const fetchLegacyRanking = async () => {
-    // Fake delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Dummy data
-    const legacyList = [
-      {name: 'Octagon', points: 999},
-      {name: 'Tower', points: 888},
-      {name: 'Bridge', points: 777},
-      {name: 'Hunter', points: 666},
-      {name: 'Chronicle', points: 555},
-      {name: 'Pyramid', points: 444},
-      {name: 'Vista', points: 333},
-      {name: 'Cable', points: 222},
-      {name: 'Pulse', points: 111},
-      {name: 'Horizon', points: 100},
-      {name: 'Pioneer', points: 90},
-      {name: 'Eclipse', points: 80},
-      {name: 'Quest', points: 70},
-      {name: 'Solar', points: 60},
-      {name: 'Nova', points: 50},
-      {name: 'Galaxy', points: 40},
-      {name: 'Orbit', points: 30},
-    ];
-
-    return legacyList;
-  }
-
   // Fetch data when component mounts
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await fetchLegacyRanking();
+        const data = await LegacyApi.fetchLegacyRanking();
         setLegacies(data);
       } catch (error) {
         console.error("Error fetching legacies:", error);
