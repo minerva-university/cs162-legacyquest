@@ -5,11 +5,20 @@ import StudentInfo from './StudentInfo';
 import AddNewTask from './AddNewTask';
 import { useAuth } from '../../backend/AuthContext.jsx';
 import { logoutUser } from '../../backend/authService';
+import UserApi from '../../backend/UserApi.jsx';
+import LegacyApi from '../../backend/LegacyApi.jsx';
+import { useEffect, useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function UserProfile({isAdmin}) {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  
+
+  // State for API data
+  const [legacyName, setLegacyName] = useState('');
+  const [cohortName, setCohortName] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
   // Extract user's display name or first part of email
   const getUserName = () => {
     if (currentUser) {
@@ -52,6 +61,28 @@ export default function UserProfile({isAdmin}) {
     return 'https://mui.com/static/images/avatar/1.jpg';
   };
 
+  // Fetch user data on component mount
+  useEffect(() => {
+    async function fetchUserData() {
+      setIsLoading(true);
+      try {
+        const legacy = await LegacyApi.getLegacyName();
+        const cohort = await UserApi.getCohort();
+        
+        setLegacyName(legacy);
+        setCohortName(cohort);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setLegacyName('Unknown Legacy');
+        setCohortName('Unknown Cohort');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchUserData();
+  }, []); // Empty dependency array means this runs once on mount
+
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -60,16 +91,6 @@ export default function UserProfile({isAdmin}) {
       console.error("Logout error:", error);
     }
   };
-
-  const getLegacyName = () => {
-    // get a student's legacy name. E.g., 'VISTA'
-    return 'Vista';
-  }
-
-  const getCohort = () => {
-    // get a student's cohort name. E.g., 'M24'
-    return 'M24';
-  }
 
   return (
     <Container sx={{m:0, px: 1, minWidth: '300px'}}>
@@ -95,8 +116,14 @@ export default function UserProfile({isAdmin}) {
           :
           // If user is student, show StudentInfo and LegacyMemberList components
           <>
-            <StudentInfo legacyName={getLegacyName()} cohortName={getCohort()} />
-            <LegacyMemberList legacyName={getLegacyName()}/>
+            {isLoading ? (
+              <CircularProgress size={24} />
+            ) : (
+              <>
+                <StudentInfo legacyName={legacyName} cohortName={cohortName} />
+                <LegacyMemberList legacyName={legacyName}/>
+              </>
+            )}
           </>
         }
 
