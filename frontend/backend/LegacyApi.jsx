@@ -43,11 +43,11 @@ const LegacyApi = {
     return members;
   },
 
-  // Simulate fetching legacy ranking data from the server. The return format is an array of objects, each containing:
+  // Simulate fetching global ranking data from the server. The return format is an array of objects, each containing:
   // - name (string): The name of the legacy
   // - points (number): The points of the legacy
   // The data is sorted in descending order by points.
-  getLegacyRanking: async () => {
+  getGlobalRanking: async () => {
     // Fake delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
@@ -73,6 +73,36 @@ const LegacyApi = {
     ];
 
     return legacyList;
+  },
+
+  // Simulate fetching local ranking data from the server.
+  // The return format is an array of objects, same format and sorting as getGlobalRanking()
+  getLocalRanking: async (cityName) => {
+    // Fake delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Dummy data
+    const localRanking = [
+      {name: 'Tower', points: 102},
+      {name: 'Octagon', points: 99},
+      {name: 'Bridge', points: 77},
+      {name: 'Chronicle', points: 68},
+      {name: 'Hunter', points: 66},
+      {name: 'Pyramid', points: 44},
+      {name: 'Vista', points: 33},
+      {name: 'Cable', points: 22},
+      {name: 'Pulse', points: 11},
+      {name: 'Horizon', points: 10},
+      {name: 'Pioneer', points: 9},
+      {name: 'Eclipse', points: 8},
+      {name: 'Quest', points: 7},
+      {name: 'Solar', points: 6},
+      {name: 'Nova', points: 5},
+      {name: 'Galaxy', points: 4},
+      {name: 'Orbit', points: 3},
+    ];
+
+    return localRanking;
   }
 };
 
