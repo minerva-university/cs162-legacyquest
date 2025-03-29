@@ -2,65 +2,37 @@ import { Button, List, Stack, Typography, Box, Collapse, CircularProgress } from
 import { useTheme } from '@mui/material/styles';
 import ListedUser from './ListedUser';
 import { useState, useEffect } from 'react';
+import LegacyApi from '../../backend/LegacyApi.jsx';
+import UserApi from '../../backend/UserApi.jsx';
 
 export default function LegacyMemberList({legacyName}) {
   const [isViewAll, setIsViewAll] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [members, setMembers] = useState([]);
+  const [userLocation, setUserLocation] = useState('');
   const [localMembers, setLocalMembers] = useState([]);
   const [nonLocalMembers, setNonLocalMembers] = useState([]);
-  const theme = useTheme();
-
-  const getUserLocation = () => {
-    return 'San Francisco';
-  }
-
-  // I recommend storing user's location somewhere in the app state, like in a cookie or session storage
-  const userLocation = getUserLocation();
-
-  // Simulate retrieving data from the server
-  const fetchLegacyMembers = async () => {
-    // A fake delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Dummy data
-    return [
-      {name: 'Albert', cohort: 'M26', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Bob', cohort: 'M27', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Cindy', cohort: 'M28', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Davis', cohort: 'M24', location: 'Berlin', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Edward', cohort: 'M25', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Frank', cohort: 'M26', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Grace', cohort: 'M27', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Howard', cohort: 'M28', location: 'Taipei', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Ivy', cohort: 'M24', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Jack', cohort: 'M25', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Kathy', cohort: 'M26', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Leo', cohort: 'M27', location: 'Berlin', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Mia', cohort: 'M28', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Nancy', cohort: 'M24', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Oliver', cohort: 'M25', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Peter', cohort: 'M26', location: 'Taipei', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Quincy', cohort: 'M27', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Rachel', cohort: 'M28', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Sam', cohort: 'M24', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-    ];
-  }
+  const theme = useTheme();  
   
-  
-  // Fetch data and separate local vs non-local members
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const fetchedMembers = await fetchLegacyMembers();
+        // Fetch data in parallel
+        const [fetchedMembers, userLocation] = await Promise.all([
+          LegacyApi.getLegacyMembers(),
+          UserApi.getUserLocation()
+        ]);
+        
+        setUserLocation(userLocation);
         setMembers(fetchedMembers);
         
-        // Separate local and non-local members
+        // Filter the members based on whether they are in the same city, sorted by cohort
+        fetchedMembers.sort((a, b) => a.cohort.localeCompare(b.cohort));
         setLocalMembers(fetchedMembers.filter(member => member.location === userLocation));
         setNonLocalMembers(fetchedMembers.filter(member => member.location !== userLocation));
       } catch (error) {
-        console.error("Error fetching members:", error);
+        console.error("Error loading legacy members:", error);
       } finally {
         setIsLoading(false);
       }
