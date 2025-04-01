@@ -25,7 +25,7 @@ export default function WelcomeCard({taskCompletedPercentage}) {
 
   return (
     <Stack spacing={4} direction='row' sx={{py: 6, alignItems: 'center'}}>
-      <img src={LegacyQuestLogo} alt='Welcome' style={{height: '120px', width: 'auto', objectFit: 'contain', transform: 'rotate(-20deg)'}}/>
+      <img src={LegacyQuestLogo} alt='Welcome' style={{height: '120px', width: 'auto', objectFit: 'contain'}}/>
       <Stack spacing={3}>
         <Typography variant='h3'>Welcome back <span style={{fontWeight: 750}}>{getUserName()}!</span></Typography>
         <Stack direction='row'>
