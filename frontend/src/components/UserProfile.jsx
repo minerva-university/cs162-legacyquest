@@ -19,48 +19,6 @@ export default function UserProfile({isAdmin}) {
   const [cohortName, setCohortName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Extract user's display name or first part of email
-  const getUserName = () => {
-    if (currentUser) {
-      if (currentUser.displayName) {
-        return currentUser.displayName;
-      } else if (currentUser.email) {
-        // Extract the name part from the email (before @)
-        const emailName = currentUser.email.split('@')[0];
-        // Convert to title case (first letter capitalized)
-        return emailName.charAt(0).toUpperCase() + emailName.slice(1);
-      }
-    }
-    return "User";
-  };
-
-  // Get user profile photo from Google account
-  const getProfilePhoto = () => {
-    if (currentUser) {
-      // Check for photoURL from Google account
-      if (currentUser.photoURL) {
-        console.log("Found photoURL:", currentUser.photoURL); // Debugging log
-        return currentUser.photoURL;
-      }
-      
-      // If using Firebase Auth with Google, try to get from providerData
-      if (currentUser.providerData && currentUser.providerData.length > 0) {
-        const googleProvider = currentUser.providerData.find(
-          provider => provider.providerId === 'google.com'
-        );
-        
-        if (googleProvider && googleProvider.photoURL) {
-          console.log("Found provider photoURL:", googleProvider.photoURL); // Debugging log
-          return googleProvider.photoURL;
-        }
-      }
-    }
-    
-    // Fallback to a default avatar if no photo is available
-    console.log("No photo found, using default"); // Debugging log
-    return 'https://mui.com/static/images/avatar/1.jpg';
-  };
-
   // Fetch user data on component mount
   useEffect(() => {
     async function fetchUserData() {
@@ -98,7 +56,7 @@ export default function UserProfile({isAdmin}) {
         {/* User Avatar and username*/}
         <Avatar
           alt='User Avatar'
-          src={getProfilePhoto()}
+          src={UserApi.getProfilePhoto(currentUser)}
           sx={{ 
             width: '150px', 
             height: '150px', 
@@ -108,7 +66,7 @@ export default function UserProfile({isAdmin}) {
             borderColor: 'white'
           }}
         />
-        <Typography variant='h6' sx={{fontWeight: 800}}>{getUserName()}</Typography>
+        <Typography variant='h6' sx={{fontWeight: 800}}>{UserApi.getUserName(currentUser)}</Typography>
 
         {isAdmin ? 
           // If user is admin, show AddNewTask component
