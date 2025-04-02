@@ -1,5 +1,5 @@
 import { Stack, Typography } from '@mui/material';
-import MinieWelcome from '../assets/MinieWelcome.svg';
+import LegacyQuestLogo from '../assets/LegacyQuestLogo.png';
 import { useAuth } from '../../backend/AuthContext.jsx';
 
 export default function WelcomeCard({taskCompletedPercentage}) {
@@ -25,7 +25,7 @@ export default function WelcomeCard({taskCompletedPercentage}) {
 
   return (
     <Stack spacing={4} direction='row' sx={{py: 6, alignItems: 'center'}}>
-      <img src={MinieWelcome} alt='Welcome' style={{height: '120px', width: 'auto', objectFit: 'contain', transform: 'rotate(-20deg)'}}/>
+      <img src={LegacyQuestLogo} alt='Welcome' style={{height: '120px', width: 'auto', objectFit: 'contain'}}/>
       <Stack spacing={3}>
         <Typography variant='h3'>Welcome back <span style={{fontWeight: 750}}>{getUserName()}!</span></Typography>
         <Stack direction='row'>
