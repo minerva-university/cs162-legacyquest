@@ -1,7 +1,7 @@
 import { Stack, Typography, Button, Box, Alert, Snackbar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import MinieWelcome from '../assets/MinieWelcome.svg';
+import LegacyQuestLogo from '../assets/LegacyQuestLogo.png';
 import GoogleIcon from '@mui/icons-material/Google';
 import { signInWithGoogle, logoutUser } from '../../backend/authService';
 import { useAuth } from '../../backend/AuthContext.jsx';
@@ -51,7 +51,7 @@ export default function LoginPage() {
       <Stack sx={{background: 'linear-gradient(30deg, #EF8D6D, #000000)', flexGrow: 2, alignItems: 'center', justifyContent: 'center'}}>
         <Typography variant='h1' sx={{mt: 10, color: 'white'}}>Welcome to</Typography>
         <Typography variant='h1' sx={{color: 'white'}}>Legacy Dashboard!</Typography>
-        <img src={MinieWelcome} alt='Minie Welcome' style={{width: '360px', height: 'auto'}} />
+        <img src={LegacyQuestLogo} alt='Legacy Quest Logo' style={{width: '360px', height: 'auto'}} />
       </Stack>
 
       {/* Right Side: login */}
