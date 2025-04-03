@@ -1,10 +1,9 @@
 import { Avatar, ListItem, Stack, Typography, Tooltip } from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import LinearProgress from './LinearProgress';
 import UploadEvidence from './UploadEvidence';
 import { useState } from 'react';
+import taskIcon from '../assets/task-icon.svg';
 
-export default function ListedTask({taskName, currentProgress, targetProgress}) {
+export default function ListedTask({taskName}) {
   const [openDialog, setOpenDialog] = useState(false);
 
   return (
@@ -17,22 +16,23 @@ export default function ListedTask({taskName, currentProgress, targetProgress}) 
 
           <Stack spacing={2} direction='row' sx={{alignItems: 'center', width: 1}}>
             {/* Task Avatar */}
-            <Avatar sx={{bgcolor: 'green', height: '48px'}} variant='rounded'>
-              <AssignmentIcon />
-            </Avatar>
+            <Avatar 
+              src={taskIcon}
+              sx={{
+                height: '56px',
+                width: '56px',
+                bgcolor: 'transparent',
+                '& img': {
+                  objectFit: 'contain',
+                  width: '100%',
+                  height: '100%'
+                }
+              }} 
+              variant='rounded'
+            />
             
             <Stack sx={{width: 1, alignItems: 'stretch'}}>
               <Typography sx={{fontWeight: 600}}>{taskName}</Typography>
-              <Stack direction='row' sx={{alignItems: 'center'}}>
-                <LinearProgress
-                value={currentProgress / targetProgress * 100}
-                height={16}
-                barStartColor={'#FF9600'}
-                barEndColor={'#FFC800'}
-                backgroundColor='#E0E0E0'
-                borderRadius={4} />
-                <Typography sx={{fontWeight: 400, fontSize: 14, width: '50px', textAlign: 'center'}}>{currentProgress}/{targetProgress}</Typography>
-              </Stack>
             </Stack>
           </Stack>
         </ListItem>

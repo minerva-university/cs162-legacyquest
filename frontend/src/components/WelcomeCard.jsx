@@ -28,11 +28,6 @@ export default function WelcomeCard({taskCompletedPercentage}) {
       <img src={LegacyQuestLogo} alt='Welcome' style={{height: '120px', width: 'auto', objectFit: 'contain'}}/>
       <Stack spacing={3}>
         <Typography variant='h3'>Welcome back <span style={{fontWeight: 750}}>{getUserName()}!</span></Typography>
-        <Stack direction='row'>
-          <Typography sx={{fontWeight: 600}}>
-            You have Completed <span style={{fontWeight: 700, color: '#CC6A02'}}>{taskCompletedPercentage}% of your daily goal!</span>
-          </Typography>
-        </Stack>
       </Stack>
     </Stack>
   )
