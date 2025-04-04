@@ -1,9 +1,7 @@
-import { Avatar, ListItem, Stack, Typography, Tooltip, Box } from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import LinearProgress from './LinearProgress';
-import CancelIcon from '@mui/icons-material/Cancel';
+import { Avatar, ListItem, Stack, Typography, Tooltip } from '@mui/material';
 import UploadEvidence from './UploadEvidence';
 import { useState } from 'react';
+import taskIcon from '../assets/task-icon.svg';
 
 export default function ListedTask({taskName, taskDescription, taskStatus}) {
   const [openDialog, setOpenDialog] = useState(false);
@@ -34,9 +32,20 @@ export default function ListedTask({taskName, taskDescription, taskStatus}) {
 
           <Stack spacing={2} direction='row' sx={{alignItems: 'center', width: '100%', py: 0.5}}>
             {/* Task Avatar */}
-            <Avatar sx={{bgcolor: getStatusColor(taskStatus), flexShrink: 0}} variant='rounded'>
-              <AssignmentIcon />
-            </Avatar>
+            <Avatar 
+              src={taskIcon}
+              sx={{
+                height: '56px',
+                width: '56px',
+                bgcolor: 'transparent',
+                '& img': {
+                  objectFit: 'contain',
+                  width: '100%',
+                  height: '100%'
+                }
+              }} 
+              variant='rounded'
+            />
             
             <Stack sx={{minWidth: 0, flexGrow: 1, overflow: 'hidden'}}>
               <Typography sx={{fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>{taskName}</Typography>
