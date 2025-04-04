@@ -19,7 +19,7 @@ export default function UploadEvidence({ open, onClose, taskName }) {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth slotProps={{
+    <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth slotProps={{
       paper: {
         style: {
           borderRadius: 16,
@@ -43,18 +43,15 @@ export default function UploadEvidence({ open, onClose, taskName }) {
         <form onSubmit={handleSubmit}>
           <Stack sx={{px: 4, pb: 2, textAlign: 'center'}}>
             <Typography variant='h4' sx={{fontWeight: 800, mb: 2}}>Submit Evidence for {taskName}</Typography>
-            <Typography>Enter Proof to submit and get points!</Typography>
+            <Typography>Submit evidence to complete tasks and score points for your legacy!</Typography>
+            <Typography>Please use <span style={{fontWeight: 800}}>Google Drive</span> links to submit any image or files.</Typography>
             <DialogContent>
-              
-              {/* Upload file Button */}
-              <FileUpload onFileUpload={handleFileUpload}/>
-
               <TextField
                 margin='dense'
                 label='Description'
                 fullWidth
                 multiline
-                rows={4}
+                rows={8}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
