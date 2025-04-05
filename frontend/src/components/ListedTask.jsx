@@ -1,9 +1,9 @@
-import { Avatar, ListItem, Stack, Typography, Tooltip } from '@mui/material';
+import { Avatar, ListItem, Stack, Typography, Tooltip, Box } from '@mui/material';
 import UploadEvidence from './UploadEvidence';
 import { useState } from 'react';
 import taskIcon from '../assets/task-icon.svg';
 
-export default function ListedTask({taskName, taskDescription, taskStatus}) {
+export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate}) {
   const [openDialog, setOpenDialog] = useState(false);
 
   const getStatusColor = (status) => {
@@ -47,17 +47,28 @@ export default function ListedTask({taskName, taskDescription, taskStatus}) {
               variant='rounded'
             />
             
-            <Stack sx={{minWidth: 0, flexGrow: 1, overflow: 'hidden'}}>
+            <Stack sx={{minWidth: 0, flexGrow: 1}}>
               <Typography sx={{fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>{taskName}</Typography>
-              <Typography sx={{fontSize: 12, color: 'gray', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>{taskDescription}</Typography>
+              <Stack direction='row' spacing={0.5} sx={{alignItems: 'center'}}>
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    bgcolor: getStatusColor(taskStatus),
+                    flexShrink: 0
+                  }}
+                />              
+                <Typography sx={{fontWeight: 400, fontSize: 14}}>{taskStatus}</Typography>
+              </Stack>
             </Stack>
             
-            <Typography sx={{fontWeight: 400, fontSize: 14, width: '60px', textAlign: 'center'}}>{taskStatus}</Typography>
+            <Typography>Due {dueDate}</Typography>
           </Stack>
         </ListItem>
       </Tooltip>
 
-      <UploadEvidence open={openDialog} onClose={() => setOpenDialog(false)} taskName={taskName}/>
+      <UploadEvidence open={openDialog} onClose={() => setOpenDialog(false)} taskID={taskDescription.taskID} taskName={taskName} description={taskDescription}/>
     </>
   )
 }

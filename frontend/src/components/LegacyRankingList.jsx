@@ -54,7 +54,7 @@ export default function LegacyRankingList({highlightedLegacy}) {
   return (
     <Stack sx={{
       width: 0.8, 
-      minWidth: '300px', 
+      minWidth: '400px', 
       borderRadius: 2, 
       boxShadow: `0 0 6px ${theme.palette.shadowGreen}`,
       display: 'flex',
@@ -80,7 +80,7 @@ export default function LegacyRankingList({highlightedLegacy}) {
       <Box sx={{
         overflowY: 'auto',
         flexGrow: 1,
-        px: 4,
+        px: 1,
         // Height to show approximately 10 items
         maxHeight: '480px',
         display: 'flex',
@@ -100,7 +100,8 @@ export default function LegacyRankingList({highlightedLegacy}) {
         {isLoading ? (
           <Box sx={{ py: 10 }}>
             <CircularProgress color="primary" size={40} thickness={4} />
-          </Box>
+            <Typography variant="body1">Loading ranking...</Typography>
+            </Box>
         ) : (
           <List sx={{ width: '100%', pt: 0, pb: 2 }}>
             {legacies.map((legacy, index) => (
