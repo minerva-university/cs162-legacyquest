@@ -5,7 +5,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import TaskApi from '../../backend/TaskApi';
 
 export default function UploadEvidence({ open, onClose, taskID, taskName, description}) {
-  const [evidence, setDescription] = useState('');
+  const [evidence, setEvidence] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   
@@ -25,7 +25,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
       
       // Handle API response
       if (response.success) {
-        setDescription('');
+        setEvidence('');
         // Set success message for snackbar
         setSnackbarMessage('Evidence uploaded successfully!');
         setSnackbarSeverity('success');
@@ -127,7 +127,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
                 multiline
                 rows={8}
                 value={evidence}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => setEvidence(e.target.value)}
                 required
                 disabled={isSubmitting}
                 sx={{mb: 2}}
