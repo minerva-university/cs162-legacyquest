@@ -71,7 +71,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
         </ListItem>
       </Tooltip>
 
-      <UploadEvidence open={openDialog} onClose={() => setOpenDialog(false)} taskID={taskDescription.taskID} taskName={taskName} description={taskDescription}/>
+      <UploadEvidence open={openDialog} onClose={() => setOpenDialog(false)} taskID={taskID} taskName={taskName} description={taskDescription}/>
     </>
   )
 }
