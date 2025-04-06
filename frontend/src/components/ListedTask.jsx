@@ -2,6 +2,7 @@ import { Avatar, ListItem, Stack, Typography, Tooltip, Box } from '@mui/material
 import UploadEvidence from './UploadEvidence';
 import { useState } from 'react';
 import taskIcon from '../assets/task-icon.svg';
+import Fade from '@mui/material/Fade';
 
 export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate}) {
   const [openDialog, setOpenDialog] = useState(false);
@@ -24,7 +25,9 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
 
   return (
     <>
-      <Tooltip title="Upload Evidence" placement="right" arrow>
+      <Tooltip title="Click To Upload Evidence" placement="right" arrow slotProps={{
+          transition: { timeout: 5 },
+        }}>
         <ListItem sx={{px: 2, py: 1, cursor: 'pointer', borderRadius: 2, overflow: 'hidden', '&:hover': {
               backgroundColor: 'rgba(0, 0, 0, 0.04)'
             }}} 

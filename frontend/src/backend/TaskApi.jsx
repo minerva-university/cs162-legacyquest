@@ -15,6 +15,11 @@ const TaskApi = {
       {taskID: 3, name: 'Task 3', description: 'Description 3..........', status: 'Waiting Approval', dueDate: 'Jun 21'},
       {taskID: 4, name: 'Task 4', description: 'Description 4..........', status: 'Approved', dueDate: 'Jun 22'},
       {taskID: 5, name: 'Task 5', description: 'Description 5..........', status: 'Rejected', dueDate: 'Jun 23'},
+      {taskID: 6, name: 'Task 6', description: 'Description 6..........', status: 'Not Submitted', dueDate: 'Jun 24'},
+      {taskID: 7, name: 'Task 7', description: 'Description 7..........', status: 'Not Submitted', dueDate: 'Jun 25'},
+      {taskID: 8, name: 'Task 8', description: 'Description 8..........', status: 'Not Submitted', dueDate: 'Jun 26'},
+      {taskID: 9, name: 'Task 9', description: 'Description 9..........', status: 'Not Submitted', dueDate: 'Jun 27'},
+      {taskID: 10, name: 'Task 10', description: 'Description 10..........', status: 'Not Submitted', dueDate: 'Jun 28'},
     ];
 
     return tasks;
