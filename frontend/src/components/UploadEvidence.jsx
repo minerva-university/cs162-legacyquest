@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogActions, Button, TextField, FormGroup, Typ
   IconButton, Stack, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { useState } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import TaskApi from '../../backend/TaskApi';
+import TaskApi from '../backend/TaskApi';
 
 export default function UploadEvidence({ open, onClose, taskID, taskName, description}) {
   const [evidence, setEvidence] = useState('');
