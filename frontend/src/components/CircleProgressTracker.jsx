@@ -1,5 +1,6 @@
 import { Box, CircularProgress, Card, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+
 export default function CircleProgressTracker({taskProgress}) {
   const theme = useTheme();
   const displayedProgress = taskProgress < 100 ? Math.min(96, Math.max(0.1, taskProgress)) : 100;
