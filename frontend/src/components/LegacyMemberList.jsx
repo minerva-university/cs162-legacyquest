@@ -56,8 +56,8 @@ export default function LegacyMemberList({legacyName}) {
     <Stack sx={{
       width: 1, 
       borderRadius: 2, 
-      boxShadow: `0 0 6px ${theme.palette.shadowGreen}`,
-      maxHeight: '500px', // Set maximum height for the entire component
+      boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}`,
+      maxHeight: '500px',
     }}>
       {/* List header */}
       <Stack direction='row' sx={{

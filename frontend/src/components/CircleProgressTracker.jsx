@@ -17,7 +17,7 @@ export default function CircleProgressTracker({taskProgress}) {
       flexDirection: 'column',
       p: 2,
       boxSizing: 'border-box',
-      boxShadow: `0 0 6px ${theme.palette.shadowGreen}`}}>
+      boxShadow: `0 0 5px 0.5px ${theme.palette.shadowGray}`}}>
       <Box sx={{ position: 'relative', display: 'inline-flex' }}>
         <CircularProgress variant='determinate' size={160} thickness={4} value={100} sx={{color: '#CEAC674D'}} />
         <CircularProgress variant='determinate' size={160} thickness={4} value={displayedProgress} sx={{position: 'absolute', left: 0, color: '#D98F41', strokeLinecap: 'round'}} />

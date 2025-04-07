@@ -56,7 +56,7 @@ export default function LegacyRankingList({highlightedLegacy}) {
       width: 0.8, 
       minWidth: '400px', 
       borderRadius: 2, 
-      boxShadow: `0 0 6px ${theme.palette.shadowGreen}`,
+      boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}`,
       display: 'flex',
       flexDirection: 'column'
     }}>

@@ -44,7 +44,13 @@ export default function DashboardContent() {
       {/* Horizontal Stack */}
       <Stack direction='row' spacing={{xs: 1, sm: 2, md: 4, lg: 8, xl: 12}} sx={{justifyContent: 'space-between'}}>
         {/* Task Tracker */}
-        <Stack sx={{flexGrow: 3, borderRadius: 2, minWidth: '250px', p: 4, boxShadow: `0 0 6px ${theme.palette.shadowGreen}`}}>
+        <Stack sx={{
+          flexGrow: 3, 
+          borderRadius: 2, 
+          minWidth: '250px', 
+          p: 4, 
+          boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}` // Added spread and increased blur
+        }}>
           <Typography variant='h6' sx={{fontWeight: 800, mb: 4}}>Task List</Typography>
           <Stack spacing={4} sx={{ justifyContent: 'center', alignItems: 'center'}}>
             {isLoading ? (
