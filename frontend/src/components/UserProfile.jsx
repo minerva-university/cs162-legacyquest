@@ -87,7 +87,7 @@ export default function UserProfile({isAdmin}) {
 
         {/* Logout button */}
         <Button disableRipple={true} onClick={handleLogout} sx={{textTransform: 'none'}}>
-          <Typography sx={{color: 'GrayText', fontWeight: 800}}>Log Out</Typography>
+          <Typography sx={{color: '#f05946', fontWeight: 800}}>Log Out</Typography>
         </Button>
       </Stack>
     </Container>

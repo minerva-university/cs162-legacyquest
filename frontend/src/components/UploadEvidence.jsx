@@ -1,79 +1,188 @@
-import { Dialog, DialogContent, DialogActions, Button, TextField, FormGroup, Typography, IconButton, Stack, Box } from '@mui/material';
+import { Dialog, DialogContent, DialogActions, Button, TextField, FormGroup, Typography, 
+  IconButton, Stack, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { useState } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import FileUpload from './FileUpload';
+import TaskApi from '../backend/TaskApi';
 
-export default function UploadEvidence({ open, onClose, taskName }) {
-  const [description, setDescription] = useState('');
+export default function UploadEvidence({ open, onClose, taskID, taskName, description}) {
+  const [evidence, setEvidence] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Snackbar states
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
-    console.log('Submitting evidence:', description);
-    setDescription('');
-    onClose();
+    try {
+      // Call API and wait for response
+      const response = await TaskApi.uploadEvidence(taskID, evidence);
+      
+      // Handle API response
+      if (response.success) {
+        setEvidence('');
+        // Set success message for snackbar
+        setSnackbarMessage('Evidence uploaded successfully!');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+        onClose();
+      } else {
+        const errorMsg = response.message || 'Failed to upload evidence';
+        setError(errorMsg);
+        // Show error snackbar
+        setSnackbarMessage(errorMsg);
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      }
+    } catch (err) {
+      const errorMsg = 'An error occurred while uploading evidence';
+      setError(errorMsg);
+      // Show error snackbar
+      setSnackbarMessage(errorMsg);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      console.error('Error submitting evidence:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleFileUpload = (files) => {
-    console.log('Uploaded Files:', files);
-  }
+  // Prevent closing dialog while submitting
+  const handleClose = () => {
+    if (!isSubmitting) {
+      onClose();
+    }
+  };
+  
+  // Handle snackbar close
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth slotProps={{
-      paper: {
-        style: {
-          borderRadius: 16,
-          overflow: 'hidden'
-        }
-      }
-    }}>
-      <Stack sx={{p: 1}}>
-        {/* Close Button */}
-        <Stack direction='row' sx={{mb: 4}}>
-          {/* Spacer */}
-          <Box sx={{flexGrow: 1}} />
+    <>
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        maxWidth='md' 
+        fullWidth 
+        disableEscapeKeyDown={isSubmitting}
+        slotProps={{
+          paper: {
+            style: {
+              borderRadius: 16,
+              overflow: 'hidden'
+            }
+          }
+        }}
+      >
+        <Stack sx={{p: 1}}>
+          {/* Close Button */}
+          <Stack direction='row' sx={{mb: 4}}>
+            {/* Spacer */}
+            <Box sx={{flexGrow: 1}} />
 
-          <IconButton onClick={onClose}>
-            <CloseRoundedIcon />
-          </IconButton>
+            <IconButton onClick={handleClose} disabled={isSubmitting}>
+              <CloseRoundedIcon />
+            </IconButton>
 
-        </Stack>
+          </Stack>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <Stack sx={{px: 4, pb: 2, textAlign: 'center'}}>
-            <Typography variant='h4' sx={{fontWeight: 800, mb: 2}}>Submit Evidence for {taskName}</Typography>
-            <Typography>Enter Proof to submit and get points!</Typography>
-            <DialogContent>
+          {/* Form */}
+          <form onSubmit={handleSubmit}>
+            <Stack sx={{px: 4, pb: 2, textAlign: 'center'}}>
+              <Typography variant='h4' sx={{fontWeight: 800, mb: 2}}>Submit Evidence for {taskName}</Typography>
+              <Typography variant='h6' sx={{textAlign: 'left', fontWeight: 800, mb: 1}}>Description</Typography>
+              <Box 
+                sx={{ 
+                  maxHeight: '200px', 
+                  overflowY: 'auto', 
+                  borderRadius: 1, 
+                  mb: 2, 
+                  '&::-webkit-scrollbar': {
+                    width: '8px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: '#bdbdbd',
+                    borderRadius: '4px',
+                  },
+                }}
+              >
+                <Typography align='left'>{description}</Typography>
+              </Box>
               
-              {/* Upload file Button */}
-              <FileUpload onFileUpload={handleFileUpload}/>
-
+              <Typography variant='h6' sx={{textAlign: 'left', fontWeight: 800, my: 1}}>Evidence Submission</Typography>
               <TextField
                 margin='dense'
                 label='Description'
                 fullWidth
                 multiline
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                rows={8}
+                value={evidence}
+                onChange={(e) => setEvidence(e.target.value)}
                 required
-                sx={{mt: 2}}
+                disabled={isSubmitting}
+                sx={{mb: 2}}
               />
-            </DialogContent>
-            <DialogActions>
-              <Button type='submit' variant='contained' fullWidth sx={{
-                background: 'linear-gradient(90deg, #020024 0%, #090979 20%, #00D4FF 100%)',
-                textTransform: 'none',
-                borderRadius: 2,
-                mx: 'auto',
-                maxWidth: '470px'}}>
-                Submit
-              </Button>
-            </DialogActions>
-          </Stack>
-        </form>
-      </Stack>
-    </Dialog>
+              
+              {/* Error message display inside form */}
+              {error && (
+                <Typography color='error' sx={{mb: 2}}>
+                  {error}
+                </Typography>
+              )}
+              
+              <DialogActions>
+                <Button 
+                  type='submit' 
+                  variant='contained' 
+                  fullWidth 
+                  disabled={isSubmitting}
+                  sx={{
+                    background: 'linear-gradient(90deg, #020024 0%, #090979 20%, #00D4FF 100%)',
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    mx: 'auto',
+                    maxWidth: '470px',
+                  }}
+                >
+                  {isSubmitting ? (
+                    <Stack direction='row' spacing={1} alignItems='center'>
+                      <CircularProgress size={20} color='primary'/>
+                      <span style={{color: 'white'}}>Submitting...</span>
+                    </Stack>
+                  ) : 'Submit'}
+                </Button>
+              </DialogActions>
+            </Stack>
+          </form>
+        </Stack>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar 
+        open={snackbarOpen} 
+        autoHideDuration={3000} 
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbarSeverity} 
+          variant='filled'
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

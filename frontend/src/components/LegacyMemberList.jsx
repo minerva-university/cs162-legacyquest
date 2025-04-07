@@ -27,8 +27,15 @@ export default function LegacyMemberList({legacyName}) {
         setUserLocation(userLocation);
         setMembers(fetchedMembers);
         
-        // Filter the members based on whether they are in the same city, sorted by cohort
-        fetchedMembers.sort((a, b) => a.cohort.localeCompare(b.cohort));
+        // Sort the members first by location and then by cohort
+        fetchedMembers.sort((a, b) => {
+          if (a.location === b.location) {
+            return a.cohort.localeCompare(b.cohort);
+          }
+          return a.location.localeCompare(b.location);
+        });
+
+        // Filter members based on location
         setLocalMembers(fetchedMembers.filter(member => member.location === userLocation));
         setNonLocalMembers(fetchedMembers.filter(member => member.location !== userLocation));
       } catch (error) {
@@ -61,7 +68,7 @@ export default function LegacyMemberList({legacyName}) {
       }}>
         <Typography variant='h6' sx={{py: 1, fontWeight: 800}}>Legacy Members</Typography>          
         <Button 
-          sx={{color: 'gray', fontWeight: 800, width: '110px'}}
+          sx={{color: 'gray', fontWeight: 800, fontSize: 12, width: '110px'}}
           onClick={toggleViewAll}
           disabled={isLoading}
         >
@@ -133,13 +140,13 @@ export default function LegacyMemberList({legacyName}) {
           <>
             {!isViewAll && localMembers.length > 0 && (
               <Typography variant="caption" color="text.secondary">
-                Showing {legacyName} members in {userLocation}
+                Showing <span style={{fontWeight: 800}}>{legacyName}</span> members in <span style={{fontWeight: 800}}>{userLocation}</span> 
               </Typography>
             )}
             
             {isViewAll && (
               <Typography variant="caption" color="text.secondary">
-                Showing all {legacyName} members
+                Showing all <span style={{fontWeight: 800}}>{legacyName}</span> members
               </Typography>
             )}
           </>
