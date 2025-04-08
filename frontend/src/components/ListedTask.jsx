@@ -1,11 +1,13 @@
 import { Avatar, ListItem, Stack, Typography, Tooltip, Box } from '@mui/material';
 import UploadEvidence from './UploadEvidence';
+import TaskFeedback from './TaskFeedback';
 import { useState } from 'react';
 import taskIcon from '../assets/task-icon.svg';
 import Fade from '@mui/material/Fade';
 
-export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate}) {
-  const [openDialog, setOpenDialog] = useState(false);
+export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate, rejectionReason}) {
+  const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -23,15 +25,23 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
     }
   }
 
+  const handleTaskClick = () => {
+    if (taskStatus === 'Rejected' || taskStatus === 'Approved' || taskStatus === 'Waiting Approval') {
+      setOpenFeedbackDialog(true);
+    } else {
+      setOpenUploadDialog(true);
+    }
+  };
+
   return (
     <>
-      <Tooltip title="Click To Upload Evidence" placement="right" arrow slotProps={{
+      <Tooltip title={taskStatus === 'Rejected' ? "Click To View Feedback" : "Click To Upload Evidence"} placement="right" arrow slotProps={{
           transition: { timeout: 5 },
         }}>
         <ListItem sx={{px: 2, py: 1, cursor: 'pointer', borderRadius: 2, overflow: 'hidden', '&:hover': {
               backgroundColor: 'rgba(0, 0, 0, 0.04)'
             }}} 
-          onClick={() => setOpenDialog(true)}>
+          onClick={handleTaskClick}>
 
           <Stack spacing={2} direction='row' sx={{alignItems: 'center', width: '100%', py: 0.5}}>
             {/* Task Avatar */}
@@ -71,7 +81,22 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
         </ListItem>
       </Tooltip>
 
-      <UploadEvidence open={openDialog} onClose={() => setOpenDialog(false)} taskID={taskID} taskName={taskName} description={taskDescription}/>
+      <UploadEvidence 
+        open={openUploadDialog} 
+        onClose={() => setOpenUploadDialog(false)} 
+        taskID={taskID} 
+        taskName={taskName} 
+        description={taskDescription}
+      />
+      
+      <TaskFeedback
+        open={openFeedbackDialog}
+        onClose={() => setOpenFeedbackDialog(false)}
+        status={taskStatus}
+        taskID={taskID}
+        taskName={taskName}
+        description={taskDescription}
+      />
     </>
   )
 }
