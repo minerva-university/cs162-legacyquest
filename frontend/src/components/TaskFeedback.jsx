@@ -13,7 +13,11 @@ export default function TaskFeedback({ open, onClose, taskID, taskName, descript
   useEffect(() => {
     async function fetchData() {
       if (open) {
+        // Clear previous data first to avoid displaying stale content
+        setEvidence('');
+        setComment('');
         setLoading(true);
+        
         try {
           if (status === 'Waiting Approval') {
             const evidenceData = await TaskApi.getTaskEvidence(taskID);
