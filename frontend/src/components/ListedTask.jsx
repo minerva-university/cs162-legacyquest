@@ -35,7 +35,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
 
   return (
     <>
-      <Tooltip title={taskStatus === 'Rejected' ? "Click To View Feedback" : "Click To Upload Evidence"} placement="right" arrow slotProps={{
+      <Tooltip title={['Rejected', 'Approved', 'Waiting Approval'].includes(taskStatus) ? "Click To View Feedback" : "Click To Upload Evidence"} placement="right" arrow slotProps={{
           transition: { timeout: 5 },
         }}>
         <ListItem sx={{px: 2, py: 1, cursor: 'pointer', borderRadius: 2, overflow: 'hidden', '&:hover': {
