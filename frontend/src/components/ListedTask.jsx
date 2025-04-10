@@ -96,6 +96,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
         taskID={taskID}
         taskName={taskName}
         description={taskDescription}
+        statusColor={getStatusColor(taskStatus)}
       />
     </>
   )
