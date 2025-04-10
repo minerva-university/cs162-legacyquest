@@ -9,11 +9,11 @@ export default function ListedLegacy({legacyRanking, legacyName, legacyIconUrl, 
       background: 
       isHighlighted ? 'linear-gradient(0deg, transparent 0%, transparent 20%, #E6FED3 20%, #E6FED3 80%, transparent 80%, transparent 100%)' : 'transparent'
     }}>
-      <Stack spacing={1} direction='row' sx={{alignItems: 'center', width: 1}}>
+      <Stack spacing={1} direction='row' sx={{alignItems: 'center', width: 1, minHeight: '40px'}}>
         <Typography sx={{width: '18px', textAlign: 'right'}}>{legacyRanking}</Typography>
 
-        <Avatar src={legacyIconUrl} />
-        <Typography sx={{fontWeight: 600}}>{legacyName}</Typography>
+        {/* <Avatar src={legacyIconUrl} /> */}
+        <Typography sx={{fontWeight: 600, pl: 1}}>{legacyName}</Typography>
 
         <Box sx={{flexGrow: 1}}></Box>
         
