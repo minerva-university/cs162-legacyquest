@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import LegacyMemberList from './LegacyMemberList';
 import StudentInfo from './StudentInfo';
 import AddNewTask from './AddNewTask';
-import { useAuth } from '../../backend/AuthContext.jsx';
-import { logoutUser } from '../../backend/authService';
-import UserApi from '../../backend/UserApi.jsx';
-import LegacyApi from '../../backend/LegacyApi.jsx';
+import { useAuth } from '@services/AuthContext.jsx';
+import { logoutUser } from '@services/authService.js';
+import UserApi from '@services/UserApi.jsx';
+import LegacyApi from '@services/LegacyApi.jsx';
 import { useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
 
