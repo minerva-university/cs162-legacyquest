@@ -16,10 +16,13 @@ lerna-debug.log*
 .pnpm-store
 
 # Prisma
-generated/prisma
-backend/generated/
+generated/prisma/*
+backend/generated/*
 backend/.env
 backend/prisma/.env
+
+# Ensure schema.prisma is not ignored
+!generated/prisma/schema.prisma
 
 # Environment files (already present, but good to keep grouped)
 .env*.local
