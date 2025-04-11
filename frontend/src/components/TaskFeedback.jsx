@@ -2,7 +2,7 @@ import { Dialog, DialogActions, Button, Typography, IconButton, Stack, Box, Circ
 import { useState, useEffect } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import UploadEvidence from './UploadEvidence';
-import TaskApi from "../services/TaskApi";
+import TaskApi from "@services/TaskApi.jsx";
 
 export default function TaskFeedback({ open, onClose, taskID, taskName, description, status, statusColor }) {
   const [uploadEvidenceOpen, setUploadEvidenceOpen] = useState(false);
