@@ -209,7 +209,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
@@ -219,12 +219,11 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "postgresql://legacyquest_owner:npg_A3hlRCFXq2Vm@ep-square-math-a68ipd2t-pooler.us-west-2.aws.neon.tech/legacyquest?sslmode=require"
       }
     }
   },
