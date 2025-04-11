@@ -1,6 +1,6 @@
 import { Stack, Typography } from '@mui/material';
 import LegacyQuestLogo from '../assets/LegacyQuestLogo.png';
-import { useAuth } from '../../backend/AuthContext.jsx';
+import { useAuth } from "@services/AuthContext.jsx";
 
 export default function WelcomeCard({taskCompletedPercentage}) {
   const { currentUser } = useAuth();

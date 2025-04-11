@@ -2,8 +2,8 @@ import { Stack, List, Typography, Box, CircularProgress, Button } from '@mui/mat
 import { useTheme } from '@mui/material/styles';
 import ListedLegacy from './ListedLegacy';
 import { useState, useEffect } from 'react';
-import LegacyApi from '../../backend/LegacyApi.jsx';
-import UserApi from '../../backend/UserApi.jsx';
+import LegacyApi from "@services/LegacyApi.jsx";
+import UserApi from "@services/UserApi.jsx";
 
 export default function LegacyRankingList({highlightedLegacy}) {
   const theme = useTheme();
