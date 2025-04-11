@@ -40,6 +40,26 @@ const TaskApi = {
       return { success: false, message: 'Failed to upload evidence. Please try again.' };
     }
   },
+
+  getTaskEvidence: async (taskID) => {
+    // Simulate a delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Dummy evidence data
+    const evidence = 'This is a dummy evidence for task ' + taskID + '. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus volutpat nec magna eu hendrerit. Nulla sed pretium ex, sit amet finibus dolor. Phasellus ante turpis, tincidunt sodales semper id, dignissim quis felis. Ut eu commodo urna, nec maximus ex. Fusce laoreet commodo auctor. Vivamus mi nisl, sollicitudin sit amet pulvinar a, venenatis nec nulla. Suspendisse ornare vulputate vehicula. Nulla blandit facilisis magna vel commodo. Fusce pretium facilisis tortor nec vestibulum. Donec vitae mattis nunc. Nam ante dolor, consectetur non nisi sed, posuere lacinia ante. Aenean auctor sed dui ut mattis. Nulla dui urna, cursus vel ante at, interdum aliquet enim. Vestibulum efficitur elementum pharetra. Fusce bibendum porta turpis vitae euismod. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis at nulla ullamcorper, dignissim nibh et, placerat magna. Aliquam a blandit orci, a volutpat diam. Duis fermentum nisl erat, et tempor tellus vehicula eget. Aenean eu semper turpis. Sed vel euismod sem, in aliquet odio. Quisque sed odio aliquam, accumsan lectus nec, consectetur lorem. Proin semper risus ut nisi vulputate, vitae pulvinar lectus auctor.';
+
+    return evidence;
+  },
+
+  getTaskComments: async (taskID) => {
+    // Simulate a delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Dummy comments data
+    const comment = 'This is a dummy comment for task ' + taskID + '. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus volutpat nec magna eu hendrerit. Nulla sed pretium ex, sit amet finibus dolor. Phasellus ante turpis, tincidunt sodales semper id, dignissim quis felis. Ut eu commodo urna, nec maximus ex. Fusce laoreet commodo auctor. Vivamus mi nisl, sollicitudin sit amet pulvinar a, venenatis nec nulla. Suspendisse ornare vulputate vehicula. Nulla blandit facilisis magna vel commodo. Fusce pretium facilisis tortor nec vestibulum. Donec vitae mattis nunc. Nam ante dolor, consectetur non nisi sed, posuere lacinia ante. Aenean auctor sed dui ut mattis. Nulla dui urna, cursus vel ante at, interdum aliquet enim. Vestibulum efficitur elementum pharetra. Fusce bibendum porta turpis vitae euismod. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis at nulla ullamcorper, dignissim nibh et, placerat magna. Aliquam a blandit orci, a volutpat diam. Duis fermentum nisl erat, et tempor tellus vehicula eget. Aenean eu semper turpis. Sed vel euismod sem, in aliquet odio. Quisque sed odio aliquam, accumsan lectus nec, consectetur lorem.';
+
+    return comment;
+  }
 }
 
 export default TaskApi;
