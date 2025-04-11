@@ -19,23 +19,30 @@ export const signInWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    const email = result.user.email;
+    const user = result.user;
+    const email = user.email;
     
     // Check if it's a Minerva email
-    if (!email.endsWith('@uni.minerva.edu')) {
+    if (!email || !email.endsWith('@uni.minerva.edu')) {
       await signOut(auth);
       throw new Error('Only Minerva University emails (@uni.minerva.edu) are allowed');
     }
+    
+    // Get the Firebase ID token
+    const idToken = await user.getIdToken();
     
     // Determine if user is admin based on email
     const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
     const role = isAdmin ? 'admin' : 'user';
     
-    return { 
-      user: result.user,
-      role
+    // Return user, role, and token
+    return {
+      user: user,
+      role: role,
+      token: idToken
     };
   } catch (error) {
+    console.error("Error during Google sign-in:", error);
     throw error;
   }
 };
