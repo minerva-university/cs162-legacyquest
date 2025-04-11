@@ -5,8 +5,8 @@ import DashboardPage from './pages/DashboardPage';
 import ThemeTestPage from './pages/ThemeTestPage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
-import { AuthProvider } from '../backend/AuthContext.jsx';
-import ProtectedRoute from '../backend/ProtectedRoutes.jsx';
+import { AuthProvider } from '../services/AuthContext.jsx';
+import ProtectedRoute from '../services/ProtectedRoutes.jsx';
 
 const theme = createTheme({
   palette: {
