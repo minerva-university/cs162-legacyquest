@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import LegacyQuestLogo from '../assets/LegacyQuestLogo.png';
 import GoogleIcon from '@mui/icons-material/Google';
-import { signInWithGoogle, logoutUser } from '../../backend/authService';
-import { useAuth } from '../../backend/AuthContext.jsx';
+import { signInWithGoogle, logoutUser } from '@services/authService.js';
+import { useAuth } from '@services/AuthContext.jsx';
 
 export default function LoginPage() {
   const navigate = useNavigate();

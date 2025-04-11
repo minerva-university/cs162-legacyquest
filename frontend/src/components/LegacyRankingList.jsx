@@ -2,8 +2,8 @@ import { Stack, List, Typography, Box, CircularProgress, Button } from '@mui/mat
 import { useTheme } from '@mui/material/styles';
 import ListedLegacy from './ListedLegacy';
 import { useState, useEffect } from 'react';
-import LegacyApi from '../../backend/LegacyApi.jsx';
-import UserApi from '../../backend/UserApi.jsx';
+import LegacyApi from "@services/LegacyApi.jsx";
+import UserApi from "@services/UserApi.jsx";
 
 export default function LegacyRankingList({highlightedLegacy}) {
   const theme = useTheme();
@@ -98,10 +98,10 @@ export default function LegacyRankingList({highlightedLegacy}) {
         }
       }}>
         {isLoading ? (
-          <Box sx={{ py: 10 }}>
+          <Box sx={{ py: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <CircularProgress color="primary" size={40} thickness={4} />
-            <Typography variant="body1">Loading ranking...</Typography>
-            </Box>
+            <Typography variant="body1" sx={{mt: 2}}>Loading ranking...</Typography>
+          </Box>
         ) : (
           <List sx={{ width: '100%', pt: 0, pb: 2 }}>
             {legacies.map((legacy, index) => (

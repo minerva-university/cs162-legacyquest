@@ -3,7 +3,7 @@ import LegacyRankingList from './LegacyRankingList';
 import WelcomeCard from './WelcomeCard';
 import CircleProgressTracker from './CircleProgressTracker';
 import TaskList from './TaskList';
-import TaskApi from '../backend/TaskApi.jsx';
+import TaskApi from '@services/TaskApi.jsx';
 import { useEffect, useState } from 'react';
 
 export default function DashboardContent() {

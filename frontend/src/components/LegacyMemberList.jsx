@@ -2,8 +2,8 @@ import { Button, List, Stack, Typography, Box, Collapse, CircularProgress } from
 import { useTheme } from '@mui/material/styles';
 import ListedUser from './ListedUser';
 import { useState, useEffect } from 'react';
-import LegacyApi from '../../backend/LegacyApi.jsx';
-import UserApi from '../../backend/UserApi.jsx';
+import LegacyApi from "@services/LegacyApi.jsx";
+import UserApi from "@services/UserApi.jsx";
 
 export default function LegacyMemberList({legacyName}) {
   const [isViewAll, setIsViewAll] = useState(false);
