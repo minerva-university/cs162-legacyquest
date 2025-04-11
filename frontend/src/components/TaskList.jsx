@@ -3,7 +3,7 @@ import ListedTask from './ListedTask';
 
 export default function TaskList({tasks}) {
   return (
-    <Stack sx={{width: 1, minWidth: '350px', maxWidth: '700px'}}>
+    <Stack sx={{width: 1, minWidth: '350px', maxWidth: '800px'}}>
       <Box 
         sx={{ 
           maxHeight: '360px',
