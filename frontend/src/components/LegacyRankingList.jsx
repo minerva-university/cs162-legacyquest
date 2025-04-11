@@ -98,10 +98,10 @@ export default function LegacyRankingList({highlightedLegacy}) {
         }
       }}>
         {isLoading ? (
-          <Box sx={{ py: 10 }}>
+          <Box sx={{ py: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <CircularProgress color="primary" size={40} thickness={4} />
-            <Typography variant="body1">Loading ranking...</Typography>
-            </Box>
+            <Typography variant="body1" sx={{mt: 2}}>Loading ranking...</Typography>
+          </Box>
         ) : (
           <List sx={{ width: '100%', pt: 0, pb: 2 }}>
             {legacies.map((legacy, index) => (
