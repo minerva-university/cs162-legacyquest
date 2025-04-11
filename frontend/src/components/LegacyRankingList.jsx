@@ -53,8 +53,8 @@ export default function LegacyRankingList({highlightedLegacy}) {
 
   return (
     <Stack sx={{
-      width: 0.8, 
-      minWidth: '400px', 
+      width: 0.9, 
+      minWidth: '450px', 
       borderRadius: 2, 
       boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}`,
       display: 'flex',
@@ -82,7 +82,7 @@ export default function LegacyRankingList({highlightedLegacy}) {
         flexGrow: 1,
         px: 1,
         // Height to show approximately 10 items
-        maxHeight: '480px',
+        maxHeight: '450px',
         display: 'flex',
         justifyContent: isLoading ? 'center' : 'flex-start',
         alignItems: isLoading ? 'center' : 'flex-start',
