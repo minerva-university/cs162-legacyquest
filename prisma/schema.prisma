@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+  output          = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================
+// Define ENUM Types
+// =============================================
+
+enum TaskAssigneeType {
+  all
+  cohort
+  legacy
+}
+
+enum SubmissionStatus {
+  Submitted
+  Approved
+  Rejected
+}
+
+// =============================================
+// Table: legacies
+// =============================================
+model Legacy {
+  legacy_id       Int      @id @default(autoincrement())
+  name            String   @unique @db.VarChar(255)
+  location_filter String?  @db.VarChar(255)
+  points          Int      @default(0)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  users User[] // Relation field
+
+  @@map("legacies")
+  @@index([points(sort: Desc)], name: "idx_legacies_points")
+  @@index([location_filter], name: "idx_legacies_location")
+}
+
+// =============================================
+// Table: cohorts
+// =============================================
+model Cohort {
+  cohort_id  Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(100)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  users User[] // Relation field
+
+  @@map("cohorts")
+}
+
+// =============================================
+// Table: tasks
+// =============================================
+model Task {
+  task_id            Int               @id @default(autoincrement())
+  title              String            @db.VarChar(255)
+  description        String?           @db.Text
+  due_date           DateTime?         @db.Date
+  points_on_approval Int               @default(0)
+  assignee_type      TaskAssigneeType
+  assignee_id        Int?              // References cohort_id or legacy_id
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+
+  submissions TaskSubmission[] // Relation field
+
+  @@map("tasks")
+  @@index([assignee_type, assignee_id], name: "idx_tasks_assignee")
+  // Check constraint cannot be directly mapped in Prisma Schema,
+  // It needs to be handled either in the application logic or via a raw SQL migration alteration.
+  // Prisma doesn't support CHECK constraints directly in the schema model definition.
+  // @@check("(assignee_type = 'all' AND assignee_id IS NULL) OR (assignee_type != 'all' AND assignee_id IS NOT NULL)", name: "check_task_assignee")
+}
+
+// =============================================
+// Table: users
+// =============================================
+model User {
+  user_id             Int      @id @default(autoincrement())
+  firebase_uid        String   @unique @db.VarChar(128)
+  email               String   @db.VarChar(255) // Keep email even if not unique in DB for sync purposes
+  email_verified      Boolean? @default(false)
+  full_name           String?  @db.VarChar(255)
+  profile_picture_url String?  @db.VarChar(512)
+  disabled            Boolean? @default(false)
+  legacy_id           Int?
+  cohort_id           Int?
+  role                String   @default("student") @db.VarChar(50)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  legacy          Legacy?          @relation(fields: [legacy_id], references: [legacy_id], onDelete: SetNull)
+  cohort          Cohort?          @relation(fields: [cohort_id], references: [cohort_id], onDelete: SetNull)
+  submissions     TaskSubmission[] @relation("UserSubmissions")
+  reviews_by_user TaskSubmission[] @relation("ReviewerSubmissions")
+
+  @@map("users")
+  @@index([email], name: "idx_users_email")
+  // The unique index on firebase_uid is handled by the @unique directive above
+}
+
+// =============================================
+// Table: task_submissions
+// =============================================
+model TaskSubmission {
+  submission_id       Int               @id @default(autoincrement())
+  task_id             Int
+  user_id             Int
+  status              SubmissionStatus  @default(Submitted)
+  submitted_evidence  String?           @db.Text
+  submitted_at        DateTime          @default(now())
+  reviewed_by_user_id Int?
+  reviewed_at         DateTime?
+  reviewer_comment    String?           @db.Text
+  is_latest           Boolean           @default(true)
+
+  task                Task              @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
+  user                User              @relation("UserSubmissions", fields: [user_id], references: [user_id], onDelete: Cascade)
+  reviewed_by_user    User?             @relation("ReviewerSubmissions", fields: [reviewed_by_user_id], references: [user_id], onDelete: SetNull)
+
+  @@map("task_submissions")
+  @@index([task_id], name: "idx_submissions_task_id")
+  @@index([user_id], name: "idx_submissions_user_id")
+  @@index([reviewed_by_user_id], name: "idx_submissions_reviewed_by")
+  @@index([status], name: "idx_submissions_status")
+  @@index([user_id, task_id, is_latest(sort: Desc), submitted_at(sort: Desc)], name: "idx_submissions_user_task_latest")
+}
