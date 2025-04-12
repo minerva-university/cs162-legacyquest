@@ -4808,9 +4808,9 @@ export namespace Prisma {
     full_name: string | null
     profile_picture_url: string | null
     disabled: boolean | null
+    role: string | null
     legacy_id: number | null
     cohort_id: number | null
-    role: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -4823,9 +4823,9 @@ export namespace Prisma {
     full_name: string | null
     profile_picture_url: string | null
     disabled: boolean | null
+    role: string | null
     legacy_id: number | null
     cohort_id: number | null
-    role: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -4838,9 +4838,9 @@ export namespace Prisma {
     full_name: number
     profile_picture_url: number
     disabled: number
+    role: number
     legacy_id: number
     cohort_id: number
-    role: number
     created_at: number
     updated_at: number
     _all: number
@@ -4867,9 +4867,9 @@ export namespace Prisma {
     full_name?: true
     profile_picture_url?: true
     disabled?: true
+    role?: true
     legacy_id?: true
     cohort_id?: true
-    role?: true
     created_at?: true
     updated_at?: true
   }
@@ -4882,9 +4882,9 @@ export namespace Prisma {
     full_name?: true
     profile_picture_url?: true
     disabled?: true
+    role?: true
     legacy_id?: true
     cohort_id?: true
-    role?: true
     created_at?: true
     updated_at?: true
   }
@@ -4897,9 +4897,9 @@ export namespace Prisma {
     full_name?: true
     profile_picture_url?: true
     disabled?: true
+    role?: true
     legacy_id?: true
     cohort_id?: true
-    role?: true
     created_at?: true
     updated_at?: true
     _all?: true
@@ -4999,9 +4999,9 @@ export namespace Prisma {
     full_name: string | null
     profile_picture_url: string | null
     disabled: boolean | null
+    role: string
     legacy_id: number | null
     cohort_id: number | null
-    role: string
     created_at: Date
     updated_at: Date
     _count: UserCountAggregateOutputType | null
@@ -5033,9 +5033,9 @@ export namespace Prisma {
     full_name?: boolean
     profile_picture_url?: boolean
     disabled?: boolean
+    role?: boolean
     legacy_id?: boolean
     cohort_id?: boolean
-    role?: boolean
     created_at?: boolean
     updated_at?: boolean
     legacy?: boolean | User$legacyArgs<ExtArgs>
@@ -5053,9 +5053,9 @@ export namespace Prisma {
     full_name?: boolean
     profile_picture_url?: boolean
     disabled?: boolean
+    role?: boolean
     legacy_id?: boolean
     cohort_id?: boolean
-    role?: boolean
     created_at?: boolean
     updated_at?: boolean
     legacy?: boolean | User$legacyArgs<ExtArgs>
@@ -5070,9 +5070,9 @@ export namespace Prisma {
     full_name?: boolean
     profile_picture_url?: boolean
     disabled?: boolean
+    role?: boolean
     legacy_id?: boolean
     cohort_id?: boolean
-    role?: boolean
     created_at?: boolean
     updated_at?: boolean
     legacy?: boolean | User$legacyArgs<ExtArgs>
@@ -5087,14 +5087,14 @@ export namespace Prisma {
     full_name?: boolean
     profile_picture_url?: boolean
     disabled?: boolean
+    role?: boolean
     legacy_id?: boolean
     cohort_id?: boolean
-    role?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"user_id" | "firebase_uid" | "email" | "email_verified" | "full_name" | "profile_picture_url" | "disabled" | "legacy_id" | "cohort_id" | "role" | "created_at" | "updated_at", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"user_id" | "firebase_uid" | "email" | "email_verified" | "full_name" | "profile_picture_url" | "disabled" | "role" | "legacy_id" | "cohort_id" | "created_at" | "updated_at", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     legacy?: boolean | User$legacyArgs<ExtArgs>
     cohort?: boolean | User$cohortArgs<ExtArgs>
@@ -5127,9 +5127,9 @@ export namespace Prisma {
       full_name: string | null
       profile_picture_url: string | null
       disabled: boolean | null
+      role: string
       legacy_id: number | null
       cohort_id: number | null
-      role: string
       created_at: Date
       updated_at: Date
     }, ExtArgs["result"]["user"]>
@@ -5566,9 +5566,9 @@ export namespace Prisma {
     readonly full_name: FieldRef<"User", 'String'>
     readonly profile_picture_url: FieldRef<"User", 'String'>
     readonly disabled: FieldRef<"User", 'Boolean'>
+    readonly role: FieldRef<"User", 'String'>
     readonly legacy_id: FieldRef<"User", 'Int'>
     readonly cohort_id: FieldRef<"User", 'Int'>
-    readonly role: FieldRef<"User", 'String'>
     readonly created_at: FieldRef<"User", 'DateTime'>
     readonly updated_at: FieldRef<"User", 'DateTime'>
   }
@@ -6104,10 +6104,10 @@ export namespace Prisma {
     status: $Enums.SubmissionStatus | null
     submitted_evidence: string | null
     submitted_at: Date | null
+    is_latest: boolean | null
     reviewed_by_user_id: number | null
     reviewed_at: Date | null
     reviewer_comment: string | null
-    is_latest: boolean | null
   }
 
   export type TaskSubmissionMaxAggregateOutputType = {
@@ -6117,10 +6117,10 @@ export namespace Prisma {
     status: $Enums.SubmissionStatus | null
     submitted_evidence: string | null
     submitted_at: Date | null
+    is_latest: boolean | null
     reviewed_by_user_id: number | null
     reviewed_at: Date | null
     reviewer_comment: string | null
-    is_latest: boolean | null
   }
 
   export type TaskSubmissionCountAggregateOutputType = {
@@ -6130,10 +6130,10 @@ export namespace Prisma {
     status: number
     submitted_evidence: number
     submitted_at: number
+    is_latest: number
     reviewed_by_user_id: number
     reviewed_at: number
     reviewer_comment: number
-    is_latest: number
     _all: number
   }
 
@@ -6159,10 +6159,10 @@ export namespace Prisma {
     status?: true
     submitted_evidence?: true
     submitted_at?: true
+    is_latest?: true
     reviewed_by_user_id?: true
     reviewed_at?: true
     reviewer_comment?: true
-    is_latest?: true
   }
 
   export type TaskSubmissionMaxAggregateInputType = {
@@ -6172,10 +6172,10 @@ export namespace Prisma {
     status?: true
     submitted_evidence?: true
     submitted_at?: true
+    is_latest?: true
     reviewed_by_user_id?: true
     reviewed_at?: true
     reviewer_comment?: true
-    is_latest?: true
   }
 
   export type TaskSubmissionCountAggregateInputType = {
@@ -6185,10 +6185,10 @@ export namespace Prisma {
     status?: true
     submitted_evidence?: true
     submitted_at?: true
+    is_latest?: true
     reviewed_by_user_id?: true
     reviewed_at?: true
     reviewer_comment?: true
-    is_latest?: true
     _all?: true
   }
 
@@ -6285,10 +6285,10 @@ export namespace Prisma {
     status: $Enums.SubmissionStatus
     submitted_evidence: string | null
     submitted_at: Date
+    is_latest: boolean
     reviewed_by_user_id: number | null
     reviewed_at: Date | null
     reviewer_comment: string | null
-    is_latest: boolean
     _count: TaskSubmissionCountAggregateOutputType | null
     _avg: TaskSubmissionAvgAggregateOutputType | null
     _sum: TaskSubmissionSumAggregateOutputType | null
@@ -6317,10 +6317,10 @@ export namespace Prisma {
     status?: boolean
     submitted_evidence?: boolean
     submitted_at?: boolean
+    is_latest?: boolean
     reviewed_by_user_id?: boolean
     reviewed_at?: boolean
     reviewer_comment?: boolean
-    is_latest?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
     reviewed_by_user?: boolean | TaskSubmission$reviewed_by_userArgs<ExtArgs>
@@ -6333,10 +6333,10 @@ export namespace Prisma {
     status?: boolean
     submitted_evidence?: boolean
     submitted_at?: boolean
+    is_latest?: boolean
     reviewed_by_user_id?: boolean
     reviewed_at?: boolean
     reviewer_comment?: boolean
-    is_latest?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
     reviewed_by_user?: boolean | TaskSubmission$reviewed_by_userArgs<ExtArgs>
@@ -6349,10 +6349,10 @@ export namespace Prisma {
     status?: boolean
     submitted_evidence?: boolean
     submitted_at?: boolean
+    is_latest?: boolean
     reviewed_by_user_id?: boolean
     reviewed_at?: boolean
     reviewer_comment?: boolean
-    is_latest?: boolean
     task?: boolean | TaskDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
     reviewed_by_user?: boolean | TaskSubmission$reviewed_by_userArgs<ExtArgs>
@@ -6365,13 +6365,13 @@ export namespace Prisma {
     status?: boolean
     submitted_evidence?: boolean
     submitted_at?: boolean
+    is_latest?: boolean
     reviewed_by_user_id?: boolean
     reviewed_at?: boolean
     reviewer_comment?: boolean
-    is_latest?: boolean
   }
 
-  export type TaskSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"submission_id" | "task_id" | "user_id" | "status" | "submitted_evidence" | "submitted_at" | "reviewed_by_user_id" | "reviewed_at" | "reviewer_comment" | "is_latest", ExtArgs["result"]["taskSubmission"]>
+  export type TaskSubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"submission_id" | "task_id" | "user_id" | "status" | "submitted_evidence" | "submitted_at" | "is_latest" | "reviewed_by_user_id" | "reviewed_at" | "reviewer_comment", ExtArgs["result"]["taskSubmission"]>
   export type TaskSubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6402,10 +6402,10 @@ export namespace Prisma {
       status: $Enums.SubmissionStatus
       submitted_evidence: string | null
       submitted_at: Date
+      is_latest: boolean
       reviewed_by_user_id: number | null
       reviewed_at: Date | null
       reviewer_comment: string | null
-      is_latest: boolean
     }, ExtArgs["result"]["taskSubmission"]>
     composites: {}
   }
@@ -6838,10 +6838,10 @@ export namespace Prisma {
     readonly status: FieldRef<"TaskSubmission", 'SubmissionStatus'>
     readonly submitted_evidence: FieldRef<"TaskSubmission", 'String'>
     readonly submitted_at: FieldRef<"TaskSubmission", 'DateTime'>
+    readonly is_latest: FieldRef<"TaskSubmission", 'Boolean'>
     readonly reviewed_by_user_id: FieldRef<"TaskSubmission", 'Int'>
     readonly reviewed_at: FieldRef<"TaskSubmission", 'DateTime'>
     readonly reviewer_comment: FieldRef<"TaskSubmission", 'String'>
-    readonly is_latest: FieldRef<"TaskSubmission", 'Boolean'>
   }
     
 
@@ -7334,9 +7334,9 @@ export namespace Prisma {
     full_name: 'full_name',
     profile_picture_url: 'profile_picture_url',
     disabled: 'disabled',
+    role: 'role',
     legacy_id: 'legacy_id',
     cohort_id: 'cohort_id',
-    role: 'role',
     created_at: 'created_at',
     updated_at: 'updated_at'
   };
@@ -7351,10 +7351,10 @@ export namespace Prisma {
     status: 'status',
     submitted_evidence: 'submitted_evidence',
     submitted_at: 'submitted_at',
+    is_latest: 'is_latest',
     reviewed_by_user_id: 'reviewed_by_user_id',
     reviewed_at: 'reviewed_at',
-    reviewer_comment: 'reviewer_comment',
-    is_latest: 'is_latest'
+    reviewer_comment: 'reviewer_comment'
   };
 
   export type TaskSubmissionScalarFieldEnum = (typeof TaskSubmissionScalarFieldEnum)[keyof typeof TaskSubmissionScalarFieldEnum]
@@ -7685,9 +7685,9 @@ export namespace Prisma {
     full_name?: StringNullableFilter<"User"> | string | null
     profile_picture_url?: StringNullableFilter<"User"> | string | null
     disabled?: BoolNullableFilter<"User"> | boolean | null
+    role?: StringFilter<"User"> | string
     legacy_id?: IntNullableFilter<"User"> | number | null
     cohort_id?: IntNullableFilter<"User"> | number | null
-    role?: StringFilter<"User"> | string
     created_at?: DateTimeFilter<"User"> | Date | string
     updated_at?: DateTimeFilter<"User"> | Date | string
     legacy?: XOR<LegacyNullableScalarRelationFilter, LegacyWhereInput> | null
@@ -7704,9 +7704,9 @@ export namespace Prisma {
     full_name?: SortOrderInput | SortOrder
     profile_picture_url?: SortOrderInput | SortOrder
     disabled?: SortOrderInput | SortOrder
+    role?: SortOrder
     legacy_id?: SortOrderInput | SortOrder
     cohort_id?: SortOrderInput | SortOrder
-    role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     legacy?: LegacyOrderByWithRelationInput
@@ -7718,24 +7718,24 @@ export namespace Prisma {
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     user_id?: number
     firebase_uid?: string
+    email?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    email?: StringFilter<"User"> | string
     email_verified?: BoolNullableFilter<"User"> | boolean | null
     full_name?: StringNullableFilter<"User"> | string | null
     profile_picture_url?: StringNullableFilter<"User"> | string | null
     disabled?: BoolNullableFilter<"User"> | boolean | null
+    role?: StringFilter<"User"> | string
     legacy_id?: IntNullableFilter<"User"> | number | null
     cohort_id?: IntNullableFilter<"User"> | number | null
-    role?: StringFilter<"User"> | string
     created_at?: DateTimeFilter<"User"> | Date | string
     updated_at?: DateTimeFilter<"User"> | Date | string
     legacy?: XOR<LegacyNullableScalarRelationFilter, LegacyWhereInput> | null
     cohort?: XOR<CohortNullableScalarRelationFilter, CohortWhereInput> | null
     submissions?: TaskSubmissionListRelationFilter
     reviews_by_user?: TaskSubmissionListRelationFilter
-  }, "user_id" | "firebase_uid">
+  }, "user_id" | "firebase_uid" | "email">
 
   export type UserOrderByWithAggregationInput = {
     user_id?: SortOrder
@@ -7745,9 +7745,9 @@ export namespace Prisma {
     full_name?: SortOrderInput | SortOrder
     profile_picture_url?: SortOrderInput | SortOrder
     disabled?: SortOrderInput | SortOrder
+    role?: SortOrder
     legacy_id?: SortOrderInput | SortOrder
     cohort_id?: SortOrderInput | SortOrder
-    role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -7768,9 +7768,9 @@ export namespace Prisma {
     full_name?: StringNullableWithAggregatesFilter<"User"> | string | null
     profile_picture_url?: StringNullableWithAggregatesFilter<"User"> | string | null
     disabled?: BoolNullableWithAggregatesFilter<"User"> | boolean | null
+    role?: StringWithAggregatesFilter<"User"> | string
     legacy_id?: IntNullableWithAggregatesFilter<"User"> | number | null
     cohort_id?: IntNullableWithAggregatesFilter<"User"> | number | null
-    role?: StringWithAggregatesFilter<"User"> | string
     created_at?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updated_at?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -7785,10 +7785,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFilter<"TaskSubmission"> | $Enums.SubmissionStatus
     submitted_evidence?: StringNullableFilter<"TaskSubmission"> | string | null
     submitted_at?: DateTimeFilter<"TaskSubmission"> | Date | string
+    is_latest?: BoolFilter<"TaskSubmission"> | boolean
     reviewed_by_user_id?: IntNullableFilter<"TaskSubmission"> | number | null
     reviewed_at?: DateTimeNullableFilter<"TaskSubmission"> | Date | string | null
     reviewer_comment?: StringNullableFilter<"TaskSubmission"> | string | null
-    is_latest?: BoolFilter<"TaskSubmission"> | boolean
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     reviewed_by_user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -7801,10 +7801,10 @@ export namespace Prisma {
     status?: SortOrder
     submitted_evidence?: SortOrderInput | SortOrder
     submitted_at?: SortOrder
+    is_latest?: SortOrder
     reviewed_by_user_id?: SortOrderInput | SortOrder
     reviewed_at?: SortOrderInput | SortOrder
     reviewer_comment?: SortOrderInput | SortOrder
-    is_latest?: SortOrder
     task?: TaskOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
     reviewed_by_user?: UserOrderByWithRelationInput
@@ -7820,10 +7820,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFilter<"TaskSubmission"> | $Enums.SubmissionStatus
     submitted_evidence?: StringNullableFilter<"TaskSubmission"> | string | null
     submitted_at?: DateTimeFilter<"TaskSubmission"> | Date | string
+    is_latest?: BoolFilter<"TaskSubmission"> | boolean
     reviewed_by_user_id?: IntNullableFilter<"TaskSubmission"> | number | null
     reviewed_at?: DateTimeNullableFilter<"TaskSubmission"> | Date | string | null
     reviewer_comment?: StringNullableFilter<"TaskSubmission"> | string | null
-    is_latest?: BoolFilter<"TaskSubmission"> | boolean
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     reviewed_by_user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -7836,10 +7836,10 @@ export namespace Prisma {
     status?: SortOrder
     submitted_evidence?: SortOrderInput | SortOrder
     submitted_at?: SortOrder
+    is_latest?: SortOrder
     reviewed_by_user_id?: SortOrderInput | SortOrder
     reviewed_at?: SortOrderInput | SortOrder
     reviewer_comment?: SortOrderInput | SortOrder
-    is_latest?: SortOrder
     _count?: TaskSubmissionCountOrderByAggregateInput
     _avg?: TaskSubmissionAvgOrderByAggregateInput
     _max?: TaskSubmissionMaxOrderByAggregateInput
@@ -7857,10 +7857,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusWithAggregatesFilter<"TaskSubmission"> | $Enums.SubmissionStatus
     submitted_evidence?: StringNullableWithAggregatesFilter<"TaskSubmission"> | string | null
     submitted_at?: DateTimeWithAggregatesFilter<"TaskSubmission"> | Date | string
+    is_latest?: BoolWithAggregatesFilter<"TaskSubmission"> | boolean
     reviewed_by_user_id?: IntNullableWithAggregatesFilter<"TaskSubmission"> | number | null
     reviewed_at?: DateTimeNullableWithAggregatesFilter<"TaskSubmission"> | Date | string | null
     reviewer_comment?: StringNullableWithAggregatesFilter<"TaskSubmission"> | string | null
-    is_latest?: BoolWithAggregatesFilter<"TaskSubmission"> | boolean
   }
 
   export type LegacyCreateInput = {
@@ -8086,9 +8086,9 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
+    role?: string
     legacy_id?: number | null
     cohort_id?: number | null
-    role?: string
     created_at?: Date | string
     updated_at?: Date | string
     submissions?: TaskSubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -8119,9 +8119,9 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    role?: StringFieldUpdateOperationsInput | string
     legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
-    role?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     submissions?: TaskSubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -8136,9 +8136,9 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
+    role?: string
     legacy_id?: number | null
     cohort_id?: number | null
-    role?: string
     created_at?: Date | string
     updated_at?: Date | string
   }
@@ -8163,9 +8163,9 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    role?: StringFieldUpdateOperationsInput | string
     legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
-    role?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8174,9 +8174,9 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
     task: TaskCreateNestedOneWithoutSubmissionsInput
     user: UserCreateNestedOneWithoutSubmissionsInput
     reviewed_by_user?: UserCreateNestedOneWithoutReviews_by_userInput
@@ -8189,19 +8189,19 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_by_user_id?: number | null
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionUpdateInput = {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
     task?: TaskUpdateOneRequiredWithoutSubmissionsNestedInput
     user?: UserUpdateOneRequiredWithoutSubmissionsNestedInput
     reviewed_by_user?: UserUpdateOneWithoutReviews_by_userNestedInput
@@ -8214,10 +8214,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_by_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TaskSubmissionCreateManyInput = {
@@ -8227,19 +8227,19 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_by_user_id?: number | null
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionUpdateManyMutationInput = {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TaskSubmissionUncheckedUpdateManyInput = {
@@ -8249,10 +8249,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_by_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -8604,9 +8604,9 @@ export namespace Prisma {
     full_name?: SortOrder
     profile_picture_url?: SortOrder
     disabled?: SortOrder
+    role?: SortOrder
     legacy_id?: SortOrder
     cohort_id?: SortOrder
-    role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -8625,9 +8625,9 @@ export namespace Prisma {
     full_name?: SortOrder
     profile_picture_url?: SortOrder
     disabled?: SortOrder
+    role?: SortOrder
     legacy_id?: SortOrder
     cohort_id?: SortOrder
-    role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -8640,9 +8640,9 @@ export namespace Prisma {
     full_name?: SortOrder
     profile_picture_url?: SortOrder
     disabled?: SortOrder
+    role?: SortOrder
     legacy_id?: SortOrder
     cohort_id?: SortOrder
-    role?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -8695,10 +8695,10 @@ export namespace Prisma {
     status?: SortOrder
     submitted_evidence?: SortOrder
     submitted_at?: SortOrder
+    is_latest?: SortOrder
     reviewed_by_user_id?: SortOrder
     reviewed_at?: SortOrder
     reviewer_comment?: SortOrder
-    is_latest?: SortOrder
   }
 
   export type TaskSubmissionAvgOrderByAggregateInput = {
@@ -8715,10 +8715,10 @@ export namespace Prisma {
     status?: SortOrder
     submitted_evidence?: SortOrder
     submitted_at?: SortOrder
+    is_latest?: SortOrder
     reviewed_by_user_id?: SortOrder
     reviewed_at?: SortOrder
     reviewer_comment?: SortOrder
-    is_latest?: SortOrder
   }
 
   export type TaskSubmissionMinOrderByAggregateInput = {
@@ -8728,10 +8728,10 @@ export namespace Prisma {
     status?: SortOrder
     submitted_evidence?: SortOrder
     submitted_at?: SortOrder
+    is_latest?: SortOrder
     reviewed_by_user_id?: SortOrder
     reviewed_at?: SortOrder
     reviewer_comment?: SortOrder
-    is_latest?: SortOrder
   }
 
   export type TaskSubmissionSumOrderByAggregateInput = {
@@ -9364,8 +9364,8 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
-    cohort_id?: number | null
     role?: string
+    cohort_id?: number | null
     created_at?: Date | string
     updated_at?: Date | string
     submissions?: TaskSubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -9409,9 +9409,9 @@ export namespace Prisma {
     full_name?: StringNullableFilter<"User"> | string | null
     profile_picture_url?: StringNullableFilter<"User"> | string | null
     disabled?: BoolNullableFilter<"User"> | boolean | null
+    role?: StringFilter<"User"> | string
     legacy_id?: IntNullableFilter<"User"> | number | null
     cohort_id?: IntNullableFilter<"User"> | number | null
-    role?: StringFilter<"User"> | string
     created_at?: DateTimeFilter<"User"> | Date | string
     updated_at?: DateTimeFilter<"User"> | Date | string
   }
@@ -9439,8 +9439,8 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
-    legacy_id?: number | null
     role?: string
+    legacy_id?: number | null
     created_at?: Date | string
     updated_at?: Date | string
     submissions?: TaskSubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -9477,9 +9477,9 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
     user: UserCreateNestedOneWithoutSubmissionsInput
     reviewed_by_user?: UserCreateNestedOneWithoutReviews_by_userInput
   }
@@ -9490,10 +9490,10 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_by_user_id?: number | null
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionCreateOrConnectWithoutTaskInput = {
@@ -9532,10 +9532,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFilter<"TaskSubmission"> | $Enums.SubmissionStatus
     submitted_evidence?: StringNullableFilter<"TaskSubmission"> | string | null
     submitted_at?: DateTimeFilter<"TaskSubmission"> | Date | string
+    is_latest?: BoolFilter<"TaskSubmission"> | boolean
     reviewed_by_user_id?: IntNullableFilter<"TaskSubmission"> | number | null
     reviewed_at?: DateTimeNullableFilter<"TaskSubmission"> | Date | string | null
     reviewer_comment?: StringNullableFilter<"TaskSubmission"> | string | null
-    is_latest?: BoolFilter<"TaskSubmission"> | boolean
   }
 
   export type LegacyCreateWithoutUsersInput = {
@@ -9582,9 +9582,9 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
     task: TaskCreateNestedOneWithoutSubmissionsInput
     reviewed_by_user?: UserCreateNestedOneWithoutReviews_by_userInput
   }
@@ -9595,10 +9595,10 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_by_user_id?: number | null
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionCreateOrConnectWithoutUserInput = {
@@ -9615,9 +9615,9 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
     task: TaskCreateNestedOneWithoutSubmissionsInput
     user: UserCreateNestedOneWithoutSubmissionsInput
   }
@@ -9629,9 +9629,9 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionCreateOrConnectWithoutReviewed_by_userInput = {
@@ -9779,9 +9779,9 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
+    role?: string
     legacy_id?: number | null
     cohort_id?: number | null
-    role?: string
     created_at?: Date | string
     updated_at?: Date | string
     reviews_by_user?: TaskSubmissionUncheckedCreateNestedManyWithoutReviewed_by_userInput
@@ -9815,9 +9815,9 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
+    role?: string
     legacy_id?: number | null
     cohort_id?: number | null
-    role?: string
     created_at?: Date | string
     updated_at?: Date | string
     submissions?: TaskSubmissionUncheckedCreateNestedManyWithoutUserInput
@@ -9896,9 +9896,9 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    role?: StringFieldUpdateOperationsInput | string
     legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
-    role?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     reviews_by_user?: TaskSubmissionUncheckedUpdateManyWithoutReviewed_by_userNestedInput
@@ -9938,9 +9938,9 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    role?: StringFieldUpdateOperationsInput | string
     legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
-    role?: StringFieldUpdateOperationsInput | string
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     submissions?: TaskSubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -9954,8 +9954,8 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
-    cohort_id?: number | null
     role?: string
+    cohort_id?: number | null
     created_at?: Date | string
     updated_at?: Date | string
   }
@@ -9983,8 +9983,8 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
     role?: StringFieldUpdateOperationsInput | string
+    cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     submissions?: TaskSubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -9999,8 +9999,8 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
     role?: StringFieldUpdateOperationsInput | string
+    cohort_id?: NullableIntFieldUpdateOperationsInput | number | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10013,8 +10013,8 @@ export namespace Prisma {
     full_name?: string | null
     profile_picture_url?: string | null
     disabled?: boolean | null
-    legacy_id?: number | null
     role?: string
+    legacy_id?: number | null
     created_at?: Date | string
     updated_at?: Date | string
   }
@@ -10042,8 +10042,8 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     role?: StringFieldUpdateOperationsInput | string
+    legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
     submissions?: TaskSubmissionUncheckedUpdateManyWithoutUserNestedInput
@@ -10058,8 +10058,8 @@ export namespace Prisma {
     full_name?: NullableStringFieldUpdateOperationsInput | string | null
     profile_picture_url?: NullableStringFieldUpdateOperationsInput | string | null
     disabled?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     role?: StringFieldUpdateOperationsInput | string
+    legacy_id?: NullableIntFieldUpdateOperationsInput | number | null
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
     updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10070,19 +10070,19 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_by_user_id?: number | null
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionUpdateWithoutTaskInput = {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneRequiredWithoutSubmissionsNestedInput
     reviewed_by_user?: UserUpdateOneWithoutReviews_by_userNestedInput
   }
@@ -10093,10 +10093,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_by_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TaskSubmissionUncheckedUpdateManyWithoutTaskInput = {
@@ -10105,10 +10105,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_by_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TaskSubmissionCreateManyUserInput = {
@@ -10117,10 +10117,10 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_by_user_id?: number | null
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionCreateManyReviewed_by_userInput = {
@@ -10130,18 +10130,18 @@ export namespace Prisma {
     status?: $Enums.SubmissionStatus
     submitted_evidence?: string | null
     submitted_at?: Date | string
+    is_latest?: boolean
     reviewed_at?: Date | string | null
     reviewer_comment?: string | null
-    is_latest?: boolean
   }
 
   export type TaskSubmissionUpdateWithoutUserInput = {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
     task?: TaskUpdateOneRequiredWithoutSubmissionsNestedInput
     reviewed_by_user?: UserUpdateOneWithoutReviews_by_userNestedInput
   }
@@ -10152,10 +10152,10 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_by_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TaskSubmissionUncheckedUpdateManyWithoutUserInput = {
@@ -10164,19 +10164,19 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_by_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TaskSubmissionUpdateWithoutReviewed_by_userInput = {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
     task?: TaskUpdateOneRequiredWithoutSubmissionsNestedInput
     user?: UserUpdateOneRequiredWithoutSubmissionsNestedInput
   }
@@ -10188,9 +10188,9 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TaskSubmissionUncheckedUpdateManyWithoutReviewed_by_userInput = {
@@ -10200,9 +10200,9 @@ export namespace Prisma {
     status?: EnumSubmissionStatusFieldUpdateOperationsInput | $Enums.SubmissionStatus
     submitted_evidence?: NullableStringFieldUpdateOperationsInput | string | null
     submitted_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    is_latest?: BoolFieldUpdateOperationsInput | boolean
     reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewer_comment?: NullableStringFieldUpdateOperationsInput | string | null
-    is_latest?: BoolFieldUpdateOperationsInput | boolean
   }
 
 

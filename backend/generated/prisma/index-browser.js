@@ -153,9 +153,9 @@ exports.Prisma.UserScalarFieldEnum = {
   full_name: 'full_name',
   profile_picture_url: 'profile_picture_url',
   disabled: 'disabled',
+  role: 'role',
   legacy_id: 'legacy_id',
   cohort_id: 'cohort_id',
-  role: 'role',
   created_at: 'created_at',
   updated_at: 'updated_at'
 };
@@ -167,10 +167,10 @@ exports.Prisma.TaskSubmissionScalarFieldEnum = {
   status: 'status',
   submitted_evidence: 'submitted_evidence',
   submitted_at: 'submitted_at',
+  is_latest: 'is_latest',
   reviewed_by_user_id: 'reviewed_by_user_id',
   reviewed_at: 'reviewed_at',
-  reviewer_comment: 'reviewer_comment',
-  is_latest: 'is_latest'
+  reviewer_comment: 'reviewer_comment'
 };
 
 exports.Prisma.SortOrder = {

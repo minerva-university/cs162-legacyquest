@@ -4,139 +4,186 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// =============================================================================
+// Schema Configuration
+// =============================================================================
+
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
-  output          = "../generated/prisma"
+  provider        = "prisma-client-js"   // Specifies Prisma Client for JavaScript/TypeScript
+  previewFeatures = ["driverAdapters"] // Enables features like the Neon serverless driver adapter
+  output          = "../generated/prisma" // Output directory for the generated Prisma Client
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"             // Database provider (PostgreSQL for Neon)
+  url      = env("DATABASE_URL")    // Database connection URL from .env file
 }
 
-// =============================================
-// Define ENUM Types
-// =============================================
+// =============================================================================
+// ENUM Definitions
+// =============================================================================
 
+/// Defines how a task can be assigned.
 enum TaskAssigneeType {
-  all
-  cohort
-  legacy
+  all     // Assigned to everyone
+  cohort  // Assigned to a specific cohort (using assignee_id)
+  legacy  // Assigned to a specific legacy (using assignee_id)
 }
 
+/// Defines the possible statuses for a task submission.
 enum SubmissionStatus {
-  Submitted
-  Approved
-  Rejected
+  Submitted // Initial status when user submits evidence
+  Approved  // Status when a reviewer approves the submission
+  Rejected  // Status when a reviewer rejects the submission
 }
 
-// =============================================
-// Table: legacies
-// =============================================
+// =============================================================================
+// Model: Legacy
+// Represents a "Legacy" group within the application.
+// =============================================================================
 model Legacy {
-  legacy_id       Int      @id @default(autoincrement())
-  name            String   @unique @db.VarChar(255)
-  location_filter String?  @db.VarChar(255)
-  points          Int      @default(0)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  legacy_id       Int      @id @default(autoincrement()) // Primary key
+  name            String   @unique @db.VarChar(255)       // Unique name of the legacy
+  location_filter String?  @db.VarChar(255)               // Optional filter for location-based rankings/features
+  points          Int      @default(0)                    // Total points accumulated by the legacy
+  created_at      DateTime @default(now())                // Timestamp of creation
+  updated_at      DateTime @updatedAt                   // Timestamp of last update
 
-  users User[] // Relation field
+  // Relation: A Legacy can have many Users.
+  // This is the inverse side of the one-to-many relation with User (legacy field).
+  users User[]
 
-  @@map("legacies")
-  @@index([points(sort: Desc)], name: "idx_legacies_points")
-  @@index([location_filter], name: "idx_legacies_location")
+  @@map("legacies") // Maps this model to the "legacies" table in the database
+  @@index([points(sort: Desc)], name: "idx_legacies_points") // Index for efficient sorting/querying by points
+  @@index([location_filter], name: "idx_legacies_location") // Index for filtering by location
 }
 
-// =============================================
-// Table: cohorts
-// =============================================
+// =============================================================================
+// Model: Cohort
+// Represents a user cohort (e.g., based on start date).
+// =============================================================================
 model Cohort {
-  cohort_id  Int      @id @default(autoincrement())
-  name       String   @unique @db.VarChar(100)
+  cohort_id  Int      @id @default(autoincrement()) // Primary key
+  name       String   @unique @db.VarChar(100)     // Unique name of the cohort (e.g., "M24")
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  users User[] // Relation field
+  // Relation: A Cohort can have many Users.
+  // Inverse side of the one-to-many relation with User (cohort field).
+  users User[]
 
   @@map("cohorts")
 }
 
-// =============================================
-// Table: tasks
-// =============================================
+// =============================================================================
+// Model: Task
+// Represents a task that can be assigned to users.
+// =============================================================================
 model Task {
-  task_id            Int               @id @default(autoincrement())
-  title              String            @db.VarChar(255)
-  description        String?           @db.Text
-  due_date           DateTime?         @db.Date
-  points_on_approval Int               @default(0)
-  assignee_type      TaskAssigneeType
-  assignee_id        Int?              // References cohort_id or legacy_id
+  task_id            Int               @id @default(autoincrement()) // Primary key
+  title              String            @db.VarChar(255)       // Title of the task
+  description        String?           @db.Text               // Optional detailed description
+  due_date           DateTime?         @db.Date               // Optional due date (Date only, no time)
+  points_on_approval Int               @default(0)            // Points awarded when a submission for this task is approved
+  assignee_type      TaskAssigneeType                       // Type of assignment (all, cohort, legacy)
+  assignee_id        Int?                                   // ID of the cohort or legacy if assignee_type is cohort/legacy; null if 'all'
   created_at         DateTime          @default(now())
   updated_at         DateTime          @updatedAt
 
-  submissions TaskSubmission[] // Relation field
+  // Relation: A Task can have many TaskSubmissions.
+  submissions TaskSubmission[]
 
   @@map("tasks")
+  // Index for efficient querying of tasks based on their assignment
   @@index([assignee_type, assignee_id], name: "idx_tasks_assignee")
-  // Check constraint cannot be directly mapped in Prisma Schema,
-  // It needs to be handled either in the application logic or via a raw SQL migration alteration.
-  // Prisma doesn't support CHECK constraints directly in the schema model definition.
-  // @@check("(assignee_type = 'all' AND assignee_id IS NULL) OR (assignee_type != 'all' AND assignee_id IS NOT NULL)", name: "check_task_assignee")
+
+  // Note on CHECK constraint for assignee_id based on assignee_type:
+  // Prisma schema doesn't directly support complex CHECK constraints.
+  // This logic (assignee_id MUST be null if type is 'all', MUST NOT be null otherwise)
+  // needs to be enforced either in:
+  // 1. Application logic (before creating/updating tasks).
+  // 2. A raw SQL migration (`ALTER TABLE tasks ADD CONSTRAINT ...`).
+  // @@check(...) // This Prisma syntax is illustrative, not directly supported.
 }
 
-// =============================================
-// Table: users
-// =============================================
+// =============================================================================
+// Model: User
+// Represents an application user, linking Firebase Auth to local data.
+// =============================================================================
 model User {
-  user_id             Int      @id @default(autoincrement())
-  firebase_uid        String   @unique @db.VarChar(128)
-  email               String   @db.VarChar(255) // Keep email even if not unique in DB for sync purposes
-  email_verified      Boolean? @default(false)
-  full_name           String?  @db.VarChar(255)
-  profile_picture_url String?  @db.VarChar(512)
-  disabled            Boolean? @default(false)
-  legacy_id           Int?
-  cohort_id           Int?
-  role                String   @default("student") @db.VarChar(50)
+  user_id             Int      @id @default(autoincrement()) // Primary key for internal use
+  // --- Authentication & Core Info ---
+  firebase_uid        String   @unique @db.VarChar(128)       // **KEY FIELD**: Unique ID from Firebase Authentication. Links this record to Firebase.
+  email               String   @unique @db.VarChar(255)       // User's email address (synced from Firebase). Enforced unique.
+  email_verified      Boolean? @default(false)                // Whether the email was verified by Firebase.
+  full_name           String?  @db.VarChar(255)               // User's full name (synced from Firebase, but preserved on link if exists).
+  profile_picture_url String?  @db.VarChar(512)               // URL to the user's profile picture (synced from Firebase).
+  disabled            Boolean? @default(false)                // Flag to disable user access (application level).
+  role                String   @default("student") @db.VarChar(50) // Application-specific role (e.g., student, admin, reviewer).
+
+  // --- Application Specific Associations ---
+  legacy_id           Int?                                   // Foreign key linking to the Legacy table.
+  cohort_id           Int?                                   // Foreign key linking to the Cohort table.
+
+  // --- Timestamps ---
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
 
+  // --- Relations ---
+  // Relation: A User belongs to one Legacy (optional).
+  // onDelete: SetNull means if the Legacy is deleted, user.legacy_id becomes null.
   legacy          Legacy?          @relation(fields: [legacy_id], references: [legacy_id], onDelete: SetNull)
+  // Relation: A User belongs to one Cohort (optional).
+  // onDelete: SetNull means if the Cohort is deleted, user.cohort_id becomes null.
   cohort          Cohort?          @relation(fields: [cohort_id], references: [cohort_id], onDelete: SetNull)
-  submissions     TaskSubmission[] @relation("UserSubmissions")
-  reviews_by_user TaskSubmission[] @relation("ReviewerSubmissions")
+  // Relation: A User can have many TaskSubmissions.
+  submissions     TaskSubmission[] @relation("UserSubmissions") // Named relation for clarity
+  // Relation: A User can be the reviewer for many TaskSubmissions.
+  reviews_by_user TaskSubmission[] @relation("ReviewerSubmissions") // Named relation for clarity
 
-  @@map("users")
-  @@index([email], name: "idx_users_email")
-  // The unique index on firebase_uid is handled by the @unique directive above
+  @@map("users") // Maps to the "users" table
+  // Index on email is now automatically created because of @unique
+  // @@index([email], name: "idx_users_email") // This index is no longer needed explicitly
+  // Unique index on firebase_uid is automatically created by the @unique directive.
 }
 
-// =============================================
-// Table: task_submissions
-// =============================================
+// =============================================================================
+// Model: TaskSubmission
+// Represents a user's submission for a specific task.
+// =============================================================================
 model TaskSubmission {
-  submission_id       Int               @id @default(autoincrement())
-  task_id             Int
-  user_id             Int
-  status              SubmissionStatus  @default(Submitted)
-  submitted_evidence  String?           @db.Text
-  submitted_at        DateTime          @default(now())
-  reviewed_by_user_id Int?
-  reviewed_at         DateTime?
-  reviewer_comment    String?           @db.Text
-  is_latest           Boolean           @default(true)
+  submission_id       Int               @id @default(autoincrement()) // Primary key
+  // --- Foreign Keys & Core Info ---
+  task_id             Int                                    // Links to the Task being submitted for
+  user_id             Int                                    // Links to the User who made the submission
+  status              SubmissionStatus  @default(Submitted)    // Current status of the submission
+  submitted_evidence  String?           @db.Text               // Content of the evidence submitted by the user
+  submitted_at        DateTime          @default(now())        // Timestamp when the submission was created/submitted
+  is_latest           Boolean           @default(true)         // Flag to easily identify the most recent submission for a user/task pair
 
+  // --- Review Information ---
+  reviewed_by_user_id Int?                                   // Foreign key linking to the User who reviewed this submission
+  reviewed_at         DateTime?                              // Timestamp when the review occurred
+  reviewer_comment    String?           @db.Text               // Optional comments from the reviewer
+
+
+  // --- Relations ---
+  // Relation: A Submission belongs to one Task.
+  // onDelete: Cascade means if the Task is deleted, this submission is also deleted.
   task                Task              @relation(fields: [task_id], references: [task_id], onDelete: Cascade)
+  // Relation: A Submission belongs to one User (the submitter).
+  // onDelete: Cascade means if the User is deleted, this submission is also deleted.
   user                User              @relation("UserSubmissions", fields: [user_id], references: [user_id], onDelete: Cascade)
+  // Relation: A Submission is reviewed by one User (optional, the reviewer).
+  // onDelete: SetNull means if the reviewer User is deleted, reviewed_by_user_id becomes null.
   reviewed_by_user    User?             @relation("ReviewerSubmissions", fields: [reviewed_by_user_id], references: [user_id], onDelete: SetNull)
 
-  @@map("task_submissions")
+  @@map("task_submissions") // Maps to the "task_submissions" table
+  // --- Indexes for efficient querying ---
   @@index([task_id], name: "idx_submissions_task_id")
   @@index([user_id], name: "idx_submissions_user_id")
   @@index([reviewed_by_user_id], name: "idx_submissions_reviewed_by")
   @@index([status], name: "idx_submissions_status")
+  // Compound index useful for finding the latest submission for a user/task quickly
   @@index([user_id, task_id, is_latest(sort: Desc), submitted_at(sort: Desc)], name: "idx_submissions_user_task_latest")
 }
