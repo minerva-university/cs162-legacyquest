@@ -21,6 +21,13 @@ backend/generated/*
 backend/.env
 backend/prisma/.env
 
+# Firebase secrets and configs
+firebase-admin-sdk-key.json
+backend/firebase-admin-sdk-key.json
+**/service-account*.json
+**/serviceAccount*.json
+**/*-firebase-adminsdk-*.json
+
 # Ensure schema.prisma is not ignored
 !generated/prisma/schema.prisma
 
