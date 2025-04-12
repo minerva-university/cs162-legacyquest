@@ -23,8 +23,8 @@ export default function ListedLegacy({legacyRanking, legacyName, legacyIconUrl, 
               src={treasureBox} 
               alt="Treasure Box" 
               style={{
-                width: '41px',
-                height: '35px',
+                width: '32px',
+                height: '28px',
                 objectFit: 'contain'
               }}
             />
@@ -37,8 +37,8 @@ export default function ListedLegacy({legacyRanking, legacyName, legacyIconUrl, 
               src={silverTreasureBox} 
               alt="Silver Treasure Box" 
               style={{
-                width: '41px',
-                height: '35px',
+                width: '32px',
+                height: '28px',
                 objectFit: 'contain'
               }}
             />
@@ -51,8 +51,8 @@ export default function ListedLegacy({legacyRanking, legacyName, legacyIconUrl, 
               src={bronzeTreasureBox} 
               alt="Bronze Treasure Box" 
               style={{
-                width: '41px',
-                height: '35px',
+                width: '32px',
+                height: '28px',
                 objectFit: 'contain'
               }}
             />

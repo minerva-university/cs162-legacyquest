@@ -7,9 +7,9 @@ export default function CircleProgressTracker({taskProgress}) {
   
   return (
     <Box sx={{
-      height: '100%',
-      width: '50%',
-      minWidth: '240px',
+      height: '90%',  // Changed from '100%'
+      width: '40%',   // Changed from '50%'
+      minWidth: '240px',  // Changed from '240px'
       borderRadius: 2,
       display: 'flex',
       alignItems: 'center',
@@ -17,10 +17,10 @@ export default function CircleProgressTracker({taskProgress}) {
       flexDirection: 'column',
       p: 2,
       boxSizing: 'border-box',
-      boxShadow: `0 0 6px ${theme.palette.shadowGreen}`}}>
+      boxShadow: `0 0 5px 0.5px ${theme.palette.shadowGray}`}}>
       <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-        <CircularProgress variant='determinate' size={160} thickness={4} value={100} sx={{color: '#CEAC674D'}} />
-        <CircularProgress variant='determinate' size={160} thickness={4} value={displayedProgress} sx={{position: 'absolute', left: 0, color: '#D98F41', strokeLinecap: 'round'}} />
+        <CircularProgress variant='determinate' size={130} thickness={4} value={100} sx={{color: '#CEAC674D'}} />
+        <CircularProgress variant='determinate' size={130} thickness={4} value={displayedProgress} sx={{position: 'absolute', left: 0, color: '#D98F41', strokeLinecap: 'round'}} />
         <Box sx={{top: 0, left: 0, bottom: 0, right: 0, position: 'absolute', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
           <Typography variant='h2'>{taskProgress}</Typography>
         </Box>

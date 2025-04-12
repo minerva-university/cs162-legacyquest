@@ -3,10 +3,10 @@ import ListedTask from './ListedTask';
 
 export default function TaskList({tasks}) {
   return (
-    <Stack sx={{width: 1, minWidth: '200px', maxWidth: '500px'}}>
+    <Stack sx={{width: 1, minWidth: '350px', maxWidth: '800px'}}>
       <Box 
         sx={{ 
-          maxHeight: '400px',
+          maxHeight: '360px',
           overflowY: 'auto',
           pr: 1, // Add right padding to create space between content and scrollbar
           mr: -1, // Add negative margin to compensate for padding in container width

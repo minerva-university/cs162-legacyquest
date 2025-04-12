@@ -10,7 +10,8 @@ import ProtectedRoute from '@services/ProtectedRoutes.jsx';
 
 const theme = createTheme({
   palette: {
-    shadowGreen: '#8EE00033', // You can adjust this hex color to your preferred shade of green
+    shadowBrown: '#8B6B4C33',
+    shadowGray: '#8B6B4C33'
   },
   typography:{
     fontFamily: 'Nunito, sans-serif',
