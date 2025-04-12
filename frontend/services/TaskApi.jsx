@@ -40,7 +40,7 @@ const TaskApi = {
       }
       const tasks = await response.json();
 
-      // --- IMPORTANT: Data Mapping Required --- 
+      // --- IMPORTANT: Data Mapping Required ---
       // TODO: The structure of `tasks` received from the backend (based on Prisma schema)
       // might differ from the structure expected by frontend components (e.g., TaskList).
       // Adapt this section to map fields correctly (e.g., task_id -> taskID, title -> name).
@@ -146,7 +146,7 @@ const TaskApi = {
       });
       // Handle 404: No submission found
       if (response.status === 404) {
-         console.log(`No comments/submission found for task ${taskID}.`);
+          console.log(`No comments/submission found for task ${taskID}.`);
         return null;
       }
       if (!response.ok) {
@@ -167,4 +167,4 @@ const TaskApi = {
   }
 }
 
-export default TaskApi; 
+export default TaskApi;
