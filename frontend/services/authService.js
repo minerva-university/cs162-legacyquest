@@ -22,8 +22,8 @@ export const signInWithGoogle = async () => {
     const user = result.user;
     const email = user.email;
     
-    // Check if it's a Minerva email
-    if (!email || !email.endsWith('@uni.minerva.edu')) {
+    // Improved Minerva email validation - check domain exactly
+    if (!email || !/^[\w.-]+@uni\.minerva\.edu$/.test(email)) {
       await signOut(auth);
       throw new Error('Only Minerva University emails (@uni.minerva.edu) are allowed');
     }

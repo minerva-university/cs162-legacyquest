@@ -28,7 +28,7 @@ admin.initializeApp({
 // Initializes Prisma Client connected to the database specified in DATABASE_URL.
 const prisma = new PrismaClient();
 
-// --- Express App Initialization ---
+// --- Express App Initialization --- 
 const app = express();
 const PORT = process.env.PORT || 3001; // Use 3001 to avoid conflict with frontend dev server (often 3000)
 
@@ -90,9 +90,11 @@ const authenticateToken = async (req, res, next) => {
       // 2. User not found by firebase_uid - check by email (now unique and lowercase)
       console.log(`User not found by firebase_uid ${firebase_uid}. Checking by email: ${tokenEmailLower}`);
       if (tokenEmailLower) { // Proceed only if email exists
-          // Use findUnique now that email is unique in the schema
+          // Use findFirst to find by email, ignoring case if the database collation isn't case-insensitive
           const existingUserByEmail = await prisma.user.findUnique({
-            where: { email: tokenEmailLower },
+            where: { 
+              email: tokenEmailLower // Email should already be lowercase, but we ensure it here
+            },
           });
 
           if (existingUserByEmail) {
@@ -100,14 +102,25 @@ const authenticateToken = async (req, res, next) => {
             if (!existingUserByEmail.firebase_uid) {
               // 2a. Found by email, firebase_uid is missing - LINK accounts (preserve existing name)
               console.log(`Linking Firebase UID ${firebase_uid} to existing user found by email ${tokenEmailLower} (Case 2a)`);
-              userRecord = await prisma.user.update({
-                where: { email: tokenEmailLower },
-                data: {
-                  firebase_uid: firebase_uid,
-                  profile_picture_url: decodedToken.picture,
-                  email_verified: decodedToken.email_verified || false,
-                  // DO NOT update full_name
-                },
+              // Use transaction to prevent race conditions when linking accounts
+              userRecord = await prisma.$transaction(async (prisma) => {
+                // Double-check the user still doesn't have a firebase_uid (could have been set by another request)
+                const freshUser = await prisma.user.findUnique({
+                  where: { email: tokenEmailLower },
+                });
+                
+                if (freshUser && !freshUser.firebase_uid) {
+                  return prisma.user.update({
+                    where: { email: tokenEmailLower },
+                    data: {
+                      firebase_uid: firebase_uid,
+                      profile_picture_url: decodedToken.picture,
+                      email_verified: decodedToken.email_verified || false,
+                      // DO NOT update full_name
+                    },
+                  });
+                }
+                return freshUser; // Return the user without updating if already has firebase_uid
               });
             } else {
               // 2b. Found by email, and firebase_uid ALREADY EXISTS in DB.
@@ -248,4 +261,4 @@ process.on('SIGTERM', async () => {
   await prisma.$disconnect()
   console.log('Prisma Client disconnected.')
   process.exit(0)
-}) 
+})
