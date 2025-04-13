@@ -48,7 +48,7 @@ out
 coverage
 .nyc_output
 
-# Firebase
+# Firebase (debug logs)
 firebase-debug.log
 firebase-debug.*.log
 .firebase/

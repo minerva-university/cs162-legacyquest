@@ -4,17 +4,21 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
+// =============================================================================
+// !! IMPORTANT !! Verify this is the correct Firebase project configuration !!
+// =============================================================================
 // Your web app's Firebase configuration for cs162-legacyquest
 // TEMPORARY: Using hardcoded values for testing, will revert to env vars when verified working
 const firebaseConfig = {
-  apiKey: "AIzaSyCsewJGS8R2e-_5vBLOz2ZNaZwOH5GXJGA",
-  authDomain: "cs162-legacyquest.firebaseapp.com",
-  projectId: "cs162-legacyquest",
-  storageBucket: "cs162-legacyquest.firebasestorage.app", // Corrected bucket name if needed
-  messagingSenderId: "1000411201391",
-  appId: "1:1000411201391:web:8dadcd620acbca50d3329a",
-  measurementId: "G-L7Y0C1BM9F"
+  apiKey: "AIzaSyCsewJGS8R2e-_5vBLOz2ZNaZwOH5GXJGA", // Verify Key
+  authDomain: "cs162-legacyquest.firebaseapp.com",   // Verify Domain
+  projectId: "cs162-legacyquest",                  // Verify Project ID
+  storageBucket: "cs162-legacyquest.appspot.com", // Standard bucket format usually ends with .appspot.com
+  messagingSenderId: "1000411201391",             // Verify Sender ID
+  appId: "1:1000411201391:web:8dadcd620acbca50d3329a", // Verify App ID
+  measurementId: "G-L7Y0C1BM9F"                    // Verify Measurement ID
 };
+// =============================================================================
 
 /* 
 // Environment variable version - uncomment after testing
@@ -32,6 +36,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
 // Note: Firestore is still initialized here. Ensure you have Firestore enabled and
 // configured security rules in the cs162-legacyquest project if you intend to use it directly
 // from the frontend for anything, otherwise this db export might be unused.
