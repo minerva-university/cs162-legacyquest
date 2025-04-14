@@ -52,8 +52,7 @@ PORT=3001
 ```
 
 Notes:
-- Replace `username`, `password`, and other values in the `DATABASE_URL` with your PostgreSQL credentials.
-- For cloud databases (like NeonDB), you'll be provided with a connection string.
+- Replace DATABASE_URL with the url provided in the secrets via Telegram
 
 ### Firebase Admin SDK Setup
 
@@ -65,7 +64,6 @@ Notes:
 
 IMPORTANT:
 - This file contains sensitive credentials, ensure it's included in your `.gitignore` file
-- The Firebase project must be the same one configured in your frontend
 
 ## Database Setup
 
