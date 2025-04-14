@@ -26,7 +26,6 @@ const TaskApi = {
       }
 
       const rawTasks = await res.json();
-      console.log('Raw tasks from backend:', rawTasks);
 
       // Map backend structure to frontend-friendly task format
       const formattedTasks = rawTasks.map((task) => {
@@ -48,10 +47,8 @@ const TaskApi = {
         };
       });
 
-      console.log('🧾 Formatted tasks for dashboard:', formattedTasks);
       return formattedTasks;
     } catch (err) {
-      console.error('❌ Error in TaskApi.getAllTasks:', err);
       throw err;
     }
   },
