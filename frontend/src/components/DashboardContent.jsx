@@ -32,7 +32,6 @@ export default function DashboardContent() {
       const fetchedTasks = await TaskApi.getAllTasks(token);
       setTasks(fetchedTasks);
     } catch (err) {
-      console.error('Failed to fetch tasks:', err);
       setError(err.message || 'Failed to load tasks.');
       setTasks([]);
     } finally {
@@ -73,7 +72,6 @@ export default function DashboardContent() {
       }
       return result;
     } catch (err) {
-      console.error('Upload failed:', err);
       return { success: false, message: err.message };
     }
   };
