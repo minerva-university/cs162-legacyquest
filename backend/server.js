@@ -227,13 +227,44 @@ app.get('/api/me', authenticateToken, (req, res) => {
 });
 
 // GET /api/tasks: Placeholder route to fetch tasks for the authenticated user.
-// This route is currently used to test the authentication flow triggered by DashboardContent.
-// TODO: Replace placeholder with actual Prisma logic to fetch tasks based on req.user assignments.
-app.get('/api/tasks', authenticateToken, (req, res) => {
-  console.log('Placeholder /api/tasks route hit by user:', req.user?.email);
-  // Send back an empty array for now so the frontend doesn't hang or error on data mapping
-  res.json([]);
+app.get('/api/tasks', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const userCohortId = req.user.cohort_id;
+    const userLegacyId = req.user.legacy_id;
+
+    console.log("📥 Fetching tasks for user:", {
+      userId,
+      cohort_id: userCohortId,
+      legacy_id: userLegacyId
+    });
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        OR: [
+          { assignee_type: 'all' },
+          userCohortId && { assignee_type: 'cohort', assignee_id: userCohortId },
+          userLegacyId && { assignee_type: 'legacy', assignee_id: userLegacyId }
+        ].filter(Boolean) // remove falsy values
+      },
+      include: {
+        submissions: {
+          where: { user_id: userId },
+          orderBy: { submitted_at: 'desc' },
+          take: 1
+        }
+      },
+      orderBy: { due_date: 'asc' }
+    });
+
+    console.log(`✅ ${tasks.length} tasks returned`);
+    res.json(tasks);
+  } catch (error) {
+    console.error("❌ Failed to fetch tasks:", error);
+    res.status(500).json({ error: 'Failed to retrieve tasks' });
+  }
 });
+
 
 // TODO: Add more routes for tasks, submissions, legacies, cohorts, users etc.
 // Consider organizing routes into separate files under a 'routes/' directory.
