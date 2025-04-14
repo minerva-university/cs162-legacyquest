@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Button, InputAdornment, Paper } from '@mui/material';
+import { Box, Typography, TextField, Button, InputAdornment, Paper, Select, MenuItem, FormControl } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -12,11 +12,30 @@ export default function AddNewTask() {
   const [city, setCity] = useState('');
   const [submissionDate, setSubmissionDate] = useState('');
 
+  // List of available cities
+  const cities = [
+    'All Cities',
+    'San Francisco',
+    'Berlin',
+    'Buenos Aires',
+    'Tokyo',
+    'Seoul',
+    'Hyderabad',
+    'Taipei'
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // In a real app, this would add the task to the database
     // All tasks need approval by default
-    console.log({ taskName, description, city, submissionDate, needsApproval: true });
+    console.log({ 
+      taskName, 
+      description, 
+      // Convert "All Cities" to null for the backend
+      targetCity: city === 'All Cities' ? null : city, 
+      submissionDate,
+      needsApproval: true 
+    });
     
     // Reset form
     setTaskName('');
@@ -91,38 +110,54 @@ export default function AddNewTask() {
               }}
             />
             
-            <TextField
-              placeholder="Which city it should display for?"
-              variant="outlined"
-              fullWidth
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
+            <FormControl fullWidth variant="outlined">
+              <Select
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                displayEmpty
+                renderValue={(selected) => {
+                  if (!selected) {
+                    return <span style={{ color: 'rgba(0, 0, 0, 0.38)' }}>Which city it should display for?</span>;
+                  }
+                  return selected;
+                }}
+                sx={{ 
+                  bgcolor: '#f5f5f5',
                   borderRadius: '4px',
-                  bgcolor: '#f5f5f5'
-                }
-              }}
-            />
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(0, 0, 0, 0.23)'
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: theme.palette.primary.main
+                  }
+                }}
+                inputProps={{
+                  sx: { py: 1.5 }
+                }}
+              >
+                {cities.map((cityOption) => (
+                  <MenuItem key={cityOption} value={cityOption}>
+                    {cityOption}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             
             <TextField
-              placeholder="Submission Deadline..."
+              type="date"
+              label="Submission Deadline"
               variant="outlined"
               fullWidth
               required
               value={submissionDate}
               onChange={(e) => setSubmissionDate(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <CalendarTodayIcon />
-                  </InputAdornment>
-                ),
+              InputLabelProps={{
+                shrink: true,
               }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '4px',
-                  bgcolor: '#f5f5f5'
+              InputProps={{
+                sx: {
+                  bgcolor: '#f5f5f5',
+                  borderRadius: '4px'
                 }
               }}
             />

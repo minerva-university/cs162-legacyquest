@@ -1,36 +1,31 @@
 import { Box, Divider, Stack } from '@mui/material';
-import AdminContent from '../components/AdminContent';
 import UserProfile from '../components/UserProfile';
+import AdminContent from '../components/AdminContent';
 
 export default function AdminPage() {
-  return(
-    <Stack direction='row' sx={{ height: '100%', alignItems: 'stretch'}}>
+  return (
+    <Stack 
+      direction='row' 
+      sx={{ 
+        height: '100vh',
+        width: '100%',
+        alignItems: 'stretch',
+        overflow: 'hidden'
+      }}
+    >
       <Box sx={{
-        flexGrow: 10,
-        display: 'flex',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        overflow: 'hidden',
-        pr: 0
+        flexGrow: 1,
+        overflow: 'auto'
       }}>
         <AdminContent />
       </Box>
       <Divider orientation='vertical' flexItem sx={{borderWidth: 1}}/>
-
-      {/* User Profile on the right */}
       <Box sx={{
-        flexGrow: 1, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        p: 4,
-        pt: 3,
-        pl: 3,
-        bgcolor: '#f9f9f9',
-        maxWidth: '350px',
+        flexGrow: 0.5,
         overflow: 'auto'
       }}>
-        <UserProfile isAdmin={true} />
+        <UserProfile isAdmin={true}/>
       </Box>
     </Stack>
-  )
+  );
 }
