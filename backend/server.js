@@ -226,14 +226,15 @@ app.get('/api/me', authenticateToken, (req, res) => {
   });
 });
 
-// GET /api/tasks: Placeholder route to fetch tasks for the authenticated user.
+
+// GET /api/tasks - Fetch all tasks for current user
 app.get('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
     const userCohortId = req.user.cohort_id;
     const userLegacyId = req.user.legacy_id;
 
-    console.log("📥 Fetching tasks for user:", {
+    console.log("Fetching tasks for user:", {
       userId,
       cohort_id: userCohortId,
       legacy_id: userLegacyId
@@ -241,36 +242,33 @@ app.get('/api/tasks', authenticateToken, async (req, res) => {
 
     const tasks = await prisma.task.findMany({
       where: {
+        // Match tasks for 'all', user's cohort, or user's legacy
         OR: [
           { assignee_type: 'all' },
           userCohortId && { assignee_type: 'cohort', assignee_id: userCohortId },
           userLegacyId && { assignee_type: 'legacy', assignee_id: userLegacyId }
-        ].filter(Boolean) // remove falsy values
+        ].filter(Boolean), // Remove any undefined/null filters
       },
       include: {
+        // Include user's latest submission for status checking
         submissions: {
           where: { user_id: userId },
           orderBy: { submitted_at: 'desc' },
           take: 1
         }
       },
-      orderBy: { due_date: 'asc' }
+      orderBy: { due_date: 'asc' } // Sort by due date
     });
 
-    console.log(`✅ ${tasks.length} tasks returned`);
+    console.log(`${tasks.length} tasks returned`);
     res.json(tasks);
   } catch (error) {
-    console.error("❌ Failed to fetch tasks:", error);
+    console.error("Failed to fetch tasks:", error);
     res.status(500).json({ error: 'Failed to retrieve tasks' });
   }
 });
 
 
-// TODO: Add more routes for tasks, submissions, legacies, cohorts, users etc.
-// Consider organizing routes into separate files under a 'routes/' directory.
-// Example:
-// const taskRoutes = require('./routes/tasks');
-// app.use('/api/tasks', authenticateToken, taskRoutes);
 
 // --- Start Server ---
 // Starts the Express server listening on the configured PORT.

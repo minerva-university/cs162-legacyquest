@@ -3,239 +3,129 @@ import LegacyRankingList from './LegacyRankingList';
 import WelcomeCard from './WelcomeCard';
 import CircleProgressTracker from './CircleProgressTracker';
 import TaskList from './TaskList';
-import TaskApi from '@services/TaskApi.jsx'; // Ensure path is correct
+import TaskApi from '@services/TaskApi.jsx';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@services/AuthContext.jsx'; // Ensure path is correct
-// Import TaskModal if it's defined elsewhere
-// import TaskModal from './TaskModal';
+import { useAuth } from '@services/AuthContext.jsx';
 
-/**
- * DashboardContent Component
- * Displays the main user dashboard, including task lists, progress tracking,
- * and other relevant information. Fetches data from the backend API.
- */
 export default function DashboardContent() {
   const theme = useTheme();
-  // Get the Firebase ID token from the authentication context.
-  // This token is required for making authenticated calls to the backend API.
-  const { idToken } = useAuth();
+  const { idToken } = useAuth(); // Firebase ID token for authenticated requests
 
-  // --- State Variables ---
-  const [tasks, setTasks] = useState([]); // Holds the list of tasks fetched from the backend (after mapping)
-  const [loading, setLoading] = useState(true); // Tracks loading state for fetching tasks
-  const [error, setError] = useState(null); // Stores any error message during task fetching
-  const [selectedTask, setSelectedTask] = useState(null); // Holds the task data for the modal
-  const [isModalOpen, setIsModalOpen] = useState(false); // Controls visibility of the task detail modal
+  const [tasks, setTasks] = useState([]);              // Task data from backend
+  const [loading, setLoading] = useState(true);        // Task loading state
+  const [error, setError] = useState(null);            // Error message from fetch
+  const [selectedTask, setSelectedTask] = useState(null); // Selected task for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);  // Task modal visibility
 
-  /**
-   * Fetches tasks from the backend API using the provided authentication token.
-   * Handles loading state, error handling, and data mapping.
-   * @param {string | null} token - The Firebase ID token.
-   */
+  // Fetch tasks from backend and format for display
   const fetchTasks = async (token) => {
-    // Prevent fetching if the token isn't available yet (e.g., on initial load before auth state is confirmed)
     if (!token) {
-      setLoading(false); // Stop loading if no token
-      // Optionally set an error or message indicating login is required
-      // setError("Please log in to view tasks.");
-      setTasks([]); // Ensure tasks are cleared if user logs out
+      setLoading(false);
+      setTasks([]);
       return;
     }
-    setLoading(true); // Set loading true before starting the fetch
-    setError(null); // Clear previous errors
+
+    setLoading(true);
+    setError(null);
+
     try {
-      // Call the API service function, passing the token for authorization
       const fetchedTasks = await TaskApi.getAllTasks(token);
-
-      // --- Data Mapping (IMPORTANT) ---
-      // TODO: Adapt the fetchedTasks structure (from backend/Prisma)
-      // to match the structure expected by child components like TaskList/TaskModal.
-      // Update this mapping based on the actual backend response.
-      const formattedTasks = fetchedTasks.map(task => ({
-        // Example mapping:
-        taskID: task.task_id,
-        name: task.title,
-        description: task.description || '', // Ensure description is at least an empty string
-        // Determine status based on latest submission if available
-        // This assumes the backend provides submissions sorted or you filter/find latest
-        status: task.submissions?.length > 0
-                  ? task.submissions.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0].status
-                  : 'Not Submitted',
-        dueDate: task.due_date
-                  ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                  : 'N/A',
-        // Pass through other potential fields if needed by modal/list
-        points_on_approval: task.points_on_approval,
-        // You might need submission details directly accessible for the modal later
-        latest_submission: task.submissions?.length > 0
-                  ? task.submissions.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0]
-                  : null,
-      }));
-
-      setTasks(formattedTasks); // Update state with the formatted tasks
+      setTasks(fetchedTasks);
     } catch (err) {
-      console.error("Failed to fetch tasks:", err);
-      setError(err.message || 'Failed to load tasks. Please try again.'); // Set error state
-      setTasks([]); // Clear tasks on error to avoid displaying stale data
+      console.error('Failed to fetch tasks:', err);
+      setError(err.message || 'Failed to load tasks.');
+      setTasks([]);
     } finally {
-      setLoading(false); // Set loading false when fetch completes (success or failure)
+      setLoading(false);
     }
   };
 
-  // useEffect Hook: Fetch tasks when the component mounts and whenever the idToken changes.
-  // This ensures data is loaded initially and refreshed if the user logs in/out/token refreshes.
+  // Re-fetch when token changes (e.g., login)
   useEffect(() => {
     fetchTasks(idToken);
   }, [idToken]);
 
-  /**
-   * Calculates the percentage of tasks marked as 'Approved'.
-   * @returns {number} - The percentage (0-100).
-   */
+  // Calculate completion percentage based on "Approved" status
   const getCompletedPercentage = () => {
-    if (tasks && tasks.length > 0) {
-      const completedTasks = tasks.filter(task => task.status === 'Approved').length;
-      return Math.round((completedTasks / tasks.length) * 100);
-    }
-    else {
-      return 0; // Default to 0% if no tasks are available
-    }
-  }
-
-  /**
-   * Handles opening the task detail modal.
-   * Sets the selected task state.
-   * TODO: Consider fetching detailed task data (evidence/comments) here if needed.
-   * @param {Object} task - The task object clicked by the user.
-   */
-  const handleOpenModal = async (task) => {
-    setSelectedTask(task); // Set the task to be displayed in the modal
-    // Optional: Fetch latest evidence/comments when modal opens if not already included in mapped task
-    // if (!idToken) return; // Need token
-    // try {
-    //   // Check if details are already present from fetchTasks mapping
-    //   if (!task.evidence || !task.comments) {
-    //     console.log(`Workspaceing details for task ${task.taskID}`);
-    //     const [evidence, comments] = await Promise.all([
-    //       TaskApi.getTaskEvidence(task.taskID, idToken),
-    //       TaskApi.getTaskComments(task.taskID, idToken) // Assumes getTaskComments returns formatted string
-    //     ]);
-    //     setSelectedTask({ ...task, evidence, comments }); // Update selected task with details
-    //   } else {
-    //      setSelectedTask(task); // Use already mapped data
-    //   }
-    // } catch (err) {
-    //    console.error("Failed to load task details for modal:", err);
-    //    // Keep basic task data even if details fail
-    //    setSelectedTask(task);
-    // }
-    setIsModalOpen(true); // Open the modal
+    if (tasks.length === 0) return 0;
+    const completed = tasks.filter((t) => t.status === 'Approved').length;
+    return Math.round((completed / tasks.length) * 100);
   };
 
-  /**
-   * Handles closing the task detail modal.
-   * Clears the selected task state.
-   */
+  const handleOpenModal = (task) => {
+    setSelectedTask(task);
+    setIsModalOpen(true);
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedTask(null);
   };
 
-  /**
-   * Handles the submission of evidence from the TaskModal.
-   * Calls the TaskApi service to upload the evidence.
-   * Refreshes the task list on success.
-   * @param {number|string} taskID - The ID of the task being submitted.
-   * @param {string} evidence - The evidence text.
-   * @returns {Promise<Object>} - The result object from TaskApi.uploadEvidence ({success, message}).
-   */
+  // Handle evidence upload and refresh task list after
   const handleUploadEvidence = async (taskID, evidence) => {
-     // Ensure token is available before attempting upload
-     if (!idToken) {
-       console.error("Cannot upload evidence: No authentication token available.");
-       return { success: false, message: 'Authentication error. Please log in again.' };
-     }
-    console.log(`Uploading evidence for task ${taskID}`);
-    // Call the API service, passing the token
-    const result = await TaskApi.uploadEvidence(taskID, evidence, idToken);
-    // If the upload was successful according to the backend response
-    if (result.success) {
-      fetchTasks(idToken); // Refresh the entire task list to show updated status
-      handleCloseModal(); // Close the modal automatically on success
+    if (!idToken) return { success: false, message: 'Authentication error.' };
+    try {
+      const result = await TaskApi.uploadEvidence(taskID, evidence, idToken);
+      if (result.success) {
+        fetchTasks(idToken);
+        handleCloseModal();
+      }
+      return result;
+    } catch (err) {
+      console.error('Upload failed:', err);
+      return { success: false, message: err.message };
     }
-    // Return the result so the modal can display success/error feedback
-    return result;
   };
 
-  // --- Render Logic ---
-  // Display loading indicator covering the whole content area initially.
-  if (loading && tasks.length === 0) return ( // Show full page load only initially
+  // Full-page loading indicator (initial load)
+  if (loading && tasks.length === 0) {
+    return (
       <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <CircularProgress />
       </Container>
-  );
-  // Display error message if fetching tasks failed initially.
-  if (error && tasks.length === 0) return (
+    );
+  }
+
+  // Error message if no tasks and fetch fails
+  if (error && tasks.length === 0) {
+    return (
       <Container sx={{ textAlign: 'center', mt: 5 }}>
         <Typography color="error">Error: {error}</Typography>
       </Container>
-  );
+    );
+  }
 
-  // Render the main dashboard content. Loading inside TaskList is handled separately.
+  // Main dashboard content layout
   return (
-    <Container sx={{mx: 'auto', py: 4}} maxWidth='lg'>
-      {/* Horizontal Stack */}
-      <Stack direction='row' spacing={{xs: 1, sm: 2, md: 4, lg: 8, xl: 12}} sx={{justifyContent: 'space-between'}}>
-        {/* Task Tracker */}
-        <Stack sx={{
-          flexGrow: 3, 
-          borderRadius: 2, 
-          minWidth: '250px', 
-          p: 4, 
-          boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}` // Added spread and increased blur
-        }}>
-          <Typography variant='h6' sx={{fontWeight: 800, mb: 4}}>Task List</Typography>
-          <Stack spacing={4} sx={{ justifyContent: 'center', alignItems: 'center'}}>
-            {/* Show loading indicator inside TaskList area only if reloading */}
-             {loading && tasks.length > 0 ? (
-               <Stack spacing={2} sx={{width: '100%', alignItems: 'center', py: 4}}>
-                 <CircularProgress color="primary" size={30} />
-                 <Typography variant="body2">Refreshing tasks...</Typography>
-               </Stack>
-             ) : error ? (
-                 <Typography color="error" variant="body2">Could not refresh tasks: {error}</Typography>
-             ) : (
+    <Container sx={{ mx: 'auto', py: 4 }} maxWidth='lg'>
+      <Stack direction='row' spacing={{ xs: 1, sm: 2, md: 4, lg: 8, xl: 12 }} sx={{ justifyContent: 'space-between' }}>
+        {/* Task Progress Panel */}
+        <Stack sx={{ flexGrow: 3, borderRadius: 2, minWidth: '250px', p: 4, boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}` }}>
+          <Typography variant='h6' sx={{ fontWeight: 800, mb: 4 }}>Task List</Typography>
+          <Stack spacing={4} sx={{ justifyContent: 'center', alignItems: 'center' }}>
+            {loading && tasks.length > 0 ? (
+              <Stack spacing={2} sx={{ width: '100%', alignItems: 'center', py: 4 }}>
+                <CircularProgress color="primary" size={30} />
+                <Typography variant="body2">Refreshing tasks...</Typography>
+              </Stack>
+            ) : error ? (
+              <Typography color="error" variant="body2">Could not refresh tasks: {error}</Typography>
+            ) : (
               <>
                 <CircleProgressTracker taskProgress={getCompletedPercentage()} />
-                {/* Pass tasks and the click handler to TaskList */}
                 <TaskList tasks={tasks} onTaskClick={handleOpenModal} />
               </>
             )}
           </Stack>
         </Stack>
 
-        {/* Welcome Card and legacy ranking*/}
-        <Stack sx={{flexGrow: 1, alignItems: 'center'}}>
-          <WelcomeCard taskCompletedPercentage={getCompletedPercentage()}/>
-          <LegacyRankingList highlightedLegacy={'Vista'} /> {/* Consider making highlightedLegacy dynamic */}
+        {/* Welcome Card + Legacy Rankings */}
+        <Stack sx={{ flexGrow: 1, alignItems: 'center' }}>
+          <WelcomeCard taskCompletedPercentage={getCompletedPercentage()} />
+          <LegacyRankingList highlightedLegacy={'Vista'} />
         </Stack>
       </Stack>
-
-      {/* Task Modal - Render conditionally based on isModalOpen */}
-      {/* Make sure TaskModal component is imported and receives necessary props */}
-      {/* Example:
-      {selectedTask && (
-        <TaskModal
-          open={isModalOpen}
-          handleClose={handleCloseModal}
-          task={selectedTask}
-          onUploadEvidence={handleUploadEvidence}
-          // Pass initial evidence/comments if fetched/available
-          initialEvidence={selectedTask.evidence || ''}
-          initialComments={selectedTask.comments || ''}
-        />
-      )}
-      */}
     </Container>
   );
 }

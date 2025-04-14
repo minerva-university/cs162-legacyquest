@@ -1,5 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+// Adds token and content headers for authenticated requests
 const getAuthHeader = (token) => ({
   Authorization: `Bearer ${token}`,
   'Content-Type': 'application/json',
@@ -7,10 +8,8 @@ const getAuthHeader = (token) => ({
 
 const TaskApi = {
   /**
-   * Fetches tasks from the backend and formats them for the frontend dashboard.
-   * Assumes each task includes its latest submission (if any).
-   * @param {string} token - Firebase ID token
-   * @returns {Promise<Array<Object>>}
+   * Fetches and formats task data for the dashboard.
+   * Assumes backend returns tasks with most recent submission included.
    */
   getAllTasks: async (token) => {
     if (!token) throw new Error('Authentication token is required for getAllTasks.');
@@ -27,8 +26,9 @@ const TaskApi = {
       }
 
       const rawTasks = await res.json();
-      console.log('📦 Raw tasks from backend:', rawTasks);
+      console.log('Raw tasks from backend:', rawTasks);
 
+      // Map backend structure to frontend-friendly task format
       const formattedTasks = rawTasks.map((task) => {
         const latest = task.submissions?.[0];
 
@@ -56,15 +56,17 @@ const TaskApi = {
     }
   },
 
-  // --- Placeholder functions to be implemented later ---
+  // Placeholder: evidence submission will be implemented
   uploadEvidence: async () => {
     throw new Error('uploadEvidence is not implemented yet');
   },
 
+  // Placeholder: fetch submitted evidence for task
   getTaskEvidence: async () => {
     throw new Error('getTaskEvidence is not implemented yet');
   },
 
+  // Placeholder: fetch reviewer comments on task
   getTaskComments: async () => {
     throw new Error('getTaskComments is not implemented yet');
   },
