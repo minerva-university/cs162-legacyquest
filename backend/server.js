@@ -226,19 +226,12 @@ app.get('/api/me', authenticateToken, (req, res) => {
   });
 });
 
-
 // GET /api/tasks - Fetch all tasks for current user
 app.get('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
     const userCohortId = req.user.cohort_id;
     const userLegacyId = req.user.legacy_id;
-
-    console.log("Fetching tasks for user:", {
-      userId,
-      cohort_id: userCohortId,
-      legacy_id: userLegacyId
-    });
 
     const tasks = await prisma.task.findMany({
       where: {
@@ -260,14 +253,11 @@ app.get('/api/tasks', authenticateToken, async (req, res) => {
       orderBy: { due_date: 'asc' } // Sort by due date
     });
 
-    console.log(`${tasks.length} tasks returned`);
     res.json(tasks);
   } catch (error) {
-    console.error("Failed to fetch tasks:", error);
     res.status(500).json({ error: 'Failed to retrieve tasks' });
   }
 });
-
 
 
 // --- Start Server ---
