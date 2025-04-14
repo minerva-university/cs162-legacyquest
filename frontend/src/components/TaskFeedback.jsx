@@ -4,7 +4,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import UploadEvidence from './UploadEvidence';
 import TaskApi from "@services/TaskApi.jsx";
 
-export default function TaskFeedback({ open, onClose, taskID, taskName, description, status, statusColor }) {
+export default function TaskFeedback({ open, onClose, taskID, taskName, description, status, statusColor, onSuccessfulSubmit }) {
   const [uploadEvidenceOpen, setUploadEvidenceOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [evidence, setEvidence] = useState('');
@@ -184,6 +184,7 @@ export default function TaskFeedback({ open, onClose, taskID, taskName, descript
         taskID={taskID} 
         taskName={taskName} 
         description={description}
+        onSuccessfulSubmit={onSuccessfulSubmit}
       />
     </>
   );

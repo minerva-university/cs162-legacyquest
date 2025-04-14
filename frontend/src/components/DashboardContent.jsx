@@ -112,7 +112,7 @@ export default function DashboardContent() {
             ) : (
               <>
                 <CircleProgressTracker taskProgress={getCompletedPercentage()} />
-                <TaskList tasks={tasks} onTaskClick={handleOpenModal} />
+                <TaskList tasks={tasks} onRefreshTasks={() => fetchTasks(idToken)} />
               </>
             )}
           </Stack>

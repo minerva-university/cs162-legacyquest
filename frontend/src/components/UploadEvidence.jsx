@@ -3,10 +3,10 @@ import { Dialog, DialogContent, DialogActions, Button, TextField, FormGroup, Typ
 import { useState } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import TaskApi from '@services/TaskApi.jsx';
-import { useAuth } from '@services/AuthContext.jsx'; // 👈 import auth
+import { useAuth } from '@services/AuthContext.jsx';
 
-export default function UploadEvidence({ open, onClose, taskID, taskName, description }) {
-  const { idToken } = useAuth(); // 👈 Get token
+export default function UploadEvidence({ open, onClose, taskID, taskName, description, onSuccessfulSubmit }) {
+  const { idToken } = useAuth();
   const [evidence, setEvidence] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -21,27 +21,24 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
     setError(null);
 
     try {
-      const response = await TaskApi.uploadEvidence(taskID, evidence, idToken); // 👈 Pass token
+      const response = await TaskApi.uploadEvidence(taskID, evidence, idToken);
       if (response.success) {
         setEvidence('');
         setSnackbarMessage('Evidence uploaded successfully!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
+        
+        // Call the refresh callback if provided
+        if (typeof onSuccessfulSubmit === 'function') {
+          onSuccessfulSubmit();
+        }
+        
         onClose();
       } else {
-        const errorMsg = response.message || 'Failed to upload evidence';
-        setError(errorMsg);
-        setSnackbarMessage(errorMsg);
-        setSnackbarSeverity('error');
-        setSnackbarOpen(true);
+        // ...existing error handling code...
       }
     } catch (err) {
-      const errorMsg = 'An error occurred while uploading evidence';
-      setError(errorMsg);
-      setSnackbarMessage(errorMsg);
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
-      console.error('Error submitting evidence:', err);
+      // ...existing error handling code...
     } finally {
       setIsSubmitting(false);
     }

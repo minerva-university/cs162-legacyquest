@@ -1,7 +1,7 @@
 import { List, Stack, Box } from '@mui/material';
 import ListedTask from './ListedTask';
 
-export default function TaskList({tasks}) {
+export default function TaskList({tasks, onRefreshTasks}) {
   return (
     <Stack sx={{width: 1, minWidth: '350px', maxWidth: '800px'}}>
       <Box 
@@ -36,6 +36,7 @@ export default function TaskList({tasks}) {
               taskDescription={task.description} 
               taskStatus={task.status} 
               dueDate={task.dueDate}
+              onRefreshTasks={onRefreshTasks}  // Pass the refresh function to each task
             />
           ))}
         </List>
