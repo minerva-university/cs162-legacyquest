@@ -3,13 +3,14 @@ import { Dialog, DialogContent, DialogActions, Button, TextField, FormGroup, Typ
 import { useState } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import TaskApi from '@services/TaskApi.jsx';
+import { useAuth } from '@services/AuthContext.jsx'; // 👈 import auth
 
-export default function UploadEvidence({ open, onClose, taskID, taskName, description}) {
+export default function UploadEvidence({ open, onClose, taskID, taskName, description }) {
+  const { idToken } = useAuth(); // 👈 Get token
   const [evidence, setEvidence] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Snackbar states
+
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
@@ -20,13 +21,9 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
     setError(null);
 
     try {
-      // Call API and wait for response
-      const response = await TaskApi.uploadEvidence(taskID, evidence);
-      
-      // Handle API response
+      const response = await TaskApi.uploadEvidence(taskID, evidence, idToken); // 👈 Pass token
       if (response.success) {
         setEvidence('');
-        // Set success message for snackbar
         setSnackbarMessage('Evidence uploaded successfully!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
@@ -34,7 +31,6 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
       } else {
         const errorMsg = response.message || 'Failed to upload evidence';
         setError(errorMsg);
-        // Show error snackbar
         setSnackbarMessage(errorMsg);
         setSnackbarSeverity('error');
         setSnackbarOpen(true);
@@ -42,7 +38,6 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
     } catch (err) {
       const errorMsg = 'An error occurred while uploading evidence';
       setError(errorMsg);
-      // Show error snackbar
       setSnackbarMessage(errorMsg);
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
