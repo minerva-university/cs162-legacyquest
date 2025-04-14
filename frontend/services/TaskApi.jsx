@@ -5,11 +5,11 @@
 // related to tasks and task submissions.
 // It handles constructing requests, adding the authorization token, and basic
 // response/error handling.
-// Assumes the VITE_API_BASE_URL environment variable is set (e.g., in frontend/.env).
+// Assumes the VITE_API_URL environment variable is set (e.g., in frontend/.env).
 // =============================================================================
 
 // Get API base URL from environment variables (defined in frontend/.env)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Helper function to create standard request headers, including Authorization.
 const getAuthHeader = (token) => ({
@@ -28,8 +28,8 @@ const TaskApi = {
   getAllTasks: async (token) => {
     if (!token) throw new Error('Authentication token is required for getAllTasks.');
     try {
-      // Calls the backend endpoint (e.g., http://localhost:3001/api/tasks)
-      const response = await fetch(`${API_BASE_URL}/tasks`, {
+      // Updated endpoint path to match backend route
+      const response = await fetch(`${API_BASE_URL}/api/tasks`, {
         method: 'GET',
         headers: getAuthHeader(token), // Pass token in header
       });
@@ -69,9 +69,8 @@ const TaskApi = {
       return { success: false, message: 'Task ID and evidence text are required.' };
     }
     try {
-      // Assumes backend endpoint POST /api/tasks/:taskId/submissions creates/updates a submission.
-      // Assumes evidence is simple text. For file uploads, use FormData and adjust headers.
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskID}/submissions`, {
+      // Updated endpoint path to match backend route
+      const response = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions`, {
         method: 'POST',
         headers: getAuthHeader(token),
         body: JSON.stringify({ submitted_evidence: evidence }), // Send evidence in request body
@@ -103,8 +102,8 @@ const TaskApi = {
     if (!token) throw new Error('Authentication token is required for getTaskEvidence.');
     if (!taskID) throw new Error('Task ID is required.');
     try {
-      // Assumes backend endpoint GET /api/tasks/:taskId/submissions/latest returns the latest submission.
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskID}/submissions/latest`, {
+      // Updated endpoint path to match backend route
+      const response = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions/latest`, {
         method: 'GET',
         headers: getAuthHeader(token),
       });
@@ -138,9 +137,8 @@ const TaskApi = {
     if (!token) throw new Error('Authentication token is required for getTaskComments.');
     if (!taskID) throw new Error('Task ID is required.');
     try {
-      // Assumes backend endpoint GET /api/tasks/:taskId/submissions/latest includes review info.
-      // Consider creating a dedicated endpoint if only comments are needed.
-      const response = await fetch(`${API_BASE_URL}/tasks/${taskID}/submissions/latest`, {
+      // Updated endpoint path to match backend route
+      const response = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions/latest`, {
         method: 'GET',
         headers: getAuthHeader(token),
       });

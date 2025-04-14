@@ -7,7 +7,8 @@ import { getAnalytics } from 'firebase/analytics';
 // =============================================================================
 // !! IMPORTANT !! Verify this is the correct Firebase project configuration !!
 // =============================================================================
-// Your web app's Firebase configuration for cs162-legacyquest (Chosen from Adam branch)
+// Your web app's Firebase configuration for cs162-legacyquest
+// TEMPORARY: Using hardcoded values for testing, will revert to env vars when verified working
 const firebaseConfig = {
   apiKey: "AIzaSyCsewJGS8R2e-_5vBLOz2ZNaZwOH5GXJGA", // Verify Key
   authDomain: "cs162-legacyquest.firebaseapp.com",   // Verify Domain
@@ -18,6 +19,19 @@ const firebaseConfig = {
   measurementId: "G-L7Y0C1BM9F"                    // Verify Measurement ID
 };
 // =============================================================================
+
+/* 
+// Environment variable version - uncomment after testing
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+};
+*/
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
