@@ -12,6 +12,9 @@ export default function AdminTaskDetails({ open, onClose, taskID, taskName, stud
   const [submissionError, setSubmissionError] = useState(null);
   const [folderLink, setFolderLink] = useState('');
   
+  // If task is approved (needsApproval is false and task was submitted), the task has already been approved
+  const isApproved = submissionDate && !needsApproval;
+  
   // Reset state when dialog is opened with a new task or closed
   useEffect(() => {
     if (open) {
@@ -58,11 +61,23 @@ export default function AdminTaskDetails({ open, onClose, taskID, taskName, stud
         'Pulse': 'https://drive.google.com/drive/folders/pulse-legacy-folder',
       };
       
+      // Simulate previous feedback for approved tasks
+      const approvedFeedback = {
+        2: "Great job on completing this task! Your attention to detail was excellent.",
+        4: "Well done. I appreciate the thoroughness of your documentation.",
+        6: "Excellent work! Your contribution to this project was outstanding."
+      };
+      
       // Use taskID to get specific evidence, or default if not found
       setEvidence(evidenceTexts[id] || "This task evidence was submitted by the student. The content is specific to this task.");
       
       // Set folder link based on legacy name
       setFolderLink(folderLinks[legacyName] || 'https://drive.google.com/drive/folders/default-folder');
+      
+      // If task is approved, load the previous feedback
+      if (isApproved) {
+        setFeedback(approvedFeedback[id] || "This task has been approved.");
+      }
     } catch (error) {
       console.error(`Error fetching data for task ${id}:`, error);
     } finally {
@@ -262,14 +277,30 @@ export default function AdminTaskDetails({ open, onClose, taskID, taskName, stud
             placeholder="Provide feedback to the student..."
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            disabled={submitting}
+            disabled={submitting || isApproved}
+            InputProps={{
+              readOnly: isApproved,
+            }}
             sx={{ 
               mb: 3,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2
-              }
+              },
+              ...(isApproved && {
+                '& .MuiInputBase-input': {
+                  bgcolor: '#f8f8f8',
+                  color: 'text.secondary'
+                }
+              })
             }}
           />
+          
+          {/* Show a message explaining why the feedback is not editable */}
+          {isApproved && (
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 2, textAlign: 'center', display: 'block' }}>
+              This task has been approved. Feedback cannot be edited.
+            </Typography>
+          )}
           
           {/* Error message if any */}
           {submissionError && (
