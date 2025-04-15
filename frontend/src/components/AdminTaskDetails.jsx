@@ -2,7 +2,7 @@ import { Dialog, DialogActions, Button, Typography, IconButton, Stack, Box, Circ
 import { useState, useEffect } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import AdminAPI from "@services/AdminApi.jsx";
-import AttachFileIcon from '@mui/icons-material/AttachFile';
+import FolderIcon from '@mui/icons-material/Folder';
 
 export default function AdminTaskDetails({ open, onClose, taskID, taskName, studentName, legacyName, submissionDate, needsApproval }) {
   const [loading, setLoading] = useState(true);
@@ -10,33 +10,81 @@ export default function AdminTaskDetails({ open, onClose, taskID, taskName, stud
   const [feedback, setFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
-  // Sample attached files
-  const [attachedFiles, setAttachedFiles] = useState([
-    { name: 'assignment1_submission.pdf', type: 'document', size: '2.4 MB' }
-  ]);
+  const [folderLink, setFolderLink] = useState('');
   
+  // Reset state when dialog is opened with a new task or closed
   useEffect(() => {
-    async function fetchData() {
-      if (open && taskID) {
-        // Clear previous data first to avoid displaying stale content
-        setEvidence('');
-        setLoading(true);
-        
-        try {
-          // In a real app, this would fetch evidence from the API
-          // Mocking API call for now
-          await new Promise(resolve => setTimeout(resolve, 800));
-          setEvidence("This is sample evidence submitted by the student. In a real implementation, this would show the actual evidence text or links submitted by the student for this specific task.");
-        } catch (error) {
-          console.error("Error fetching task evidence:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
+    if (open) {
+      // Reset states when opening a new task
+      setLoading(true);
+      setEvidence('');
+      setFeedback('');
+      setSubmissionError(null);
+      
+      fetchTaskData(taskID);
+    } else {
+      // Clear data when closing to avoid showing stale data next time
+      setEvidence('');
+      setFeedback('');
+      setSubmissionError(null);
+      setFolderLink('');
     }
-    
-    fetchData();
   }, [open, taskID]);
+  
+  // Fetch task data separately
+  const fetchTaskData = async (id) => {
+    if (!id) return;
+    
+    try {
+      // In a real app, this would fetch evidence from the API
+      // Mocking API call for now
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Simulate different evidence for different tasks
+      const evidenceTexts = {
+        1: "This is evidence for Task 1. The student visited the museum and completed all required activities.",
+        2: "Evidence for Task 2 includes a written report and photos from the event.",
+        3: "For Task 3, the student submitted a video presentation and feedback from participants.",
+        4: "Task 4 evidence contains documentation of the community service hours.",
+        5: "The student's Task 5 submission includes reflections on the learning experience.",
+      };
+      
+      // Simulate folder links per legacy
+      const folderLinks = {
+        'Vista': 'https://drive.google.com/drive/folders/vista-legacy-folder',
+        'Tower': 'https://drive.google.com/drive/folders/tower-legacy-folder',
+        'Bridge': 'https://drive.google.com/drive/folders/bridge-legacy-folder',
+        'Chronicle': 'https://drive.google.com/drive/folders/chronicle-legacy-folder',
+        'Pulse': 'https://drive.google.com/drive/folders/pulse-legacy-folder',
+      };
+      
+      // Use taskID to get specific evidence, or default if not found
+      setEvidence(evidenceTexts[id] || "This task evidence was submitted by the student. The content is specific to this task.");
+      
+      // Set folder link based on legacy name
+      setFolderLink(folderLinks[legacyName] || 'https://drive.google.com/drive/folders/default-folder');
+    } catch (error) {
+      console.error(`Error fetching data for task ${id}:`, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleFolderClick = () => {
+    // In production, this would open the Google Drive folder
+    console.log(`Opening folder: ${folderLink}`);
+    // window.open(folderLink, '_blank');
+  };
+  
+  const handleCloseDialog = () => {
+    // Don't allow closing while submitting
+    if (submitting) return;
+    
+    // Clear feedback and error on close
+    setFeedback('');
+    setSubmissionError(null);
+    onClose();
+  };
   
   const handleApprove = async () => {
     setSubmitting(true);
@@ -86,7 +134,7 @@ export default function AdminTaskDetails({ open, onClose, taskID, taskName, stud
   return (
     <Dialog 
       open={open} 
-      onClose={submitting ? undefined : onClose} 
+      onClose={handleCloseDialog} 
       maxWidth='md' 
       fullWidth
       slotProps={{
@@ -104,7 +152,7 @@ export default function AdminTaskDetails({ open, onClose, taskID, taskName, stud
           {/* Spacer */}
           <Box sx={{flexGrow: 1}} />
 
-          <IconButton onClick={onClose} disabled={submitting}>
+          <IconButton onClick={handleCloseDialog} disabled={submitting}>
             <CloseRoundedIcon />
           </IconButton>
         </Stack>
@@ -144,32 +192,29 @@ export default function AdminTaskDetails({ open, onClose, taskID, taskName, stud
             </Stack>
           </Box>
           
-          {/* Attached Files section */}
-          <Typography variant='h6' sx={{fontWeight: 700, mb: 2}}>
-            Attached Files
-          </Typography>
-          
-          {attachedFiles.map((file, index) => (
-            <Paper
-              key={index}
+          {/* Folder Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+            <Button
               variant="outlined"
+              startIcon={<FolderIcon />}
+              onClick={handleFolderClick}
               sx={{
-                py: 1.5,
-                px: 2,
-                mb: 3,
                 borderRadius: 2,
-                borderColor: '#e0e0e0',
-                display: 'flex',
-                alignItems: 'center'
+                py: 1,
+                px: 3,
+                textTransform: 'none',
+                fontWeight: 'medium',
+                borderColor: '#00A36C',
+                color: '#00A36C',
+                '&:hover': {
+                  borderColor: '#009060',
+                  backgroundColor: 'rgba(0, 163, 108, 0.04)'
+                }
               }}
             >
-              <AttachFileIcon sx={{ mr: 1, color: '#757575' }} />
-              <Typography>{file.name}</Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
-                {file.size}
-              </Typography>
-            </Paper>
-          ))}
+              {legacyName} Folder
+            </Button>
+          </Box>
           
           {/* Submitted Evidence section */}
           <Typography variant='h6' sx={{fontWeight: 700, mb: 2}}>
