@@ -15,11 +15,11 @@ const AdminAPI = {
       
       // Dummy data
       const pendingTasks = [
-        {taskID: 1, taskName: 'Task 1', submissionDate: '2023/05/15', studentName: 'Alice Chen', legacyName: 'Vista', evidence: 'https://example.com/evidence1', points: 10, status: 'Needs Approval', attachedFiles: [{name: 'museum_visit.png', type: 'image', size: '1.8 MB'}]},
-        {taskID: 3, taskName: 'Task 3', submissionDate: '2023/05/16', studentName: 'Bob Johnson', legacyName: 'Tower', evidence: 'Evidence for task 3 completion...', points: 15, status: 'Needs Approval', attachedFiles: [{name: 'assignment1_submission.pdf', type: 'document', size: '2.4 MB'}]},
-        {taskID: 5, taskName: 'Task 5', submissionDate: '2023/05/17', studentName: 'Carlos Rodriguez', legacyName: 'Bridge', evidence: 'https://example.com/evidence5', points: 20, status: 'Needs Approval', attachedFiles: [{name: 'dancing_video.mp4', type: 'video', size: '8.7 MB'}]},
-        {taskID: 8, taskName: 'Task 8', submissionDate: '2023/05/18', studentName: 'Diana Kim', legacyName: 'Chronicle', evidence: 'Evidence for task 8 completion...', points: 10, status: 'Needs Approval', attachedFiles: []},
-        {taskID: 9, taskName: 'Task 9', submissionDate: '2023/05/18', studentName: 'Elijah Williams', legacyName: 'Vista', evidence: 'https://example.com/evidence9', points: 25, status: 'Needs Approval', attachedFiles: [{name: 'presentation.pptx', type: 'document', size: '3.1 MB'}]},
+        {taskID: 1, taskName: 'Task 1', submissionDate: '2023/05/15', studentName: 'Alice Chen', legacyName: 'Vista', evidence: 'This is evidence for Task 1. The student visited the museum and completed all required activities.', points: 10, status: 'Needs Approval'},
+        {taskID: 3, taskName: 'Task 3', submissionDate: '2023/05/16', studentName: 'Bob Johnson', legacyName: 'Tower', evidence: 'For Task 3, the student submitted a video presentation and feedback from participants.', points: 15, status: 'Needs Approval'},
+        {taskID: 5, taskName: 'Task 5', submissionDate: '2023/05/17', studentName: 'Carlos Rodriguez', legacyName: 'Bridge', evidence: 'The student\'s Task 5 submission includes reflections on the learning experience.', points: 20, status: 'Needs Approval'},
+        {taskID: 8, taskName: 'Task 8', submissionDate: '2023/05/18', studentName: 'Diana Kim', legacyName: 'Chronicle', evidence: 'Evidence for Task 8 includes a written report and photos from the event.', points: 10, status: 'Needs Approval'},
+        {taskID: 9, taskName: 'Task 9', submissionDate: '2023/05/18', studentName: 'Elijah Williams', legacyName: 'Vista', evidence: 'Task 9 evidence contains documentation of the community service hours.', points: 25, status: 'Needs Approval'},
       ];
       
       return pendingTasks;
@@ -153,32 +153,24 @@ const AdminAPI = {
       return tasks;
     },
     
-    // Get attached files for a task submission
+    // Get folder link for a legacy group
     // Parameters:
-    // - taskID (number): ID of the task to get files for
-    // Returns: Array of file objects
-    getTaskAttachments: async (taskID) => {
+    // - legacyName (string): Name of the legacy group
+    // Returns: URL string for the folder
+    getLegacyFolderLink: async (legacyName) => {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Dummy file data based on taskID
-      const files = {
-        1: [
-          { name: 'museum_visit.png', type: 'image', size: '1.8 MB' },
-          { name: 'dancing_video.mp4', type: 'video', size: '8.7 MB' }
-        ],
-        3: [
-          { name: 'assignment1_submission.pdf', type: 'document', size: '2.4 MB' }
-        ],
-        5: [
-          { name: 'dancing_video.mp4', type: 'video', size: '8.7 MB' }
-        ],
-        9: [
-          { name: 'presentation.pptx', type: 'document', size: '3.1 MB' }
-        ]
+      // Dummy folder links for each legacy group
+      const folderLinks = {
+        'Vista': 'https://drive.google.com/drive/folders/vista-legacy-folder',
+        'Tower': 'https://drive.google.com/drive/folders/tower-legacy-folder',
+        'Bridge': 'https://drive.google.com/drive/folders/bridge-legacy-folder',
+        'Chronicle': 'https://drive.google.com/drive/folders/chronicle-legacy-folder',
+        'Pulse': 'https://drive.google.com/drive/folders/pulse-legacy-folder',
       };
       
-      return files[taskID] || [];
+      return folderLinks[legacyName] || 'https://drive.google.com/drive/folders/default-folder';
     }
   };
   
