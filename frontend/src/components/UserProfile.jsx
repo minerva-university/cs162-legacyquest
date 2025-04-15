@@ -44,7 +44,7 @@ export default function UserProfile({isAdmin}) {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      navigate('/login');
+    navigate('/login');
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -65,7 +65,7 @@ export default function UserProfile({isAdmin}) {
             border: 5, 
             borderColor: 'white'
           }}
-        />
+          />
         <Typography variant='h6' sx={{fontWeight: 800}}>{UserApi.getUserName(currentUser)}</Typography>
 
         {isAdmin ? 
