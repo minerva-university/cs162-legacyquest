@@ -259,6 +259,42 @@ app.get('/api/tasks', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /api/tasks/:taskId/submissions - Upload evidence for a task
+app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const taskId = parseInt(req.params.taskId, 10);
+    const { submitted_evidence } = req.body;
+
+    if (isNaN(taskId)) return res.status(400).json({ error: 'Invalid task ID.' });
+    if (!submitted_evidence || submitted_evidence.trim() === '') {
+      return res.status(400).json({ error: 'Evidence cannot be empty.' });
+    }
+
+    // Mark previous submissions as not latest
+    await prisma.taskSubmission.updateMany({
+      where: { task_id: taskId, user_id: userId, is_latest: true },
+      data: { is_latest: false }
+    });
+
+    // Create new submission
+    const submission = await prisma.taskSubmission.create({
+      data: {
+        task_id: taskId,
+        user_id: userId,
+        submitted_evidence,
+        is_latest: true,
+        submitted_at: new Date(),
+        status: 'Submitted'
+      }
+    });
+
+    res.status(201).json({ success: true, submission });
+  } catch (err) {
+    console.error('Upload failed:', err);
+    res.status(500).json({ error: 'Failed to upload submission.' });
+  }
+});
 
 // --- Start Server ---
 // Starts the Express server listening on the configured PORT.

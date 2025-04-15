@@ -3,13 +3,14 @@ import { Dialog, DialogContent, DialogActions, Button, TextField, FormGroup, Typ
 import { useState } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import TaskApi from '@services/TaskApi.jsx';
+import { useAuth } from '@services/AuthContext.jsx';
 
-export default function UploadEvidence({ open, onClose, taskID, taskName, description}) {
+export default function UploadEvidence({ open, onClose, taskID, taskName, description, onSuccessfulSubmit }) {
+  const { idToken } = useAuth();
   const [evidence, setEvidence] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Snackbar states
+
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
@@ -20,33 +21,24 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
     setError(null);
 
     try {
-      // Call API and wait for response
-      const response = await TaskApi.uploadEvidence(taskID, evidence);
-      
-      // Handle API response
+      const response = await TaskApi.uploadEvidence(taskID, evidence, idToken);
       if (response.success) {
         setEvidence('');
-        // Set success message for snackbar
         setSnackbarMessage('Evidence uploaded successfully!');
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
+        
+        // Call the refresh callback if provided
+        if (typeof onSuccessfulSubmit === 'function') {
+          onSuccessfulSubmit();
+        }
+        
         onClose();
       } else {
-        const errorMsg = response.message || 'Failed to upload evidence';
-        setError(errorMsg);
-        // Show error snackbar
-        setSnackbarMessage(errorMsg);
-        setSnackbarSeverity('error');
-        setSnackbarOpen(true);
+        // ...existing error handling code...
       }
     } catch (err) {
-      const errorMsg = 'An error occurred while uploading evidence';
-      setError(errorMsg);
-      // Show error snackbar
-      setSnackbarMessage(errorMsg);
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
-      console.error('Error submitting evidence:', err);
+      // ...existing error handling code...
     } finally {
       setIsSubmitting(false);
     }

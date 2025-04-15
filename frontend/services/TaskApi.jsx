@@ -53,10 +53,27 @@ const TaskApi = {
     }
   },
 
-  // Placeholder: evidence submission will be implemented
-  uploadEvidence: async () => {
-    throw new Error('uploadEvidence is not implemented yet');
+  // Uploads evidence for a specific task
+  uploadEvidence: async (taskID, evidence, token) => {
+    if (!token) throw new Error('Authentication token is required for uploading evidence.');
+  
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions`, {
+        method: 'POST',
+        headers: getAuthHeader(token),
+        body: JSON.stringify({ submitted_evidence: evidence }), // 👈 schema field match
+      });
+  
+      const result = await res.json();
+  
+      if (!res.ok) throw new Error(result.error || 'Upload failed.');
+      return result;
+    } catch (err) {
+      console.error('Error in TaskApi.uploadEvidence:', err);
+      return { success: false, message: err.message };
+    }
   },
+  
 
   // Placeholder: fetch submitted evidence for task
   getTaskEvidence: async () => {
