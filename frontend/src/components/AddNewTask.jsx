@@ -4,6 +4,7 @@ import { useState } from 'react';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddIcon from '@mui/icons-material/Add';
+import StarIcon from '@mui/icons-material/Star';
 
 export default function AddNewTask() {
   const theme = useTheme();
@@ -11,6 +12,7 @@ export default function AddNewTask() {
   const [description, setDescription] = useState('');
   const [city, setCity] = useState('');
   const [submissionDate, setSubmissionDate] = useState('');
+  const [points, setPoints] = useState('');
 
   // List of available cities
   const cities = [
@@ -34,6 +36,7 @@ export default function AddNewTask() {
       // Convert "All Cities" to null for the backend
       targetCity: city === 'All Cities' ? null : city, 
       submissionDate,
+      points: Number(points),
       needsApproval: true 
     });
     
@@ -42,6 +45,7 @@ export default function AddNewTask() {
     setDescription('');
     setCity('');
     setSubmissionDate('');
+    setPoints('');
   };
 
   const handleToggleExpand = () => {
@@ -142,6 +146,30 @@ export default function AddNewTask() {
                 ))}
               </Select>
             </FormControl>
+            
+            <TextField
+              type="number"
+              label="Points"
+              variant="outlined"
+              fullWidth
+              required
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <StarIcon sx={{ color: '#f8c740' }} />
+                  </InputAdornment>
+                ),
+                sx: {
+                  bgcolor: '#f5f5f5',
+                  borderRadius: '4px'
+                }
+              }}
+            />
             
             <TextField
               type="date"
