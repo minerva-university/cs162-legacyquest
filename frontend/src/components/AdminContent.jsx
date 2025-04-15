@@ -1,51 +1,36 @@
-import { Container, Card, Box, Stack, Typography, Paper } from '@mui/material';
+import { Container, Stack, useTheme } from '@mui/material';
 import LegacyRankingList from './LegacyRankingList';
 import TaskCentral from './TaskCentral';
+import WelcomeCard from './WelcomeCard';
 
 export default function AdminContent() {
-  const taskData = [
-    {name: 'Task 1', submissionDate: '2021-10-01', isWaitingApproval: false},
-    {name: 'Task 2', submissionDate: '2021-10-02', isWaitingApproval: true},
-    {name: 'Task 3', submissionDate: '2021-10-03', isWaitingApproval: false},
-    {name: 'Task 4', submissionDate: '2021-10-04', isWaitingApproval: true},
-    {name: 'Task 5', submissionDate: '2021-10-05', isWaitingApproval: false},
-    {name: 'Task 6', submissionDate: '2021-10-06', isWaitingApproval: false},
-  ];
-
+  const theme = useTheme();
+  
+  // Main dashboard content layout - exact copy of student dashboard structure
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'row',
-      width: '100%',
-      height: '100%',
-      p: 2,
-      gap: 3
-    }}>
-      {/* Task Central */}
-      <Paper 
-        elevation={1} 
-        sx={{
-          width: '58%',
-          borderRadius: 1,
+    <Container sx={{ mx: 'auto', py: 4 }} maxWidth='lg'>
+      <Stack direction='row' spacing={{ xs: 1, sm: 2, md: 4, lg: 8, xl: 12 }} sx={{ justifyContent: 'space-between' }}>
+        {/* Task Central Panel */}
+        <Stack sx={{ 
+          flexGrow: 3, 
+          borderRadius: 2, 
+          minWidth: '250px', 
           overflow: 'hidden',
+          boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}`,
           bgcolor: 'white'
-        }}
-      >
-        <TaskCentral />
-      </Paper>
+        }}>
+          <TaskCentral />
+        </Stack>
 
-      {/* Legacy ranking*/}
-      <Paper 
-        elevation={1} 
-        sx={{
-          width: '42%',
-          borderRadius: 1,
-          overflow: 'hidden',
-          bgcolor: 'white'
-        }}
-      >
-        <LegacyRankingList />
-      </Paper>
-    </Box>
+        {/* Legacy Rankings */}
+        <Stack sx={{ flexGrow: 1, alignItems: 'center' }}>
+          {/* WelcomeCard without container - matches student dashboard exactly */}
+          <WelcomeCard taskCompletedPercentage={100} />
+          
+          {/* Legacy Ranking List */}
+          <LegacyRankingList />
+        </Stack>
+      </Stack>
+    </Container>
   );
 }

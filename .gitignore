@@ -1,6 +1,7 @@
 # Existing User Ignores
 .vscode
 .env
+frontend/.env
 
 # Node.js / npm / yarn / pnpm
 node_modules
