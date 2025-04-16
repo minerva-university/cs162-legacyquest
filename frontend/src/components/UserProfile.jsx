@@ -12,7 +12,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 export default function UserProfile({isAdmin}) {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, idToken } = useAuth();
 
   // State for API data
   const [legacyName, setLegacyName] = useState('');
@@ -24,8 +24,8 @@ export default function UserProfile({isAdmin}) {
     async function fetchUserData() {
       setIsLoading(true);
       try {
-        const legacy = await LegacyApi.getLegacyName();
-        const cohort = await UserApi.getCohort();
+        const legacy = await LegacyApi.getLegacyName(idToken);
+        const cohort = await UserApi.getCohort(idToken);
         
         setLegacyName(legacy);
         setCohortName(cohort);

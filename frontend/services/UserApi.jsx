@@ -1,18 +1,89 @@
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// Adds token and content headers for authenticated requests
+const getAuthHeader = (token) => ({
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+});
+
 const UserApi = {
-  // Simulate retrieving a user's cohort name from the server. The return format is the user's cohort name (string).
+  // Retrieve a user's cohort name from the server. The return format is the user's cohort name (string).
   // E.g., 'M24'
-  getCohort: async () => {
-    // A fake delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return 'M24';
+  getCohort: async (token) => {
+    if (!token) throw new Error('Authentication token is required for getCohort.');
+    
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/me`, {
+        method: 'GET',
+        headers: getAuthHeader(token),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const userData = await res.json();
+      return userData.cohort?.name || 'Unknown Cohort';
+    } catch (err) {
+      console.error('Error in UserApi.getCohort:', err);
+      throw err;
+    }
+  },
+  
+  // Retrieve a user's legacy name from the server. The return format is the legacy name (string).
+  // E.g., 'Turing'
+  getLegacy: async (token) => {
+    if (!token) throw new Error('Authentication token is required for getLegacy.');
+    
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/me`, {
+        method: 'GET',
+        headers: getAuthHeader(token),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const userData = await res.json();
+      return userData.legacy?.name || 'Unknown Legacy';
+    } catch (err) {
+      console.error('Error in UserApi.getLegacy:', err);
+      throw err;
+    }
   },
 
-  // Simulate retrieving a user's location from the server. The return format is a city name (string).
+  // Retrieve a user's location from the server. The return format is a city name (string).
   // E.g., 'San Francisco'
-  getUserLocation: async () => {
-    // A fake delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return 'San Francisco';
+  getUserLocation: async (token) => {
+    if (!token) throw new Error('Authentication token is required for getUserLocation.');
+    
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/me`, {
+        method: 'GET',
+        headers: getAuthHeader(token),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const userData = await res.json();
+      console.log('User data from API:', userData); // Debug log to see the entire user data
+      
+      // Check if legacy data exists and has a location_filter property
+      if (userData.legacy && userData.legacy.location_filter) {
+        return userData.legacy.location_filter;
+      }
+      
+      return 'Unknown Location';
+    } catch (err) {
+      console.error('Error in UserApi.getUserLocation:', err);
+      throw err;
+    }
   },
 
   // Get username from current user data
@@ -54,7 +125,7 @@ const UserApi = {
     
     // Fallback to a default avatar if no photo is available
     console.log("No photo found, using default"); // Debugging log
-    return 'https://mui.com/static/images/avatar/1.jpg';
+    return 'https://img.icons8.com/?size=100&id=114140&format=png&color=000000';
   }
 };
 

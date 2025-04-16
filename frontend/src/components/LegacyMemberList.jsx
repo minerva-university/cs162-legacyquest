@@ -4,6 +4,7 @@ import ListedUser from './ListedUser';
 import { useState, useEffect } from 'react';
 import LegacyApi from "@services/LegacyApi.jsx";
 import UserApi from "@services/UserApi.jsx";
+import { useAuth } from '@services/AuthContext.jsx';
 
 export default function LegacyMemberList({legacyName}) {
   const [isViewAll, setIsViewAll] = useState(false);
@@ -12,7 +13,8 @@ export default function LegacyMemberList({legacyName}) {
   const [userLocation, setUserLocation] = useState('');
   const [localMembers, setLocalMembers] = useState([]);
   const [nonLocalMembers, setNonLocalMembers] = useState([]);
-  const theme = useTheme();  
+  const theme = useTheme();
+  const { idToken } = useAuth();  
   
   useEffect(() => {
     const fetchData = async () => {
@@ -20,8 +22,8 @@ export default function LegacyMemberList({legacyName}) {
       try {
         // Fetch data in parallel
         const [fetchedMembers, userLocation] = await Promise.all([
-          LegacyApi.getLegacyMembers(),
-          UserApi.getUserLocation()
+          LegacyApi.getLegacyMembers(idToken),
+          UserApi.getUserLocation(idToken)
         ]);
         
         setUserLocation(userLocation);
