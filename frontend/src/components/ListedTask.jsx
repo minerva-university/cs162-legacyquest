@@ -12,9 +12,9 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
   const getStatusColor = (status) => {
     switch (status) {
       case 'Not Submitted':
-        // return dark red
         return '#b71c1c'; 
       case 'Waiting Approval':
+      case 'Submitted':
         return 'orange';
       case 'Approved':
         return 'green';
@@ -26,7 +26,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
   }
 
   const handleTaskClick = () => {
-    if (taskStatus === 'Rejected' || taskStatus === 'Approved' || taskStatus === 'Waiting Approval') {
+    if (taskStatus === 'Rejected' || taskStatus === 'Approved' || taskStatus === 'Waiting Approval' || taskStatus === 'Submitted') {
       setOpenFeedbackDialog(true);
     } else {
       setOpenUploadDialog(true);
@@ -35,7 +35,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
 
   return (
     <>
-      <Tooltip title={['Rejected', 'Approved', 'Waiting Approval'].includes(taskStatus) ? "Click To View Feedback" : "Click To Upload Evidence"} placement="right" arrow slotProps={{
+      <Tooltip title={['Rejected', 'Approved', 'Waiting Approval', 'Submitted'].includes(taskStatus) ? "Click To View Feedback" : "Click To Upload Evidence"} placement="right" arrow slotProps={{
           transition: { timeout: 5 },
         }}>
         <ListItem sx={{px: 2, py: 1, cursor: 'pointer', borderRadius: 2, overflow: 'hidden', '&:hover': {
@@ -72,7 +72,11 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
                     flexShrink: 0
                   }}
                 />              
-                <Typography sx={{fontWeight: 400, fontSize: 14}}>{taskStatus}</Typography>
+                <Typography sx={{fontWeight: 400, fontSize: 14}}>
+                  {
+                    (taskStatus === 'Submitted') ? 'Waiting Approval' : taskStatus
+                  }
+                </Typography>
               </Stack>
             </Stack>
             

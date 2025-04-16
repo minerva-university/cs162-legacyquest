@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogActions, Button, TextField, FormGroup, Typography, 
   IconButton, Stack, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import TaskApi from '@services/TaskApi.jsx';
 import { useAuth } from '@services/AuthContext.jsx';
 
@@ -10,10 +11,39 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
   const [evidence, setEvidence] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [folderUrl, setFolderUrl] = useState('');
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  // Fetch folder URL when the dialog opens
+  useEffect(() => {
+    async function fetchFolderUrl() {
+      if (open && taskID) {
+        try {
+          const url = TaskApi.getSubmissionFolderUrl(taskID, idToken);
+          setFolderUrl(url);
+        } catch (err) {
+          console.error("Error fetching folder URL:", err);
+          setFolderUrl('');
+        }
+      }
+    }
+    
+    fetchFolderUrl();
+  }, [open, taskID, idToken]);
+
+  const handleOpenFolder = () => {
+    if (folderUrl) {
+      window.open(folderUrl, '_blank');
+    } else {
+      setSnackbarMessage('Folder URL is not available');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -111,7 +141,17 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
                 <Typography align='left'>{description}</Typography>
               </Box>
               
-              <Typography variant='h6' sx={{textAlign: 'left', fontWeight: 800, my: 1}}>Evidence Submission</Typography>
+              <Stack direction='row'>
+                <Typography variant='h6' sx={{textAlign: 'left', fontWeight: 800, my: 1}}>Evidence Submission</Typography>
+                <Box sx={{flexGrow: 1}} />
+                <Button 
+                  startIcon={<DriveFolderUploadIcon/>}
+                  onClick={handleOpenFolder}
+                  disabled={!folderUrl}
+                  sx={{textTransform: 'none', px: 2, borderRadius: '10px'}}>
+                    Upload Files Here
+                  </Button>
+              </Stack>
               <TextField
                 margin='dense'
                 label='Description'

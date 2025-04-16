@@ -98,6 +98,16 @@ const TaskApi = {
     if (!res.ok) throw new Error(result.error || 'Failed to fetch reviewer comment.');
     return result.reviewer_comment || '';
   },
+
+  // Returns the URL for the user's legacy's Google drive submission folder
+  // Merxon's note: I assume the url can be hardcoded somewhere or be stored in the session? So I did not make it an async function.
+  // Please let me know if backend decide to make this async so I will update the frontend to handle this change!
+  getSubmissionFolderUrl() {
+    // Dummy url
+    const url = 'https://drive.google.com/drive/folders/1gdMTa1UiJvnBwFdIVnsiVc0AQ-HYjic5';
+
+    return url
+  }
 };
 
 export default TaskApi;

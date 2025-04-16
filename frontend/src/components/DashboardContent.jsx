@@ -99,7 +99,7 @@ export default function DashboardContent() {
     <Container sx={{ mx: 'auto', py: 4 }} maxWidth='lg'>
       <Stack direction='row' spacing={{ xs: 1, sm: 2, md: 4, lg: 8, xl: 12 }} sx={{ justifyContent: 'space-between' }}>
         {/* Task Progress Panel */}
-        <Stack sx={{ flexGrow: 3, borderRadius: 2, minWidth: '250px', p: 4, boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}` }}>
+        <Stack sx={{ flexGrow: 3, borderRadius: 2, minWidth: '400px', p: 4, boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}` }}>
           <Typography variant='h6' sx={{ fontWeight: 800, mb: 4 }}>Task List</Typography>
           <Stack spacing={4} sx={{ justifyContent: 'center', alignItems: 'center' }}>
             {loading && tasks.length > 0 ? (
