@@ -32,7 +32,7 @@ export default function TaskFeedback({
         setLoading(true);
 
         try {
-          if (status === 'Waiting Approval') {
+          if (status === 'Waiting Approval' || status === 'Submitted') {
             const evidenceData = await TaskApi.getTaskEvidence(taskID, idToken);
             setEvidence(evidenceData);
           } else if (status === 'Rejected' || status === 'Approved') {
@@ -62,6 +62,7 @@ export default function TaskFeedback({
   const getContentTitle = () => {
     switch (status) {
       case 'Waiting Approval':
+      case 'Submitted':
         return 'Your Submitted Evidence';
       case 'Approved':
         return 'Approval Comment';
@@ -92,7 +93,7 @@ export default function TaskFeedback({
           <Stack sx={{ px: 4, pb: 2, textAlign: 'center' }}>
             <Typography variant='h4' sx={{ fontWeight: 800, mb: 2 }}>{taskName}</Typography>
             <Typography variant='h6' sx={{ fontWeight: 800, mb: 1, textAlign: 'center', color: statusColor }}>
-              {status}
+              {(status === 'Submitted') ? 'Waiting Approval' : status}
             </Typography>
             <Typography variant='h6' sx={{ textAlign: 'left', fontWeight: 800, mb: 1 }}>
               {getContentTitle()}
