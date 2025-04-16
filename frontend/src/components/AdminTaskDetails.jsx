@@ -1,11 +1,12 @@
 import {
-  Dialog, DialogActions, Button, Typography, IconButton,
+  Dialog, Button, Typography, IconButton,
   Stack, Box, CircularProgress, TextField
 } from "@mui/material";
 import { useState, useEffect } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import FolderIcon from '@mui/icons-material/Folder';
 import AdminAPI from "@services/AdminApi.jsx";
+import { getAuth } from 'firebase/auth';
 
 export default function AdminTaskDetails({
   open,
@@ -15,7 +16,8 @@ export default function AdminTaskDetails({
   studentName,
   legacyName,
   submissionDate,
-  needsApproval
+  needsApproval,
+  userId
 }) {
   const [loading, setLoading] = useState(true);
   const [evidence, setEvidence] = useState('');
@@ -26,7 +28,7 @@ export default function AdminTaskDetails({
 
   const isApproved = submissionDate && !needsApproval;
 
-  // Fetch task evidence and folder link on open
+  // When dialog opens, fetch evidence and legacy folder link
   useEffect(() => {
     if (open) {
       setLoading(true);
@@ -35,7 +37,7 @@ export default function AdminTaskDetails({
       setSubmissionError(null);
       fetchTaskData(taskID, legacyName);
     } else {
-      // Clear state when closed
+      // Clear data on close to avoid stale state
       setEvidence('');
       setFeedback('');
       setFolderLink('');
@@ -43,42 +45,50 @@ export default function AdminTaskDetails({
     }
   }, [open, taskID, legacyName]);
 
-  // Load task evidence and folder info
+  // Fetch task evidence and optional feedback
   const fetchTaskData = async (id, legacy) => {
     try {
       const folder = await AdminAPI.getLegacyFolderLink(legacy);
       setFolderLink(folder);
 
-      const evidenceText = await AdminAPI.getTaskEvidence(id);
-      setEvidence(evidenceText);
+      // Get auth token from Firebase
+      const user = getAuth().currentUser;
+      if (!user) throw new Error('No authenticated user');
+      const token = await user.getIdToken();
 
-      if (isApproved) {
-        const comment = await AdminAPI.getTaskComments(id);
-        setFeedback(comment || 'This task has already been approved.');
+      // Fetch task evidence with token
+      const evidenceText = await AdminAPI.getTaskEvidenceForAdmin(id, userId, token);
+      setEvidence(evidenceText.submitted_evidence || 'No evidence found.');
+
+      // If approved, fetch comment
+      if (isApproved && evidenceText.reviewer_comment) {
+        setFeedback(evidenceText.reviewer_comment);
       }
-    } catch (error) {
-      console.error(`Failed to fetch task data: ${error.message}`);
+    } catch (err) {
+      console.error('Failed to fetch task data:', err.message);
       setEvidence('Failed to load evidence.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle approval submission
   const handleApprove = async () => {
     setSubmitting(true);
     setSubmissionError(null);
     try {
       const result = await AdminAPI.approveTask(taskID, feedback);
       if (result.success) onClose();
-      else setSubmissionError(result.message || 'Failed to approve task.');
+      else setSubmissionError(result.message || 'Approval failed');
     } catch (err) {
       console.error(err);
-      setSubmissionError('Unexpected error occurred during approval.');
+      setSubmissionError('Unexpected error occurred during approval');
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Handle rejection submission
   const handleReject = async () => {
     if (!feedback.trim()) {
       setSubmissionError('Please provide a rejection reason.');
@@ -90,10 +100,10 @@ export default function AdminTaskDetails({
     try {
       const result = await AdminAPI.rejectTask(taskID, feedback);
       if (result.success) onClose();
-      else setSubmissionError(result.message || 'Failed to reject task.');
+      else setSubmissionError(result.message || 'Rejection failed');
     } catch (err) {
       console.error(err);
-      setSubmissionError('Unexpected error occurred during rejection.');
+      setSubmissionError('Unexpected error occurred during rejection');
     } finally {
       setSubmitting(false);
     }
@@ -123,7 +133,7 @@ export default function AdminTaskDetails({
       }}
     >
       <Stack sx={{ p: 1 }}>
-        {/* Close Button */}
+        {/* Header */}
         <Stack direction="row" sx={{ mb: 2 }}>
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleCloseDialog} disabled={submitting}>
@@ -174,7 +184,7 @@ export default function AdminTaskDetails({
             </Button>
           </Box>
 
-          {/* Evidence View */}
+          {/* Evidence */}
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>Submitted Evidence</Typography>
           <Box
             sx={{
@@ -196,7 +206,7 @@ export default function AdminTaskDetails({
             )}
           </Box>
 
-          {/* Feedback Box */}
+          {/* Feedback Field */}
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>Admin Feedback</Typography>
           <TextField
             multiline
@@ -219,19 +229,21 @@ export default function AdminTaskDetails({
             }}
           />
 
+          {/* Approved Message */}
           {isApproved && (
             <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', mb: 2 }}>
               This task is already approved. Feedback cannot be changed.
             </Typography>
           )}
 
+          {/* Error Message */}
           {submissionError && (
             <Typography color="error" sx={{ textAlign: 'center', mb: 2 }}>
               {submissionError}
             </Typography>
           )}
 
-          {/* Approve/Reject */}
+          {/* Action Buttons */}
           {needsApproval && (
             <Stack direction="row" spacing={2} justifyContent="center">
               <Button

@@ -406,6 +406,102 @@ app.get('/api/tasks/:taskId/submissions/latest', authenticateToken, async (req, 
   }
 });
 
+// GET /api/admin/tasks - Admin only
+// This route fetches all tasks for admin review.
+app.get('/api/admin/tasks', async (req, res) => {
+  const legacyFilter = req.query.legacy || 'All';
+  const statusFilter = req.query.status || 'All';
+
+  try {
+    const tasks = await prisma.taskSubmission.findMany({
+      where: {
+        ...(statusFilter !== 'All' && { status: statusFilter }),
+        user: {
+          ...(legacyFilter !== 'All' && {
+            legacy: {
+              name: legacyFilter
+            }
+          })
+        }
+      },
+      include: {
+        user: {
+          select: {
+            full_name: true,
+            legacy: {
+              select: { name: true }
+            }
+          }
+        },
+        task: true
+      },
+      orderBy: { submitted_at: 'desc' }
+    });
+
+    const result = tasks.map((entry) => ({
+      taskID: entry.task_id,
+      taskName: entry.task.title,
+      submissionDate: new Date(entry.submitted_at).toISOString().split('T')[0],
+      studentName: entry.user.full_name,
+      legacyName: entry.user.legacy?.name || '—',
+      evidence: entry.submitted_evidence || '',
+      points: entry.task.points_on_approval,
+      status: entry.status === 'Submitted' ? 'Needs Approval' : entry.status,
+      userId: entry.user_id,
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error('Error fetching admin task submissions:', err);
+    res.status(500).json({ error: 'Failed to fetch admin task data' });
+  }
+});
+
+
+// GET /api/admin/tasks/:taskId/evidence - Admin only
+// This route fetches the evidence for a specific task submission.
+app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const taskId = parseInt(req.params.taskId, 10);
+
+  if (isNaN(taskId)) {
+    return res.status(400).json({ error: 'Invalid taskId' });
+  }
+
+  try {
+    // Get the latest submission for that task from *any* user
+    const userId = parseInt(req.query.userId, 10);
+    if (isNaN(taskId) || isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid taskId or userId' });
+    }
+
+    const submission = await prisma.taskSubmission.findFirst({
+      where: {
+        task_id: taskId,
+        user_id: userId,
+        is_latest: true
+      },
+      orderBy: { submitted_at: 'desc' }
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'No submission found' });
+    }
+
+    res.json({
+      submitted_evidence: submission.submitted_evidence,
+      reviewer_comment: submission.reviewer_comment || null,
+    });
+  } catch (err) {
+    console.error('Error fetching admin evidence:', err);
+    res.status(500).json({ error: 'Server error while fetching evidence' });
+  }
+});
+
+
 
 // --- Start Server ---
 // Starts the Express server listening on the configured PORT.
