@@ -18,34 +18,36 @@ import {
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import AdminTaskDetails from './AdminTaskDetails';
+import AdminAPI from '@services/AdminApi.jsx';
 
 export default function TaskCentral() {
+  // State for fetched tasks
+  const [tasks, setTasks] = useState([]);
+
   // Available Legacy names for filtering
   const legacyOptions = ['All', 'Vista', 'Tower', 'Bridge', 'Chronicle', 'Pulse'];
   
   // Task status options for filtering
   const statusOptions = ['All', 'Approved', 'Needs Approval', 'Not Submitted'];
-  
-  // dummy data
-  const tasks = [
-    {id: 1, taskName: 'Task 1', submissionDate: '2025/01/01', needsApproval: true, studentName: 'Alice Chen', legacyName: 'Vista', status: 'Needs Approval'},
-    {id: 2, taskName: 'Task 2', submissionDate: '2025/01/02', needsApproval: false, studentName: 'Bob Johnson', legacyName: 'Tower', status: 'Approved'},
-    {id: 3, taskName: 'Task 3', submissionDate: '2025/01/03', needsApproval: true, studentName: 'Carlos Rodriguez', legacyName: 'Bridge', status: 'Needs Approval'},
-    {id: 4, taskName: 'Task 4', submissionDate: '2025/01/04', needsApproval: false, studentName: 'Diana Kim', legacyName: 'Chronicle', status: 'Approved'},
-    {id: 5, taskName: 'Task 5', submissionDate: '2025/01/05', needsApproval: true, studentName: 'Elijah Williams', legacyName: 'Vista', status: 'Needs Approval'},
-    {id: 6, taskName: 'Task 6', submissionDate: '2025/01/06', needsApproval: false, studentName: 'Fatima Hassan', legacyName: 'Pulse', status: 'Approved'},
-    {id: 7, taskName: 'Task 7', submissionDate: '', needsApproval: false, studentName: 'George Smith', legacyName: 'Tower', status: 'Not Submitted'},
-  ];
 
   // Filter states
   const [legacyFilter, setLegacyFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [filteredTasks, setFilteredTasks] = useState(tasks);
+  const [filteredTasks, setFilteredTasks] = useState([]);
   
   const [selectedTask, setSelectedTask] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  // Apply filters whenever they change
+  // Fetch tasks from AdminAPI whenever filters change
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const fetched = await AdminAPI.getAllTasks(legacyFilter, statusFilter);
+      setTasks(fetched);
+    };
+    fetchTasks();
+  }, [legacyFilter, statusFilter]);
+
+  // Apply filters after tasks are fetched
   useEffect(() => {
     let result = [...tasks];
     
@@ -58,9 +60,9 @@ export default function TaskCentral() {
     if (statusFilter !== 'All') {
       result = result.filter(task => task.status === statusFilter);
     }
-    
+
     setFilteredTasks(result);
-  }, [legacyFilter, statusFilter]);
+  }, [tasks, legacyFilter, statusFilter]);
 
   const handleLegacyFilterChange = (event) => {
     setLegacyFilter(event.target.value);
@@ -134,7 +136,7 @@ export default function TaskCentral() {
             <TableBody>
               {filteredTasks.map((task) => (
                 <TableRow 
-                  key={task.id} 
+                  key={task.taskID} // Updated to match backend schema
                   hover
                   onClick={() => handleRowClick(task)}
                   sx={{ cursor: 'pointer' }}
@@ -170,7 +172,7 @@ export default function TaskCentral() {
         <AdminTaskDetails
           open={detailsOpen}
           onClose={handleCloseDetails}
-          taskID={selectedTask.id}
+          taskID={selectedTask.taskID}
           taskName={selectedTask.taskName}
           studentName={selectedTask.studentName}
           legacyName={selectedTask.legacyName}
