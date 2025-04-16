@@ -75,14 +75,28 @@ const TaskApi = {
   },
   
 
-  // Placeholder: fetch submitted evidence for task
-  getTaskEvidence: async () => {
-    throw new Error('getTaskEvidence is not implemented yet');
+  // Fetch user's latest submitted evidence for a task
+  getTaskEvidence: async (taskID, token) => {
+    if (!token) throw new Error('Token required');
+    const res = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions/latest`, {
+      method: 'GET',
+      headers: getAuthHeader(token),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to fetch evidence.');
+    return result.submitted_evidence || '';
   },
 
-  // Placeholder: fetch reviewer comments on task
-  getTaskComments: async () => {
-    throw new Error('getTaskComments is not implemented yet');
+  // Fetch reviewer comment for the latest submission of a task
+  getTaskComments: async (taskID, token) => {
+    if (!token) throw new Error('Token required');
+    const res = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions/latest`, {
+      method: 'GET',
+      headers: getAuthHeader(token),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to fetch reviewer comment.');
+    return result.reviewer_comment || '';
   },
 };
 

@@ -296,6 +296,37 @@ app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) =
   }
 });
 
+// GET /api/tasks/:taskId/submissions/latest
+app.get('/api/tasks/:taskId/submissions/latest', authenticateToken, async (req, res) => {
+  const taskId = parseInt(req.params.taskId, 10);
+  const userId = req.user.user_id;
+
+  if (isNaN(taskId)) {
+    return res.status(400).json({ error: 'Invalid task ID' });
+  }
+
+  try {
+    const latestSubmission = await prisma.taskSubmission.findFirst({
+      where: {
+        task_id: taskId,
+        user_id: userId,
+        is_latest: true,
+      },
+      orderBy: { submitted_at: 'desc' },
+    });
+
+    if (!latestSubmission) {
+      return res.status(404).json({ error: 'No submission found' });
+    }
+
+    res.json(latestSubmission);
+  } catch (err) {
+    console.error(`Error fetching latest submission for task ${taskId}`, err);
+    res.status(500).json({ error: 'Failed to fetch submission' });
+  }
+});
+
+
 // --- Start Server ---
 // Starts the Express server listening on the configured PORT.
 app.listen(PORT, () => {
