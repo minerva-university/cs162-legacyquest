@@ -22,7 +22,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
     async function fetchFolderUrl() {
       if (open && taskID) {
         try {
-          const url = TaskApi.getSubmissionFolderUrl(taskID, idToken);
+          const url = await TaskApi.getSubmissionFolderUrl(taskID, idToken);
           setFolderUrl(url);
         } catch (err) {
           console.error("Error fetching folder URL:", err);

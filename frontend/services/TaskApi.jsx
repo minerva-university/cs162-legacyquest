@@ -77,6 +77,7 @@ const TaskApi = {
 
   // Fetch user's latest submitted evidence for a task
   getTaskEvidence: async (taskID, token) => {
+    console.log(`Fetching evidence for task ID: ${taskID}`);
     if (!token) throw new Error('Token required');
     const res = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions/latest`, {
       method: 'GET',
