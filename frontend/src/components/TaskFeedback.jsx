@@ -74,7 +74,7 @@ export default function TaskFeedback({
   };
 
   const getContent = () => {
-    if (status === 'Waiting Approval') return evidence;
+    if (status === 'Waiting Approval' || status === 'Submitted') return evidence;
     if (status === 'Rejected' || status === 'Approved') return comment;
     return '';
   };
