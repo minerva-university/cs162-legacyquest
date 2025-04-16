@@ -72,7 +72,6 @@ const UserApi = {
       }
 
       const userData = await res.json();
-      console.log('User data from API:', userData); // Debug log to see the entire user data
       
       // Check if legacy data exists and has a location_filter property
       if (userData.legacy && userData.legacy.location_filter) {
