@@ -4,9 +4,11 @@ import ListedLegacy from './ListedLegacy';
 import { useState, useEffect } from 'react';
 import LegacyApi from "@services/LegacyApi.jsx";
 import UserApi from "@services/UserApi.jsx";
+import { useAuth } from '@services/AuthContext.jsx';
 
 export default function LegacyRankingList({highlightedLegacy}) {
   const theme = useTheme();
+  const { idToken } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [legacies, setLegacies] = useState([]);
   const [isGlobal, setIsGlobal] = useState(true); // Track if viewing global or local rankings
@@ -26,7 +28,7 @@ export default function LegacyRankingList({highlightedLegacy}) {
         // Get user location if not already fetched
         let location = userLocation;
         if (!location) {
-          location = await UserApi.getUserLocation();
+          location = await UserApi.getUserLocation(idToken);
           setUserLocation(location);
         }
         

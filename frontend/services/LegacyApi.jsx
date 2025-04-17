@@ -1,46 +1,99 @@
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+// Adds token and content headers for authenticated requests
+const getAuthHeader = (token) => ({
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+});
+
 const LegacyApi = {
-  // Simulate retrieving a user's legacy name from the server. The return format is a the user's legacy name (string).
+  // Retrieve a user's legacy name from the server. The return format is a the user's legacy name (string).
   // E.g., 'Vista'
-  getLegacyName: async () => {
-    // A fake delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return 'Vista';
+  getLegacyName: async (token) => {
+    if (!token) throw new Error('Authentication token is required for getLegacyName.');
+    
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/me`, {
+        method: 'GET',
+        headers: getAuthHeader(token),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const userData = await res.json();
+      return userData.legacy?.name || 'Unknown Legacy';
+    } catch (err) {
+      console.error('Error in LegacyApi.getLegacyName:', err);
+      throw err;
+    }
   },
   
-  // Simulate retrieving a list of legacy members from the server. The return format is an array of objects, each containing:
+  // Retrieve a list of legacy members from the server. The return format is an array of objects, each containing:
   // - name (string): The name of the member
   // - cohort (string): The cohort of the member
   // - location (string): The location of the member
   // - avatarUrl (string): The URL of the member's avatar image
   // The data doesn't need to be sorted.
-  getLegacyMembers: async () => {
-    // A fake delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  getLegacyMembers: async (token) => {
+    if (!token) throw new Error('Authentication token is required for getLegacyMembers.');
     
-    // Dummy data
-    const members = [
-      {name: 'Albert', cohort: 'M26', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Bob', cohort: 'M27', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Cindy', cohort: 'M28', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Davis', cohort: 'M24', location: 'Berlin', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Edward', cohort: 'M25', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Frank', cohort: 'M26', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Grace', cohort: 'M27', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Howard', cohort: 'M28', location: 'Taipei', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Ivy', cohort: 'M24', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Jack', cohort: 'M25', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Kathy', cohort: 'M26', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Leo', cohort: 'M27', location: 'Berlin', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Mia', cohort: 'M28', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Nancy', cohort: 'M24', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Oliver', cohort: 'M25', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Peter', cohort: 'M26', location: 'Taipei', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Quincy', cohort: 'M27', location: 'San Francisco', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Rachel', cohort: 'M28', location: 'Tokyo', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-      {name: 'Sam', cohort: 'M24', location: 'Buenos Aires', avatarUrl: 'https://mui.com/static/images/avatar/1.jpg'},
-    ];
+    try {
+      // First, get the user's data to determine their legacy ID
+      const res = await fetch(`${API_BASE_URL}/api/me`, {
+        method: 'GET',
+        headers: getAuthHeader(token),
+      });
 
-    return members;
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const userData = await res.json();
+      const legacyId = userData.legacy?.legacy_id;
+      const legacyName = userData.legacy?.name || 'Unknown Legacy';
+      
+      if (!legacyId) {
+        console.warn('User does not have a legacy ID, cannot fetch legacy members');
+        return [];
+      }
+      
+      // Fetch all users with the same legacy ID
+      const membersRes = await fetch(`${API_BASE_URL}/api/legacy/${legacyId}/members`, {
+        method: 'GET',
+        headers: getAuthHeader(token),
+      });
+
+      if (!membersRes.ok) {
+        // If the endpoint doesn't exist or returns an error, log it and return empty array
+        console.warn(`Failed to fetch legacy members: ${membersRes.status} ${membersRes.statusText}`);
+        return [];
+      }
+
+      const membersData = await membersRes.json();
+      
+      if (Array.isArray(membersData)) {
+        // Map the backend data to the expected format
+        const members = membersData.map(member => ({
+          name: member.full_name || member.name || 'Unknown',
+          cohort: member.cohort?.name || 'Unknown Cohort',
+          location: member.location || 'Unknown Location',
+          avatarUrl: member.profile_picture_url || 'https://mui.com/static/images/avatar/1.jpg',
+          legacy: legacyName
+        }));
+        return members;
+      }
+      
+      // If we reach here, the endpoint returned invalid data
+      console.warn('Legacy members endpoint returned invalid data');
+      return [];
+    } catch (err) {
+      console.error('Error in LegacyApi.getLegacyMembers:', err);
+      throw err;
+    }
   },
 
   // Simulate fetching global ranking data from the server. The return format is an array of objects, each containing:

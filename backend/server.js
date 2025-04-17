@@ -209,21 +209,101 @@ app.get('/', (req, res) => {
 
 // GET /api/me: Returns profile information for the currently authenticated user.
 // Uses `authenticateToken` middleware to get user data into `req.user`.
-app.get('/api/me', authenticateToken, (req, res) => {
-  // req.user is populated by the authenticateToken middleware
-  // We don't send back the firebase_uid or other sensitive details unless needed
-  const { user_id, email, full_name, profile_picture_url, role, created_at, legacy_id, cohort_id } = req.user;
-  res.json({
-    user_id,
-    email,
-    full_name,
-    profile_picture_url,
-    role,
-    created_at,
-    legacy_id,
-    cohort_id
-    // Add other fields you want the frontend to have access to
-  });
+app.get('/api/me', authenticateToken, async (req, res) => {
+  try {
+    // Get the user with related legacy and cohort information
+    const userWithRelations = await prisma.user.findUnique({
+      where: { user_id: req.user.user_id },
+      include: {
+        legacy: true,  // Include legacy details
+        cohort: true   // Include cohort details
+      }
+    });
+
+    if (!userWithRelations) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Extract only the necessary fields to send to frontend
+    // Exclude sensitive information like firebase_uid
+    const { 
+      user_id, 
+      email, 
+      full_name, 
+      profile_picture_url, 
+      role, 
+      created_at, 
+      email_verified,
+      legacy,
+      cohort 
+    } = userWithRelations;
+
+    // Format the response with nested objects for related data
+    res.json({
+      user_id,
+      email,
+      email_verified,
+      full_name,
+      profile_picture_url,
+      role,
+      created_at,
+      // Include legacy information if available
+      legacy: legacy ? {
+        legacy_id: legacy.legacy_id,
+        name: legacy.name,
+        points: legacy.points,
+        location_filter: legacy.location_filter
+      } : null,
+      // Include cohort information if available
+      cohort: cohort ? {
+        cohort_id: cohort.cohort_id,
+        name: cohort.name
+      } : null
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Failed to retrieve user profile' });
+  }
+});
+
+// GET /api/legacy/:legacyId/members - Fetch all members of a specific legacy
+app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => {
+  try {
+    const legacyId = parseInt(req.params.legacyId);
+    
+    if (isNaN(legacyId)) {
+      return res.status(400).json({ error: 'Invalid legacy ID' });
+    }
+    
+    // Verify the user belongs to the requested legacy or is an admin
+    if (req.user.legacy_id !== legacyId && req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'You can only view members of your own legacy' });
+    }
+    
+    // Fetch all users with the specified legacy_id and include the legacy information for location_filter
+    const legacyMembers = await prisma.user.findMany({
+      where: { legacy_id: legacyId },
+      include: {
+        cohort: true,  // Include cohort details
+        legacy: true   // Include legacy details to access location_filter
+      }
+    });
+    
+    // Format the response to match the expected frontend structure
+    const formattedMembers = legacyMembers.map(member => ({
+      user_id: member.user_id,
+      name: member.full_name,
+      email: member.email,
+      profile_picture_url: member.profile_picture_url || "https://img.icons8.com/?size=100&id=u4U9G3tGGHu1&format=png&color=737373", // Use provided icon as default avatar only when profile_picture_url is null or undefined
+      location: member.legacy?.location_filter, // Use location_filter from the legacy relationship
+      cohort: member.cohort
+    }));
+    
+    res.json(formattedMembers);
+  } catch (error) {
+    console.error('Error fetching legacy members:', error);
+    res.status(500).json({ error: 'Failed to retrieve legacy members' });
+  }
 });
 
 // GET /api/tasks - Fetch all tasks for current user
