@@ -2,6 +2,7 @@ import { Stack, Typography } from '@mui/material';
 import LegacyQuestLogo from '../assets/LegacyQuestLogo.png';
 import { useAuth } from "@services/AuthContext.jsx";
 
+// A welcome card displayed on the dashboard, showing a welcome message and the user's name
 export default function WelcomeCard({taskCompletedPercentage}) {
   const { currentUser } = useAuth();
   

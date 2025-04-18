@@ -3,7 +3,8 @@ import treasureBox from '../assets/treasure-box.svg';
 import silverTreasureBox from '../assets/silver-treasure-box.svg';
 import bronzeTreasureBox from '../assets/bronze-treasure-box.svg';
 
-export default function ListedLegacy({legacyRanking, legacyName, legacyIconUrl, legacyScore, isHighlighted}) {
+// The legacy that is displayed in the legacy ranking list
+export default function ListedLegacy({legacyRanking, legacyName, legacyScore, isHighlighted}) {
   return (
     <ListItem sx={{px: 2, py: 0.5, borderRadius: 2, overflow: 'hidden',
       background: 
@@ -11,12 +12,11 @@ export default function ListedLegacy({legacyRanking, legacyName, legacyIconUrl, 
     }}>
       <Stack spacing={1} direction='row' sx={{alignItems: 'center', width: 1, minHeight: '40px'}}>
         <Typography sx={{width: '18px', textAlign: 'right'}}>{legacyRanking}</Typography>
-
-        {/* <Avatar src={legacyIconUrl} /> */}
         <Typography sx={{fontWeight: 600, pl: 1}}>{legacyName}</Typography>
 
         <Box sx={{flexGrow: 1}}></Box>
         
+        {/* Display gold, silver, or bronze treasure box based on ranking */}
         {legacyRanking === 1 && (
           <Box sx={{display: 'flex', alignItems: 'center', mx: 1}}>
             <img 

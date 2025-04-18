@@ -1,6 +1,7 @@
 import { Stack, Typography, Box } from '@mui/material';
 import crownIcon from '../assets/crown.svg';
 
+// Component that displays a student's info (name, cohort, legacy)
 export default function StudentInfo({legacyName, cohortName}) {
   return (
     <Stack direction='column' spacing={1} sx={{width: 1, alignContent: 'center'}}>

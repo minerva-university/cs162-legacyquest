@@ -1,36 +1,28 @@
-import {
-  Dialog, DialogActions, Button, Typography, IconButton,
-  Stack, Box, CircularProgress
-} from "@mui/material";
+import { Dialog, DialogActions, Button, Typography, IconButton, Stack, Box, CircularProgress } from "@mui/material";
 import { useState, useEffect } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import UploadEvidence from './UploadEvidence';
 import TaskApi from "@services/TaskApi.jsx";
 import { useAuth } from '@services/AuthContext.jsx';
 
-export default function TaskFeedback({
-  open,
-  onClose,
-  taskID,
-  taskName,
-  description,
-  status,
-  statusColor,
-  onSuccessfulSubmit
-}) {
+// A dialog component to display task feedback from admin, including evidence and comments
+export default function TaskFeedback({ open, onClose, taskID, taskName, description, status, statusColor, onSuccessfulSubmit }) {
   const [uploadEvidenceOpen, setUploadEvidenceOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [evidence, setEvidence] = useState('');
   const [comment, setComment] = useState('');
   const { idToken } = useAuth();
 
+  // Function to fetch task evidence or comments based on the status
   useEffect(() => {
     async function fetchData() {
       if (open) {
         setEvidence('');
         setComment('');
         setLoading(true);
-
+        
+        // If the task is submitted but not reviewed, fetch submitted evidence
+        // If the task is approved or rejected, fetch comments
         try {
           if (status === 'Waiting Approval' || status === 'Submitted') {
             const evidenceData = await TaskApi.getTaskEvidence(taskID, idToken);
@@ -50,6 +42,7 @@ export default function TaskFeedback({
     fetchData();
   }, [open, taskID, status, idToken]);
 
+  // Show/hide the upload evidence dialog when the user wants to resubmit
   const handleResubmit = () => {
     onClose();
     setUploadEvidenceOpen(true);
@@ -59,6 +52,7 @@ export default function TaskFeedback({
     setUploadEvidenceOpen(false);
   };
 
+  // Dynamically set the title based on the status of the task
   const getContentTitle = () => {
     switch (status) {
       case 'Waiting Approval':
@@ -73,6 +67,7 @@ export default function TaskFeedback({
     }
   };
 
+  // Dynamically set the content based on the status of the task
   const getContent = () => {
     if (status === 'Waiting Approval' || status === 'Submitted') return evidence;
     if (status === 'Rejected' || status === 'Approved') return comment;
@@ -81,15 +76,15 @@ export default function TaskFeedback({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth
-        slotProps={{ paper: { style: { borderRadius: 16, overflow: 'hidden' } } }}
-      >
+      <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth slotProps={{ paper: { style: { borderRadius: 16, overflow: 'hidden' } } }} >
         <Stack sx={{ p: 1 }}>
+          {/* Close button */}
           <Stack direction='row' sx={{ mb: 4 }}>
             <Box sx={{ flexGrow: 1 }} />
             <IconButton onClick={onClose}><CloseRoundedIcon /></IconButton>
           </Stack>
 
+          {/* Task status and title */}
           <Stack sx={{ px: 4, pb: 2, textAlign: 'center' }}>
             <Typography variant='h4' sx={{ fontWeight: 800, mb: 2 }}>{taskName}</Typography>
             <Typography variant='h6' sx={{ fontWeight: 800, mb: 1, textAlign: 'center', color: statusColor }}>
@@ -99,6 +94,7 @@ export default function TaskFeedback({
               {getContentTitle()}
             </Typography>
 
+            {/* Task evidence or comments, displayed as scrollable area */}
             <Box
               sx={{
                 maxHeight: '300px',

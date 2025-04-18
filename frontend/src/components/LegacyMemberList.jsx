@@ -6,6 +6,8 @@ import LegacyApi from "@services/LegacyApi.jsx";
 import UserApi from "@services/UserApi.jsx";
 import { useAuth } from '@services/AuthContext.jsx';
 
+// A component to display a list of legacy members
+// This component is no longer used in the new design, but is kept for reference
 export default function LegacyMemberList({legacyName}) {
   const [isViewAll, setIsViewAll] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -131,7 +133,7 @@ export default function LegacyMemberList({legacyName}) {
         )}
       </Box>
       
-      {/* Displays the location of the members */}
+      {/* A footer to display whether this is a list of all members or local members */}
       <Box sx={{
         p: 1, 
         textAlign: 'center',

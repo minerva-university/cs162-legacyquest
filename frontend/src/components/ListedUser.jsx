@@ -1,5 +1,6 @@
 import { Avatar, ListItem, Stack, Typography, Box } from '@mui/material';
 
+// The user listed in the legacy ranking list
 export default function ListedUser({userName, cohort, location, avatarUrl}) {
   return (
     <ListItem sx={{px: 2, py: 0.5}}>
