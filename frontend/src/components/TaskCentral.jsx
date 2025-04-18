@@ -6,6 +6,7 @@ import {
 import { useState, useEffect, useCallback } from 'react';
 import AdminTaskDetails from './AdminTaskDetails';
 import AdminAPI from '@services/AdminApi.jsx';
+import { getAuth } from 'firebase/auth';
 
 export default function TaskCentral() {
   const [tasks, setTasks] = useState([]);
@@ -13,18 +14,48 @@ export default function TaskCentral() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [selectedTask, setSelectedTask] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [legacyOptions, setLegacyOptions] = useState([{ legacy_id: 'All', name: 'All' }]);
+  const [statusOptions, setStatusOptions] = useState(['All']);
 
-  const legacyOptions = ['All', 'Vista', 'Tower', 'Bridge', 'Chronicle', 'Pulse'];
-  const statusOptions = ['All', 'Approved', 'Needs Approval', 'Not Submitted'];
+  // Maps backend enum status to user-friendly display text
+  const statusLabelMap = {
+    Submitted: 'Needs Approval',
+    Approved: 'Approved',
+    Rejected: 'Rejected',
+  };
 
+  // Fetch filtered task data from the backend
   const fetchTasks = useCallback(async () => {
     const fetched = await AdminAPI.getAllTasks(legacyFilter, statusFilter);
     setTasks(fetched);
   }, [legacyFilter, statusFilter]);
 
+  // Re-fetch tasks whenever filters change
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // Fetch all legacy groups for the filter dropdown
+  useEffect(() => {
+    const fetchLegacies = async () => {
+      const user = getAuth().currentUser;
+      const token = await user.getIdToken();
+      const data = await AdminAPI.getAllLegacies(token);
+      setLegacyOptions([{ legacy_id: 'All', name: 'All' }, ...data]);
+    };
+    fetchLegacies();
+  }, []);
+
+  // Fetch status options (from backend-defined enum)
+  useEffect(() => {
+    const fetchStatusOptions = async () => {
+      const user = getAuth().currentUser;
+      const token = await user.getIdToken();
+      const data = await AdminAPI.getStatusOptions(token);
+      setStatusOptions(['All', ...data]); // Add 'All' manually for default filter
+    };
+    fetchStatusOptions();
+  }, []);
 
   const handleLegacyFilterChange = (e) => setLegacyFilter(e.target.value);
   const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
@@ -36,16 +67,18 @@ export default function TaskCentral() {
 
   const handleCloseDetails = () => {
     setDetailsOpen(false);
-    fetchTasks(); // Refresh after approval/rejection
+    fetchTasks(); // Refresh tasks after approving or rejecting a task
   };
 
   return (
     <>
       <Box sx={{ p: 3, borderRadius: 2, boxShadow: 1, bgcolor: 'white', height: '100%' }}>
+        {/* Header and Filters */}
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
           <Typography variant="h6" fontWeight="bold">Task Central</Typography>
 
           <Grid container spacing={2} justifyContent="flex-end" sx={{ maxWidth: 500 }}>
+            {/* Legacy Filter */}
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <InputLabel id="legacy-filter-label">Legacy</InputLabel>
@@ -55,12 +88,16 @@ export default function TaskCentral() {
                   label="Legacy"
                   onChange={handleLegacyFilterChange}
                 >
-                  {legacyOptions.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                  {legacyOptions.map((option) => (
+                    <MenuItem key={option.legacy_id} value={option.legacy_id}>
+                      {option.name}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
+
+            {/* Status Filter */}
             <Grid item xs={6}>
               <FormControl fullWidth size="small">
                 <InputLabel id="status-filter-label">Task Status</InputLabel>
@@ -71,7 +108,9 @@ export default function TaskCentral() {
                   onChange={handleStatusFilterChange}
                 >
                   {statusOptions.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                    <MenuItem key={option} value={option}>
+                      {statusLabelMap[option] || option}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -79,6 +118,7 @@ export default function TaskCentral() {
           </Grid>
         </Stack>
 
+        {/* Tasks Table */}
         <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
           <Table>
             <TableHead>
@@ -102,13 +142,13 @@ export default function TaskCentral() {
                   <TableCell>{task.submissionDate || '—'}</TableCell>
                   <TableCell>
                     <Chip
-                      label={task.status}
+                      label={statusLabelMap[task.status] || task.status}
                       size="small"
                       sx={{
                         bgcolor:
-                          task.status === 'Needs Approval' ? '#F5B041' :
-                          task.status === 'Approved' ? '#66BB6A' :
-                          '#9E9E9E',
+                          task.status === 'Needs Approval' ? '#F5B041' : // Needs Approval
+                          task.status === 'Approved' ? '#66BB6A' : // Green
+                          '#9E9E9E', // Grey fallback
                         color: 'white',
                         borderRadius: '16px',
                         fontWeight: 'medium',
@@ -123,7 +163,7 @@ export default function TaskCentral() {
         </TableContainer>
       </Box>
 
-      {/* Dialog */}
+      {/* Task Detail Dialog */}
       {selectedTask && (
         <AdminTaskDetails
           open={detailsOpen}
@@ -133,7 +173,7 @@ export default function TaskCentral() {
           studentName={selectedTask.studentName}
           legacyName={selectedTask.legacyName}
           submissionDate={selectedTask.submissionDate}
-          needsApproval={selectedTask.status === 'Needs Approval'}
+          needsApproval={selectedTask.status === 'Submitted'} // For conditional logic in dialog
           userId={selectedTask.userId}
         />
       )}

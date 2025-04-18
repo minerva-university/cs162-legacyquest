@@ -418,9 +418,7 @@ app.get('/api/admin/tasks', async (req, res) => {
         ...(statusFilter !== 'All' && { status: statusFilter }),
         user: {
           ...(legacyFilter !== 'All' && {
-            legacy: {
-              name: legacyFilter
-            }
+            legacy_id: parseInt(legacyFilter)
           })
         }
       },
@@ -546,6 +544,44 @@ app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res)
   } catch (err) {
     console.error('Error reviewing task:', err);
     res.status(500).json({ error: 'Failed to update submission' });
+  }
+});
+
+// GET /api/admin/legacies - Admin Only
+// List all legacies
+app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  try {
+    const legacies = await prisma.legacy.findMany({
+      select: {
+        legacy_id: true,
+        name: true
+      },
+      orderBy: { name: 'asc' }
+    });
+    res.json(legacies);
+  } catch (err) {
+    console.error('Error fetching legacies:', err);
+    res.status(500).json({ error: 'Failed to fetch legacies' });
+  }
+});
+
+// GET /api/admin/status-options - Admin Only
+// Fetches the available status options for task submissions.
+app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  try {
+    const statusOptions = ['Submitted', 'Approved', 'Rejected'];
+    res.json(statusOptions);
+  } catch (err) {
+    console.error('Error fetching status options:', err);
+    res.status(500).json({ error: 'Failed to fetch status options' });
   }
 });
 

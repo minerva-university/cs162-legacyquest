@@ -80,6 +80,33 @@ const AdminAPI = {
     if (!res.ok) throw new Error(result.error || 'Failed to fetch admin evidence');
     return result;
   },  
+
+  getAllLegacies: async (token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/legacies`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch legacies');
+    return data;
+  },
+
+  /**
+   * Get all status options for tasks.
+  */
+  getStatusOptions: async (token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/status-options`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+  
+    if (!res.ok) throw new Error('Failed to fetch status options');
+    return res.json();
+  },
   
 
   /**
