@@ -245,7 +245,7 @@ app.get('/api/me', authenticateToken, async (req, res) => {
       email_verified,
       full_name,
       profile_picture_url,
-      role,
+      role: role === 'student' ? 'user' : role, // Normalize role for frontend
       created_at,
       // Include legacy information if available
       legacy: legacy ? {

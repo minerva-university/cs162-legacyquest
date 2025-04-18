@@ -5,15 +5,8 @@ import {
 } from 'firebase/auth';
 import { auth } from './firebase';
 
-// List of admin emails
-const ADMIN_EMAILS = [
-  'admin@uni.minerva.edu',
-  // 'yuan@uni.minerva.edu'
-  'kim@uni.minerva.edu'
-];
-
 /**
- * Signs in a user with Google and determines their role
+ * Signs in a user with Google and retrieves their role from the backend
  * @returns {Object} - User info, role, and ID token
  */
 export const signInWithGoogle = async () => {
@@ -23,23 +16,32 @@ export const signInWithGoogle = async () => {
     const user = result.user;
     const email = user.email;
 
-    // Improved Minerva email validation - check domain exactly
+    // Only allow @uni.minerva.edu emails
     if (!email || !/^[\w.-]+@uni\.minerva\.edu$/.test(email)) {
       await signOut(auth);
       throw new Error('Only Minerva University emails (@uni.minerva.edu) are allowed');
     }
 
-    // Get the Firebase ID token
+    // Get Firebase ID token
     const idToken = await user.getIdToken();
 
-    // Determine if user is admin based on email
-    const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
-    const role = isAdmin ? 'admin' : 'user';
+    // Fetch role and profile info from backend
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/me`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      }
+    });
 
-    // Return user, role, and token
+    if (!res.ok) {
+      throw new Error('Failed to retrieve user data from backend');
+    }
+
+    const userData = await res.json();
+    const role = userData.role || 'user';
+
     return {
-      user: user,
-      role: role,
+      user,
+      role,
       token: idToken
     };
   } catch (error) {
@@ -59,13 +61,4 @@ export const logoutUser = async () => {
     console.error('Error signing out:', error);
     return false;
   }
-};
-
-/**
- * Gets the user's role based on email
- * (Note: This is also used by the AuthContext)
- */
-export const getUserRole = (email) => {
-  if (!email) return null;
-  return ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'user';
 };
