@@ -72,38 +72,28 @@ export default function AdminTaskDetails({
     }
   };
 
-  // Handle approval submission
-  const handleApprove = async () => {
-    setSubmitting(true);
-    setSubmissionError(null);
-    try {
-      const result = await AdminAPI.approveTask(taskID, feedback);
-      if (result.success) onClose();
-      else setSubmissionError(result.message || 'Approval failed');
-    } catch (err) {
-      console.error(err);
-      setSubmissionError('Unexpected error occurred during approval');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Handle rejection submission
-  const handleReject = async () => {
-    if (!feedback.trim()) {
+  // Handle approval/rejection in unified handler
+  const handleReview = async (action) => {
+    if (action === 'reject' && !feedback.trim()) {
       setSubmissionError('Please provide a rejection reason.');
       return;
     }
 
     setSubmitting(true);
     setSubmissionError(null);
+
     try {
-      const result = await AdminAPI.rejectTask(taskID, feedback);
-      if (result.success) onClose();
-      else setSubmissionError(result.message || 'Rejection failed');
+      const user = getAuth().currentUser;
+      const token = await user.getIdToken();
+      const result = await AdminAPI.reviewTask(taskID, userId, action, feedback, token);
+      if (result.success) {
+        onClose();
+      } else {
+        setSubmissionError(result.message || 'Review failed');
+      }
     } catch (err) {
       console.error(err);
-      setSubmissionError('Unexpected error occurred during rejection');
+      setSubmissionError('Unexpected error occurred during review');
     } finally {
       setSubmitting(false);
     }
@@ -249,7 +239,7 @@ export default function AdminTaskDetails({
               <Button
                 variant="contained"
                 color="error"
-                onClick={handleReject}
+                onClick={() => handleReview('reject')}
                 disabled={submitting}
                 sx={{ minWidth: 150, borderRadius: 4, textTransform: 'none', py: 1 }}
               >
@@ -257,7 +247,7 @@ export default function AdminTaskDetails({
               </Button>
               <Button
                 variant="contained"
-                onClick={handleApprove}
+                onClick={() => handleReview('approve')}
                 disabled={submitting}
                 sx={{
                   minWidth: 150,

@@ -1,56 +1,33 @@
 import {
-  Typography,
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid
+  Typography, Box, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, Chip, Stack, FormControl,
+  InputLabel, Select, MenuItem, Grid
 } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminTaskDetails from './AdminTaskDetails';
 import AdminAPI from '@services/AdminApi.jsx';
 
 export default function TaskCentral() {
-  // Full list of tasks from backend
   const [tasks, setTasks] = useState([]);
-
-  // Filters
-  const legacyOptions = ['All', 'Vista', 'Tower', 'Bridge', 'Chronicle', 'Pulse'];
-  const statusOptions = ['All', 'Approved', 'Needs Approval', 'Not Submitted'];
-
   const [legacyFilter, setLegacyFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-
-  // State for selected task (details modal)
   const [selectedTask, setSelectedTask] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  // Fetch filtered tasks when filters change
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const fetched = await AdminAPI.getAllTasks(legacyFilter, statusFilter);
-      setTasks(fetched);
-    };
-    fetchTasks();
+  const legacyOptions = ['All', 'Vista', 'Tower', 'Bridge', 'Chronicle', 'Pulse'];
+  const statusOptions = ['All', 'Approved', 'Needs Approval', 'Not Submitted'];
+
+  const fetchTasks = useCallback(async () => {
+    const fetched = await AdminAPI.getAllTasks(legacyFilter, statusFilter);
+    setTasks(fetched);
   }, [legacyFilter, statusFilter]);
 
-  const handleLegacyFilterChange = (event) => {
-    setLegacyFilter(event.target.value);
-  };
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
-  const handleStatusFilterChange = (event) => {
-    setStatusFilter(event.target.value);
-  };
+  const handleLegacyFilterChange = (e) => setLegacyFilter(e.target.value);
+  const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
 
   const handleRowClick = (task) => {
     setSelectedTask(task);
@@ -59,12 +36,12 @@ export default function TaskCentral() {
 
   const handleCloseDetails = () => {
     setDetailsOpen(false);
+    fetchTasks(); // Refresh after approval/rejection
   };
 
   return (
     <>
       <Box sx={{ p: 3, borderRadius: 2, boxShadow: 1, bgcolor: 'white', height: '100%' }}>
-        {/* Header and filters */}
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
           <Typography variant="h6" fontWeight="bold">Task Central</Typography>
 
@@ -102,7 +79,6 @@ export default function TaskCentral() {
           </Grid>
         </Stack>
 
-        {/* Task Table */}
         <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 2 }}>
           <Table>
             <TableHead>
@@ -147,7 +123,7 @@ export default function TaskCentral() {
         </TableContainer>
       </Box>
 
-      {/* Task Detail Dialog */}
+      {/* Dialog */}
       {selectedTask && (
         <AdminTaskDetails
           open={detailsOpen}

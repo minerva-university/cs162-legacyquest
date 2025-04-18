@@ -46,36 +46,23 @@ const AdminAPI = {
   },
 
   /**
-   * Approve a submitted task.
+   * Review a task submission (approve/reject). 
    */
-  approveTask: async (taskID, feedback = '') => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    console.log(`Approving task ${taskID} with feedback: ${feedback}`);
+  reviewTask: async (taskID, userID, action, comment, token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/tasks/${taskID}/review`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ userId: userID, action, comment })
+    });
+  
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to review task');
+    return result;
+  },  
 
-    const isSuccessful = Math.random() > 0.1;
-    return isSuccessful
-      ? { success: true, message: 'Task approved successfully', taskID, newStatus: 'Approved' }
-      : { success: false, message: 'Error approving task: Database connection failed', taskID };
-  },
-
-  /**
-   * Reject a submitted task with reason.
-   */
-  rejectTask: async (taskID, reason) => {
-    if (!reason) {
-      return { success: false, message: 'Rejection reason is required' };
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 600));
-    console.log(`Rejecting task ${taskID} with reason: ${reason}`);
-
-    return {
-      success: true,
-      message: 'Task rejected successfully',
-      taskID,
-      newStatus: 'Not Submitted'
-    };
-  },
 
   /**
    * Admin-specific function to fetch latest evidence for a given task.
