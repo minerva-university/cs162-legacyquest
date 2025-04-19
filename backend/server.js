@@ -628,29 +628,49 @@ app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch status options' });
   }
 });
-// GET /api/legacies/rankings/global - Get global legacy rankings
+// GET /api/legacies/rankings/global - Get global legacy rankings with aggregation
 app.get('/api/legacies/rankings/global', async (req, res) => {
   try {
-    // Fetch only legacies with location_filter = "global"
-    const legacies = await prisma.legacy.findMany({
-      where: {
-        location_filter: "global"
-      },
+    // Fetch all legacies from the database
+    const allLegacies = await prisma.legacy.findMany({
       select: {
         name: true,
         points: true
-      },
-      orderBy: {
-        points: 'desc'
       }
     });
 
-    // If no legacies found with global filter, log a warning
-    if (legacies.length === 0) {
-      console.warn("No legacies found with location_filter='global'");
-    }
+    // Group legacies by their base name (before space) and sum their points
+    const aggregatedLegacies = {};
+    
+    allLegacies.forEach(legacy => {
+      // Extract the base name (e.g., "Ocean SF" -> "Ocean")
+      const baseName = legacy.name.split(' ')[0];
+      
+      // Initialize or add to the base name's total points
+      if (!aggregatedLegacies[baseName]) {
+        aggregatedLegacies[baseName] = {
+          name: baseName,
+          points: 0,
+          subLegacies: []
+        };
+      }
+      
+      // Add points from this legacy to the base name's total
+      aggregatedLegacies[baseName].points += legacy.points;
+      
+      // Store original legacy details for reference
+      aggregatedLegacies[baseName].subLegacies.push({
+        name: legacy.name,
+        points: legacy.points
+      });
+    });
+    
+    // Convert the grouped object to an array and sort by points
+    const result = Object.values(aggregatedLegacies)
+      .sort((a, b) => b.points - a.points)
+      .map(({ name, points }) => ({ name, points }));
 
-    res.json(legacies);
+    res.json(result);
   } catch (error) {
     console.error('Error fetching global legacy rankings:', error);
     res.status(500).json({ error: 'Failed to retrieve global legacy rankings' });
