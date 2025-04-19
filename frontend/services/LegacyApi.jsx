@@ -96,66 +96,58 @@ const LegacyApi = {
     }
   },
 
-  // Simulate fetching global ranking data from the server. The return format is an array of objects, each containing:
-  // - name (string): The name of the legacy
-  // - points (number): The points of the legacy
-  // The data is sorted in descending order by points.
+  // Updated to fetch real global ranking data from the server.
   getGlobalRanking: async () => {
-    // Fake delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Dummy data
-    const legacyList = [
-      {name: 'Octagon', points: 999},
-      {name: 'Tower', points: 888},
-      {name: 'Bridge', points: 777},
-      {name: 'Hunter', points: 666},
-      {name: 'Chronicle', points: 555},
-      {name: 'Pyramid', points: 444},
-      {name: 'Vista', points: 333},
-      {name: 'Cable', points: 222},
-      {name: 'Pulse', points: 111},
-      {name: 'Horizon', points: 100},
-      {name: 'Pioneer', points: 90},
-      {name: 'Eclipse', points: 80},
-      {name: 'Quest', points: 70},
-      {name: 'Solar', points: 60},
-      {name: 'Nova', points: 50},
-      {name: 'Galaxy', points: 40},
-      {name: 'Orbit', points: 30},
-    ];
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/legacies/rankings/global`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-    return legacyList;
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to fetch global rankings: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const rankings = await res.json();
+      
+      // Ensure we have the expected format
+      if (!Array.isArray(rankings)) {
+        throw new Error('Global rankings endpoint returned invalid data format');
+      }
+
+      return rankings;
+    } catch (err) {
+      console.error('Error in LegacyApi.getGlobalRanking:', err);
+      throw err; // Re-throw the error instead of using fallback data
+    }
   },
 
-  // Simulate fetching local ranking data from the server.
-  // The return format is an array of objects, same format and sorting as getGlobalRanking()
+  // Updated to fetch real local ranking data from the server.
   getLocalRanking: async (cityName) => {
-    // Fake delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Dummy data
-    const localRanking = [
-      {name: 'Tower', points: 102},
-      {name: 'Octagon', points: 99},
-      {name: 'Bridge', points: 77},
-      {name: 'Chronicle', points: 68},
-      {name: 'Hunter', points: 66},
-      {name: 'Pyramid', points: 44},
-      {name: 'Vista', points: 33},
-      {name: 'Cable', points: 22},
-      {name: 'Pulse', points: 11},
-      {name: 'Horizon', points: 10},
-      {name: 'Pioneer', points: 9},
-      {name: 'Eclipse', points: 8},
-      {name: 'Quest', points: 7},
-      {name: 'Solar', points: 6},
-      {name: 'Nova', points: 5},
-      {name: 'Galaxy', points: 4},
-      {name: 'Orbit', points: 3},
-    ];
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/legacies/rankings/local/${encodeURIComponent(cityName)}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-    return localRanking;
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Failed to fetch local rankings: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const rankings = await res.json();
+      
+      // Ensure we have the expected format
+      if (!Array.isArray(rankings)) {
+        throw new Error('Local rankings endpoint returned invalid data format');
+      }
+
+      return rankings;
+    } catch (err) {
+      console.error('Error in LegacyApi.getLocalRanking:', err);
+      throw err; // Re-throw the error instead of using fallback data
+    }
   }
 };
 

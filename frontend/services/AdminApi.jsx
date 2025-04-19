@@ -18,63 +18,84 @@ const AdminAPI = {
   /**
    * Create a new task to be shown to students.
    */
-  createTask: async (taskName, description, dueDate, targetCity = null, points) => {
+  createTask: async (taskName, description, dueDate, location = null, points, token) => {
     if (!taskName || !description || !dueDate || !points) {
       return { success: false, message: 'Missing required task information' };
     }
     if (isNaN(points) || points <= 0) {
       return { success: false, message: 'Points must be a positive number' };
     }
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const newTask = {
-      taskID: Math.floor(Math.random() * 1000) + 100,
-      taskName,
-      description,
-      dueDate,
-      targetCity,
-      points: Number(points),
-      createdAt: new Date().toISOString(),
-      status: 'Not Submitted'
-    };
-
-    return {
-      success: true,
-      message: 'Task created successfully',
-      task: newTask
-    };
-  },
-
-  /**
-   * Approve a submitted task.
-   */
-  approveTask: async (taskID, feedback = '') => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    console.log(`Approving task ${taskID} with feedback: ${feedback}`);
-
-    const isSuccessful = Math.random() > 0.1;
-    return isSuccessful
-      ? { success: true, message: 'Task approved successfully', taskID, newStatus: 'Approved' }
-      : { success: false, message: 'Error approving task: Database connection failed', taskID };
-  },
-
-  /**
-   * Reject a submitted task with reason.
-   */
-  rejectTask: async (taskID, reason) => {
-    if (!reason) {
-      return { success: false, message: 'Rejection reason is required' };
+  
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: taskName,
+          description,
+          due_date: dueDate,
+          location,
+          points_on_approval: Number(points)
+        })
+      });
+  
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create task');
+      }
+  
+      return {
+        success: true,
+        message: 'Task created successfully',
+        task: data
+      };
+    } catch (err) {
+      console.error('AdminAPI.createTask failed:', err);
+      return {
+        success: false,
+        message: err.message
+      };
     }
+  },
+  
+  
 
-    await new Promise(resolve => setTimeout(resolve, 600));
-    console.log(`Rejecting task ${taskID} with reason: ${reason}`);
+  /**
+   * Review a task submission (approve/reject). 
+   */
+  reviewTask: async (taskID, userID, action, comment, token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/tasks/${taskID}/review`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ userId: userID, action, comment })
+    });
+  
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to review task');
+    return result;
+  },  
 
-    return {
-      success: true,
-      message: 'Task rejected successfully',
-      taskID,
-      newStatus: 'Not Submitted'
-    };
+  /**
+   * Admin-specific function to fetch evidence for a specific submission.
+   */
+  getTaskSubmissionDetails: async (submissionId, token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/submissions/${submissionId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to fetch submission details');
+    return result;
   },
 
   /**
@@ -93,6 +114,33 @@ const AdminAPI = {
     if (!res.ok) throw new Error(result.error || 'Failed to fetch admin evidence');
     return result;
   },  
+
+  getAllLegacies: async (token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/legacies`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch legacies');
+    return data;
+  },
+
+  /**
+   * Get all status options for tasks.
+  */
+  getStatusOptions: async (token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/status-options`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    });
+  
+    if (!res.ok) throw new Error('Failed to fetch status options');
+    return res.json();
+  },
   
 
   /**

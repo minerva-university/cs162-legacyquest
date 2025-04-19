@@ -6,15 +6,32 @@ import LegacyApi from "@services/LegacyApi.jsx";
 import UserApi from "@services/UserApi.jsx";
 import { useAuth } from '@services/AuthContext.jsx';
 
-// A component to display a list of legacy rankings, either global or local
-// Some parts are commented out as they are not used in the current version, but might become useful if we will improve this system in the future.
-export default function LegacyRankingList({highlightedLegacy, isGlobal}) {
+// Helper function to check if legacy names match or are similar
+const isLegacyMatch = (userLegacyName, displayedLegacyName) => {
+  if (!userLegacyName || !displayedLegacyName) return false;
+  
+  // Exact match
+  if (userLegacyName.toLowerCase() === displayedLegacyName.toLowerCase()) return true;
+  
+  // Check if one contains the other (for cases like "Ocean SF" and "Ocean")
+  if (userLegacyName.toLowerCase().includes(displayedLegacyName.toLowerCase())) return true;
+  if (displayedLegacyName.toLowerCase().includes(userLegacyName.toLowerCase())) return true;
+  
+  // Extract the first word for comparison (e.g., "Ocean SF" -> "Ocean")
+  const userFirstWord = userLegacyName.split(' ')[0].toLowerCase();
+  const displayedFirstWord = displayedLegacyName.split(' ')[0].toLowerCase();
+  
+  return userFirstWord === displayedFirstWord;
+};
+
+export default function LegacyRankingList() {
   const theme = useTheme();
-  const { idToken } = useAuth();
+  const { idToken, user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [legacies, setLegacies] = useState([]);
-  // const [isGlobal, setIsGlobal] = useState(true);
+  const [isGlobal, setIsGlobal] = useState(true);
   const [userLocation, setUserLocation] = useState('');
+  const [userLegacy, setUserLegacy] = useState('');
   
   // Function to get legacy icon URL based on legacy name
   // This is no longer used in the new design, but is kept for reference
@@ -36,6 +53,12 @@ export default function LegacyRankingList({highlightedLegacy, isGlobal}) {
           setUserLocation(location);
         }
         
+        // Fetch user's legacy name if not already set
+        if (!userLegacy) {
+          const legacyName = await LegacyApi.getLegacyName(idToken);
+          setUserLegacy(legacyName);
+        }
+        
         // Fetch either global or local rankings based on current state
         const data = isGlobal 
           ? await LegacyApi.getGlobalRanking() 
@@ -50,7 +73,7 @@ export default function LegacyRankingList({highlightedLegacy, isGlobal}) {
     };
     
     fetchData();
-  }, [isGlobal, highlightedLegacy]); // Re-fetch if view changes or highlightedLegacy changes
+  }, [isGlobal, idToken]);
 
   // Toggle between global and local view
   const toggleView = () => {
@@ -118,7 +141,7 @@ export default function LegacyRankingList({highlightedLegacy, isGlobal}) {
                 legacyName={legacy.name}
                 legacyIconUrl={getLegacyIcon(legacy.name)}
                 legacyScore={legacy.points}
-                isHighlighted={highlightedLegacy === legacy.name}
+                isHighlighted={isLegacyMatch(userLegacy, legacy.name)}
               />
             ))}
           </List>

@@ -310,34 +310,41 @@ app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => 
 app.get('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const userCohortId = req.user.cohort_id;
-    const userLegacyId = req.user.legacy_id;
+
+    // Fetch user's legacy to get their location_filter
+    const user = await prisma.user.findUnique({
+      where: { user_id: userId },
+      include: {
+        legacy: true // access legacy.location_filter
+      }
+    });
+
+    const userLocation = user.legacy?.location_filter;
 
     const tasks = await prisma.task.findMany({
       where: {
-        // Match tasks for 'all', user's cohort, or user's legacy
         OR: [
-          { assignee_type: 'all' },
-          userCohortId && { assignee_type: 'cohort', assignee_id: userCohortId },
-          userLegacyId && { assignee_type: 'legacy', assignee_id: userLegacyId }
-        ].filter(Boolean), // Remove any undefined/null filters
+          { location: null }, // Global tasks with no location
+          { location: userLocation } // Tasks matching user's legacy location
+        ]
       },
       include: {
-        // Include user's latest submission for status checking
         submissions: {
           where: { user_id: userId },
           orderBy: { submitted_at: 'desc' },
           take: 1
         }
       },
-      orderBy: { due_date: 'asc' } // Sort by due date
+      orderBy: { due_date: 'asc' }
     });
 
     res.json(tasks);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve tasks' });
+    console.error('Failed to fetch tasks:', error);
+    res.status(500).json({ error: 'Failed to fetch tasks' });
   }
 });
+
 
 // POST /api/tasks/:taskId/submissions - Upload evidence for a task
 app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
@@ -415,12 +422,11 @@ app.get('/api/admin/tasks', async (req, res) => {
   try {
     const tasks = await prisma.taskSubmission.findMany({
       where: {
+        is_latest: true,
         ...(statusFilter !== 'All' && { status: statusFilter }),
         user: {
           ...(legacyFilter !== 'All' && {
-            legacy: {
-              name: legacyFilter
-            }
+            legacy_id: parseInt(legacyFilter)
           })
         }
       },
@@ -448,12 +454,44 @@ app.get('/api/admin/tasks', async (req, res) => {
       points: entry.task.points_on_approval,
       status: entry.status === 'Submitted' ? 'Needs Approval' : entry.status,
       userId: entry.user_id,
+      submissionId: entry.submission_id // Add this line to include the submission ID
     }));
 
     res.json(result);
   } catch (err) {
     console.error('Error fetching admin task submissions:', err);
     res.status(500).json({ error: 'Failed to fetch admin task data' });
+  }
+});
+
+// POST /api/admin/tasks - Admin only
+// Create a new task
+app.post('/api/admin/tasks', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const { title, description, due_date, location, points_on_approval } = req.body;
+
+  if (!title || !due_date || !points_on_approval) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const task = await prisma.task.create({
+      data: {
+        title,
+        description,
+        due_date: new Date(due_date),
+        location,
+        points_on_approval: parseInt(points_on_approval, 10),
+      }
+    });
+
+    res.status(201).json(task);
+  } catch (err) {
+    console.error('Failed to create task:', err);
+    res.status(500).json({ error: 'Failed to create task' });
   }
 });
 
@@ -501,7 +539,208 @@ app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res)
   }
 });
 
+// GET /api/admin/submissions/:submissionId - Admin only 
+// This route fetches a specific submission by ID
+app.get('/api/admin/submissions/:submissionId', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
 
+  const submissionId = parseInt(req.params.submissionId, 10);
+
+  if (isNaN(submissionId)) {
+    return res.status(400).json({ error: 'Invalid submission ID' });
+  }
+
+  try {
+    const submission = await prisma.taskSubmission.findUnique({
+      where: { submission_id: submissionId },
+      include: {
+        user: {
+          select: {
+            full_name: true,
+            legacy: { select: { name: true } }
+          }
+        },
+        task: true
+      }
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    res.json({
+      submitted_evidence: submission.submitted_evidence,
+      reviewer_comment: submission.reviewer_comment || null,
+      status: submission.status,
+      submitted_at: submission.submitted_at
+    });
+  } catch (err) {
+    console.error('Error fetching submission:', err);
+    res.status(500).json({ error: 'Server error while fetching submission' });
+  }
+});
+
+// PATCH /api/admin/tasks/:taskId/review - Admin-only 
+// Route to approve or reject a task
+app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const taskId = parseInt(req.params.taskId, 10);
+  const { userId, action, comment } = req.body;
+
+  if (isNaN(taskId) || isNaN(userId) || !['approve', 'reject'].includes(action)) {
+    return res.status(400).json({ error: 'Invalid parameters' });
+  }
+
+  try {
+    const latestSubmission = await prisma.taskSubmission.findFirst({
+      where: {
+        task_id: taskId,
+        user_id: userId,
+        is_latest: true
+      }
+    });
+
+    if (!latestSubmission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    const updated = await prisma.taskSubmission.update({
+      where: { submission_id: latestSubmission.submission_id },
+      data: {
+        status: action === 'approve' ? 'Approved' : 'Rejected',
+        reviewed_by_user_id: req.user.user_id,
+        reviewed_at: new Date(),
+        reviewer_comment: comment || '',
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Task ${action}d successfully`,
+      newStatus: updated.status
+    });
+  } catch (err) {
+    console.error('Error reviewing task:', err);
+    res.status(500).json({ error: 'Failed to update submission' });
+  }
+});
+
+// GET /api/admin/legacies - Admin Only
+// List all legacies
+app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  try {
+    const legacies = await prisma.legacy.findMany({
+      select: {
+        legacy_id: true,
+        name: true
+      },
+      orderBy: { name: 'asc' }
+    });
+    res.json(legacies);
+  } catch (err) {
+    console.error('Error fetching legacies:', err);
+    res.status(500).json({ error: 'Failed to fetch legacies' });
+  }
+});
+
+// GET /api/admin/status-options - Admin Only
+// Fetches the available status options for task submissions.
+app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  try {
+    const statusOptions = ['Submitted', 'Approved', 'Rejected'];
+    res.json(statusOptions);
+  } catch (err) {
+    console.error('Error fetching status options:', err);
+    res.status(500).json({ error: 'Failed to fetch status options' });
+  }
+});
+// GET /api/legacies/rankings/global - Get global legacy rankings with aggregation
+app.get('/api/legacies/rankings/global', async (req, res) => {
+  try {
+    // Fetch all legacies from the database
+    const allLegacies = await prisma.legacy.findMany({
+      select: {
+        name: true,
+        points: true
+      }
+    });
+
+    // Group legacies by their base name (before space) and sum their points
+    const aggregatedLegacies = {};
+    
+    allLegacies.forEach(legacy => {
+      // Extract the base name (e.g., "Ocean SF" -> "Ocean")
+      const baseName = legacy.name.split(' ')[0];
+      
+      // Initialize or add to the base name's total points
+      if (!aggregatedLegacies[baseName]) {
+        aggregatedLegacies[baseName] = {
+          name: baseName,
+          points: 0,
+          subLegacies: []
+        };
+      }
+      
+      // Add points from this legacy to the base name's total
+      aggregatedLegacies[baseName].points += legacy.points;
+      
+      // Store original legacy details for reference
+      aggregatedLegacies[baseName].subLegacies.push({
+        name: legacy.name,
+        points: legacy.points
+      });
+    });
+    
+    // Convert the grouped object to an array and sort by points
+    const result = Object.values(aggregatedLegacies)
+      .sort((a, b) => b.points - a.points)
+      .map(({ name, points }) => ({ name, points }));
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching global legacy rankings:', error);
+    res.status(500).json({ error: 'Failed to retrieve global legacy rankings' });
+  }
+});
+
+// GET /api/legacies/rankings/local/:location - Get local legacy rankings by location
+app.get('/api/legacies/rankings/local/:location', async (req, res) => {
+  try {
+    const location = req.params.location;
+    
+    // Fetch all legacies for the specified location
+    const legacies = await prisma.legacy.findMany({
+      where: {
+        location_filter: location
+      },
+      select: {
+        name: true,
+        points: true
+      },
+      orderBy: {
+        points: 'desc'
+      }
+    });
+
+    res.json(legacies);
+  } catch (error) {
+    console.error('Error fetching local legacy rankings:', error);
+    res.status(500).json({ error: 'Failed to retrieve local legacy rankings' });
+  }
+});
 
 // --- Start Server ---
 // Starts the Express server listening on the configured PORT.

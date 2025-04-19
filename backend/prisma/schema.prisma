@@ -23,13 +23,6 @@ datasource db {
 // ENUM Definitions
 // =============================================================================
 
-/// Defines how a task can be assigned.
-enum TaskAssigneeType {
-  all     // Assigned to everyone
-  cohort  // Assigned to a specific cohort (using assignee_id)
-  legacy  // Assigned to a specific legacy (using assignee_id)
-}
-
 /// Defines the possible statuses for a task submission.
 enum SubmissionStatus {
   Submitted // Initial status when user submits evidence
@@ -80,29 +73,19 @@ model Cohort {
 // Represents a task that can be assigned to users.
 // =============================================================================
 model Task {
-  task_id            Int              @id @default(autoincrement()) // Primary key
-  title              String           @db.VarChar(255)            // Title of the task
-  description        String?          @db.Text                    // Optional detailed description
-  due_date           DateTime?        @db.Date                    // Optional due date (Date only, no time)
-  points_on_approval Int              @default(0)                 // Points awarded when a submission for this task is approved
-  assignee_type      TaskAssigneeType                             // Type of assignment (all, cohort, legacy)
-  assignee_id        Int?                                         // ID of the cohort or legacy if assignee_type is cohort/legacy; null if 'all'
+  task_id            Int              @id @default(autoincrement())
+  title              String           @db.VarChar(255)
+  description        String?          @db.Text
+  due_date           DateTime?        @db.Date
+  points_on_approval Int              @default(0)
+  location           String?          @db.VarChar(255) // This will match Legacy.location_filter
   created_at         DateTime         @default(now())
   updated_at         DateTime         @updatedAt
 
-  // Relation: A Task can have many TaskSubmissions.
-  submissions TaskSubmission[]
+  submissions        TaskSubmission[]
 
   @@map("tasks")
-  // Index for efficient querying of tasks based on their assignment
-  @@index([assignee_type, assignee_id], name: "idx_tasks_assignee")
-
-  // Note on CHECK constraint for assignee_id based on assignee_type:
-  // Prisma schema doesn't directly support complex CHECK constraints.
-  // This logic (assignee_id MUST be null if type is 'all', MUST NOT be null otherwise)
-  // needs to be enforced either in:
-  // 1. Application logic (before creating/updating tasks).
-  // 2. A raw SQL migration (`ALTER TABLE tasks ADD CONSTRAINT ...`).
+  @@index([location], name: "idx_tasks_location")
 }
 
 // =============================================================================
