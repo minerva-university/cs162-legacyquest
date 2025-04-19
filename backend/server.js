@@ -415,6 +415,7 @@ app.get('/api/admin/tasks', async (req, res) => {
   try {
     const tasks = await prisma.taskSubmission.findMany({
       where: {
+        is_latest: true,
         ...(statusFilter !== 'All' && { status: statusFilter }),
         user: {
           ...(legacyFilter !== 'All' && {
@@ -448,6 +449,7 @@ app.get('/api/admin/tasks', async (req, res) => {
       points: entry.task.points_on_approval,
       status: entry.status === 'Submitted' ? 'Needs Approval' : entry.status,
       userId: entry.user_id,
+      submissionId: entry.submission_id // Add this line to include the submission ID
     }));
 
     res.json(result);
@@ -456,7 +458,6 @@ app.get('/api/admin/tasks', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch admin task data' });
   }
 });
-
 
 // GET /api/admin/tasks/:taskId/evidence - Admin only
 // This route fetches the evidence for a specific task submission.
@@ -498,6 +499,49 @@ app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res)
   } catch (err) {
     console.error('Error fetching admin evidence:', err);
     res.status(500).json({ error: 'Server error while fetching evidence' });
+  }
+});
+
+// GET /api/admin/submissions/:submissionId - Admin only 
+// This route fetches a specific submission by ID
+app.get('/api/admin/submissions/:submissionId', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const submissionId = parseInt(req.params.submissionId, 10);
+
+  if (isNaN(submissionId)) {
+    return res.status(400).json({ error: 'Invalid submission ID' });
+  }
+
+  try {
+    const submission = await prisma.taskSubmission.findUnique({
+      where: { submission_id: submissionId },
+      include: {
+        user: {
+          select: {
+            full_name: true,
+            legacy: { select: { name: true } }
+          }
+        },
+        task: true
+      }
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    res.json({
+      submitted_evidence: submission.submitted_evidence,
+      reviewer_comment: submission.reviewer_comment || null,
+      status: submission.status,
+      submitted_at: submission.submitted_at
+    });
+  } catch (err) {
+    console.error('Error fetching submission:', err);
+    res.status(500).json({ error: 'Server error while fetching submission' });
   }
 });
 
