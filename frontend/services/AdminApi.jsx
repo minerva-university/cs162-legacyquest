@@ -18,32 +18,50 @@ const AdminAPI = {
   /**
    * Create a new task to be shown to students.
    */
-  createTask: async (taskName, description, dueDate, targetCity = null, points) => {
+  createTask: async (taskName, description, dueDate, location = null, points, token) => {
     if (!taskName || !description || !dueDate || !points) {
       return { success: false, message: 'Missing required task information' };
     }
     if (isNaN(points) || points <= 0) {
       return { success: false, message: 'Points must be a positive number' };
     }
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const newTask = {
-      taskID: Math.floor(Math.random() * 1000) + 100,
-      taskName,
-      description,
-      dueDate,
-      targetCity,
-      points: Number(points),
-      createdAt: new Date().toISOString(),
-      status: 'Not Submitted'
-    };
-
-    return {
-      success: true,
-      message: 'Task created successfully',
-      task: newTask
-    };
+  
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/admin/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: taskName,
+          description,
+          due_date: dueDate,
+          location,
+          points_on_approval: Number(points)
+        })
+      });
+  
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create task');
+      }
+  
+      return {
+        success: true,
+        message: 'Task created successfully',
+        task: data
+      };
+    } catch (err) {
+      console.error('AdminAPI.createTask failed:', err);
+      return {
+        success: false,
+        message: err.message
+      };
+    }
   },
+  
+  
 
   /**
    * Review a task submission (approve/reject). 

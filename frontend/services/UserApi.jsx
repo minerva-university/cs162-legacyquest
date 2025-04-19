@@ -105,7 +105,6 @@ const UserApi = {
     if (currentUser) {
       // Check for photoURL from Google account
       if (currentUser.photoURL) {
-        console.log("Found photoURL:", currentUser.photoURL); // Debugging log
         return currentUser.photoURL;
       }
       
@@ -116,14 +115,12 @@ const UserApi = {
         );
         
         if (googleProvider && googleProvider.photoURL) {
-          console.log("Found provider photoURL:", googleProvider.photoURL); // Debugging log
           return googleProvider.photoURL;
         }
       }
     }
     
     // Fallback to a default avatar if no photo is available
-    console.log("No photo found, using default"); // Debugging log
     return 'https://img.icons8.com/?size=100&id=114140&format=png&color=000000';
   }
 };
