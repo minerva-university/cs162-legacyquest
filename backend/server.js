@@ -415,6 +415,7 @@ app.get('/api/admin/tasks', async (req, res) => {
   try {
     const tasks = await prisma.taskSubmission.findMany({
       where: {
+        is_latest: true,
         ...(statusFilter !== 'All' && { status: statusFilter }),
         user: {
           ...(legacyFilter !== 'All' && {
@@ -448,6 +449,7 @@ app.get('/api/admin/tasks', async (req, res) => {
       points: entry.task.points_on_approval,
       status: entry.status === 'Submitted' ? 'Needs Approval' : entry.status,
       userId: entry.user_id,
+      submissionId: entry.submission_id // Add this line to include the submission ID
     }));
 
     res.json(result);
@@ -456,7 +458,6 @@ app.get('/api/admin/tasks', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch admin task data' });
   }
 });
-
 
 // GET /api/admin/tasks/:taskId/evidence - Admin only
 // This route fetches the evidence for a specific task submission.
@@ -501,6 +502,96 @@ app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res)
   }
 });
 
+// GET /api/admin/submissions/:submissionId - Admin only 
+// This route fetches a specific submission by ID
+app.get('/api/admin/submissions/:submissionId', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const submissionId = parseInt(req.params.submissionId, 10);
+
+  if (isNaN(submissionId)) {
+    return res.status(400).json({ error: 'Invalid submission ID' });
+  }
+
+  try {
+    const submission = await prisma.taskSubmission.findUnique({
+      where: { submission_id: submissionId },
+      include: {
+        user: {
+          select: {
+            full_name: true,
+            legacy: { select: { name: true } }
+          }
+        },
+        task: true
+      }
+    });
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    res.json({
+      submitted_evidence: submission.submitted_evidence,
+      reviewer_comment: submission.reviewer_comment || null,
+      status: submission.status,
+      submitted_at: submission.submitted_at
+    });
+  } catch (err) {
+    console.error('Error fetching submission:', err);
+    res.status(500).json({ error: 'Server error while fetching submission' });
+  }
+});
+
+// PATCH /api/admin/tasks/:taskId/review - Admin-only 
+// Route to approve or reject a task
+app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const taskId = parseInt(req.params.taskId, 10);
+  const { userId, action, comment } = req.body;
+
+  if (isNaN(taskId) || isNaN(userId) || !['approve', 'reject'].includes(action)) {
+    return res.status(400).json({ error: 'Invalid parameters' });
+  }
+
+  try {
+    const latestSubmission = await prisma.taskSubmission.findFirst({
+      where: {
+        task_id: taskId,
+        user_id: userId,
+        is_latest: true
+      }
+    });
+
+    if (!latestSubmission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    const updated = await prisma.taskSubmission.update({
+      where: { submission_id: latestSubmission.submission_id },
+      data: {
+        status: action === 'approve' ? 'Approved' : 'Rejected',
+        reviewed_by_user_id: req.user.user_id,
+        reviewed_at: new Date(),
+        reviewer_comment: comment || '',
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `Task ${action}d successfully`,
+      newStatus: updated.status
+    });
+  } catch (err) {
+    console.error('Error reviewing task:', err);
+    res.status(500).json({ error: 'Failed to update submission' });
+  }
+});
 
 
 // --- Start Server ---
