@@ -18,7 +18,7 @@ const AdminAPI = {
   /**
    * Create a new task to be shown to students.
    */
-  createTask: async (taskName, description, dueDate, location = null, points) => {
+  createTask: async (taskName, description, dueDate, location = null, points, token) => {
     if (!taskName || !description || !dueDate || !points) {
       return { success: false, message: 'Missing required task information' };
     }
@@ -30,7 +30,8 @@ const AdminAPI = {
       const res = await fetch(`${API_BASE_URL}/api/admin/tasks`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
           title: taskName,
@@ -59,6 +60,7 @@ const AdminAPI = {
       };
     }
   },
+  
   
 
   /**

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import StarIcon from '@mui/icons-material/Star';
 import AdminAPI from '@services/AdminApi.jsx';
+import { getAuth } from 'firebase/auth';
 
 export default function AddNewTask() {
   const theme = useTheme();
@@ -12,6 +13,7 @@ export default function AddNewTask() {
   const [city, setCity] = useState('');
   const [submissionDate, setSubmissionDate] = useState('');
   const [points, setPoints] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // List of available cities
   const cities = [
@@ -28,23 +30,42 @@ export default function AddNewTask() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const location = city === 'All Cities' ? null : city;
-  
-    const response = await AdminAPI.createTask(
-      taskName,
-      description,
-      submissionDate,
-      location,
-      points
-    );
-  
-    if (response.success) {
-      console.log('Task created:', response.task);
-    } else {
-      console.error('Task creation failed:', response.message);
+
+    try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        console.error('No authenticated user found.');
+        return;
+      }
+
+      const token = await currentUser.getIdToken();
+
+      const response = await AdminAPI.createTask(
+        taskName,
+        description,
+        submissionDate,
+        location,
+        points,
+        token
+      );
+
+      if (response.success) {
+        const displayCity = city || 'All Cities';
+        setSuccessMessage(`"${taskName}" successfully created for ${displayCity}`);
+        console.log('Task created:', response.task);
+      } else {
+        console.error('Task creation failed:', response.message);
+        setSuccessMessage('');
+      }
+    } catch (err) {
+      console.error('Task creation failed:', err.message);
+      setSuccessMessage('');
     }
-  
+
     // Reset form
     setTaskName('');
     setDescription('');
@@ -52,7 +73,6 @@ export default function AddNewTask() {
     setSubmissionDate('');
     setPoints('');
   };
-  
 
   return (
     <Box sx={{ mt: 6 }}>
@@ -207,6 +227,14 @@ export default function AddNewTask() {
           </Button>
         </Box>
       </Paper>
+
+      {successMessage && (
+        <Typography
+          sx={{ mt: 3, textAlign: 'center', fontWeight: 'bold', color: 'green' }}
+        >
+          {successMessage}
+        </Typography>
+      )}
     </Box>
   );
 }
