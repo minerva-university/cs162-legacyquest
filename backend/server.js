@@ -628,7 +628,60 @@ app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch status options' });
   }
 });
+// GET /api/legacies/rankings/global - Get global legacy rankings
+app.get('/api/legacies/rankings/global', async (req, res) => {
+  try {
+    // Fetch only legacies with location_filter = "global"
+    const legacies = await prisma.legacy.findMany({
+      where: {
+        location_filter: "global"
+      },
+      select: {
+        name: true,
+        points: true
+      },
+      orderBy: {
+        points: 'desc'
+      }
+    });
 
+    // If no legacies found with global filter, log a warning
+    if (legacies.length === 0) {
+      console.warn("No legacies found with location_filter='global'");
+    }
+
+    res.json(legacies);
+  } catch (error) {
+    console.error('Error fetching global legacy rankings:', error);
+    res.status(500).json({ error: 'Failed to retrieve global legacy rankings' });
+  }
+});
+
+// GET /api/legacies/rankings/local/:location - Get local legacy rankings by location
+app.get('/api/legacies/rankings/local/:location', async (req, res) => {
+  try {
+    const location = req.params.location;
+    
+    // Fetch all legacies for the specified location
+    const legacies = await prisma.legacy.findMany({
+      where: {
+        location_filter: location
+      },
+      select: {
+        name: true,
+        points: true
+      },
+      orderBy: {
+        points: 'desc'
+      }
+    });
+
+    res.json(legacies);
+  } catch (error) {
+    console.error('Error fetching local legacy rankings:', error);
+    res.status(500).json({ error: 'Failed to retrieve local legacy rankings' });
+  }
+});
 
 // --- Start Server ---
 // Starts the Express server listening on the configured PORT.
