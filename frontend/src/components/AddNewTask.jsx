@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import StarIcon from '@mui/icons-material/Star';
+import AdminAPI from '@services/AdminApi.jsx';
 
 export default function AddNewTask() {
   const theme = useTheme();
@@ -24,20 +25,26 @@ export default function AddNewTask() {
     'Taipei'
   ];
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, this would add the task to the database
-    // All tasks need approval by default
-    console.log({ 
-      taskName, 
-      description, 
-      // Convert "All Cities" to null for the backend
-      targetCity: city === 'All Cities' ? null : city, 
+  
+    const location = city === 'All Cities' ? null : city;
+  
+    const response = await AdminAPI.createTask(
+      taskName,
+      description,
       submissionDate,
-      points: Number(points),
-      needsApproval: true 
-    });
-    
+      location,
+      points
+    );
+  
+    if (response.success) {
+      console.log('Task created:', response.task);
+    } else {
+      console.error('Task creation failed:', response.message);
+    }
+  
     // Reset form
     setTaskName('');
     setDescription('');
@@ -45,6 +52,7 @@ export default function AddNewTask() {
     setSubmissionDate('');
     setPoints('');
   };
+  
 
   return (
     <Box sx={{ mt: 6 }}>

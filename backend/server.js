@@ -310,34 +310,41 @@ app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => 
 app.get('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const userCohortId = req.user.cohort_id;
-    const userLegacyId = req.user.legacy_id;
+
+    // Fetch user's legacy to get their location_filter
+    const user = await prisma.user.findUnique({
+      where: { user_id: userId },
+      include: {
+        legacy: true // So we can access legacy.location_filter
+      }
+    });
+
+    const userLocation = user.legacy?.location_filter;
 
     const tasks = await prisma.task.findMany({
       where: {
-        // Match tasks for 'all', user's cohort, or user's legacy
         OR: [
-          { assignee_type: 'all' },
-          userCohortId && { assignee_type: 'cohort', assignee_id: userCohortId },
-          userLegacyId && { assignee_type: 'legacy', assignee_id: userLegacyId }
-        ].filter(Boolean), // Remove any undefined/null filters
+          { location: null }, // Global tasks with no location
+          { location: userLocation } // Tasks matching user's legacy location
+        ]
       },
       include: {
-        // Include user's latest submission for status checking
         submissions: {
           where: { user_id: userId },
           orderBy: { submitted_at: 'desc' },
           take: 1
         }
       },
-      orderBy: { due_date: 'asc' } // Sort by due date
+      orderBy: { due_date: 'asc' }
     });
 
     res.json(tasks);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to retrieve tasks' });
+    console.error('Failed to fetch tasks:', error);
+    res.status(500).json({ error: 'Failed to fetch tasks' });
   }
 });
+
 
 // POST /api/tasks/:taskId/submissions - Upload evidence for a task
 app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
@@ -456,6 +463,37 @@ app.get('/api/admin/tasks', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch admin task data' });
   }
 });
+
+// POST /api/admin/tasks - Create a new task
+app.post('/api/admin/tasks', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const { title, description, due_date, location, points_on_approval } = req.body;
+
+  if (!title || !due_date || !points_on_approval) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const task = await prisma.task.create({
+      data: {
+        title,
+        description,
+        due_date: new Date(due_date),
+        location,
+        points_on_approval: parseInt(points_on_approval, 10),
+      }
+    });
+
+    res.status(201).json(task);
+  } catch (err) {
+    console.error('Failed to create task:', err);
+    res.status(500).json({ error: 'Failed to create task' });
+  }
+});
+
 
 // GET /api/admin/tasks/:taskId/evidence - Admin only
 // This route fetches the evidence for a specific task submission.
