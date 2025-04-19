@@ -56,7 +56,6 @@ export default function AddNewTask() {
       if (response.success) {
         const displayCity = city || 'All Cities';
         setSuccessMessage(`"${taskName}" successfully created for ${displayCity}`);
-        console.log('Task created:', response.task);
       } else {
         console.error('Task creation failed:', response.message);
         setSuccessMessage('');

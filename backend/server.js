@@ -315,7 +315,7 @@ app.get('/api/tasks', authenticateToken, async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { user_id: userId },
       include: {
-        legacy: true // So we can access legacy.location_filter
+        legacy: true // access legacy.location_filter
       }
     });
 
@@ -464,7 +464,8 @@ app.get('/api/admin/tasks', async (req, res) => {
   }
 });
 
-// POST /api/admin/tasks - Create a new task
+// POST /api/admin/tasks - Admin only
+// Create a new task
 app.post('/api/admin/tasks', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });

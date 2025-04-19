@@ -30,8 +30,6 @@ export default function LoginPage() {
       setError(null);
       const { role } = await signInWithGoogle();
       
-      // The redirection will be handled by the useEffect above
-      console.log(`User signed in with role: ${role}`);
     } catch (error) {
       console.error("Login error:", error);
       setError(error.message || "Failed to sign in. Please try again.");
