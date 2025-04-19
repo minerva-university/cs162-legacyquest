@@ -169,11 +169,13 @@ export default function TaskCentral() {
           open={detailsOpen}
           onClose={handleCloseDetails}
           taskID={selectedTask.taskID}
+          submissionId={selectedTask.submissionId}
           taskName={selectedTask.taskName}
           studentName={selectedTask.studentName}
           legacyName={selectedTask.legacyName}
           submissionDate={selectedTask.submissionDate}
-          needsApproval={selectedTask.status === 'Submitted'} // For conditional logic in dialog
+          needsApproval={selectedTask.status === 'Needs Approval'}
+          status={selectedTask.status}
           userId={selectedTask.userId}
         />
       )}

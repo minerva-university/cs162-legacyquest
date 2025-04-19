@@ -17,7 +17,9 @@ export default function AdminTaskDetails({
   legacyName,
   submissionDate,
   needsApproval,
-  userId
+  userId,
+  status,
+  submissionId
 }) {
   const [loading, setLoading] = useState(true);
   const [evidence, setEvidence] = useState('');
@@ -26,7 +28,8 @@ export default function AdminTaskDetails({
   const [submissionError, setSubmissionError] = useState(null);
   const [folderLink, setFolderLink] = useState('');
 
-  const isApproved = submissionDate && !needsApproval;
+  const isApproved = status === 'Approved';
+  const isRejected = status === 'Rejected';
 
   // When dialog opens, fetch evidence and legacy folder link
   useEffect(() => {
@@ -35,7 +38,7 @@ export default function AdminTaskDetails({
       setEvidence('');
       setFeedback('');
       setSubmissionError(null);
-      fetchTaskData(taskID, legacyName);
+      fetchTaskData();
     } else {
       // Clear data on close to avoid stale state
       setEvidence('');
@@ -43,12 +46,12 @@ export default function AdminTaskDetails({
       setFolderLink('');
       setSubmissionError(null);
     }
-  }, [open, taskID, legacyName]);
+  }, [open, taskID, legacyName, submissionId]);
 
   // Fetch task evidence and optional feedback
-  const fetchTaskData = async (id, legacy) => {
+  const fetchTaskData = async () => {
     try {
-      const folder = await AdminAPI.getLegacyFolderLink(legacy);
+      const folder = await AdminAPI.getLegacyFolderLink(legacyName);
       setFolderLink(folder);
 
       // Get auth token from Firebase
@@ -56,12 +59,18 @@ export default function AdminTaskDetails({
       if (!user) throw new Error('No authenticated user');
       const token = await user.getIdToken();
 
-      // Fetch task evidence with token
-      const evidenceText = await AdminAPI.getTaskEvidenceForAdmin(id, userId, token);
+      // Use specific submission if ID is provided, otherwise fall back to latest
+      let evidenceText;
+      if (submissionId) {
+        evidenceText = await AdminAPI.getTaskSubmissionDetails(submissionId, token);
+      } else {
+        evidenceText = await AdminAPI.getTaskEvidenceForAdmin(taskID, userId, token);
+      }
+
       setEvidence(evidenceText.submitted_evidence || 'No evidence found.');
 
-      // If approved, fetch comment
-      if (isApproved && evidenceText.reviewer_comment) {
+      // If approved or rejected, fetch comment
+      if ((isApproved || isRejected) && evidenceText.reviewer_comment) {
         setFeedback(evidenceText.reviewer_comment);
       }
     } catch (err) {
@@ -205,12 +214,12 @@ export default function AdminTaskDetails({
             placeholder="Write feedback or rejection reason..."
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            disabled={submitting || isApproved}
-            InputProps={{ readOnly: isApproved }}
+            disabled={submitting || isApproved || isRejected}
+            InputProps={{ readOnly: isApproved || isRejected }}
             sx={{
               mb: 3,
               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-              ...(isApproved && {
+              ...((isApproved || isRejected) && {
                 '& .MuiInputBase-input': {
                   bgcolor: '#f8f8f8',
                   color: 'text.secondary',
@@ -219,10 +228,15 @@ export default function AdminTaskDetails({
             }}
           />
 
-          {/* Approved Message */}
+          {/* Status Messages */}
           {isApproved && (
             <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', mb: 2 }}>
               This task is already approved. Feedback cannot be changed.
+            </Typography>
+          )}
+          {isRejected && (
+            <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', mb: 2 }}>
+              This task is already rejected. Feedback cannot be changed.
             </Typography>
           )}
 

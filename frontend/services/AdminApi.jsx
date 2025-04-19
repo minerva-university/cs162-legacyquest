@@ -63,6 +63,22 @@ const AdminAPI = {
     return result;
   },  
 
+  /**
+   * Admin-specific function to fetch evidence for a specific submission.
+   */
+  getTaskSubmissionDetails: async (submissionId, token) => {
+    const res = await fetch(`${API_BASE_URL}/api/admin/submissions/${submissionId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Failed to fetch submission details');
+    return result;
+  },
 
   /**
    * Admin-specific function to fetch latest evidence for a given task.
