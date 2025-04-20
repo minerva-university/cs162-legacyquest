@@ -85,7 +85,7 @@ export default function LegacyMemberList({legacyName}) {
         overflowY: 'auto',
         flexGrow: 1,
         maxHeight: '400px',
-        minHeight: '100px',
+        minHeight: '60px',
         display: 'flex',
         justifyContent: isLoading ? 'center' : 'flex-start',
         alignItems: isLoading ? 'center' : 'flex-start',
