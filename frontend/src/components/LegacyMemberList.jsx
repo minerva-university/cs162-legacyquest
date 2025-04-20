@@ -6,13 +6,15 @@ import LegacyApi from "@services/LegacyApi.jsx";
 import UserApi from "@services/UserApi.jsx";
 import { useAuth } from '@services/AuthContext.jsx';
 
+// A component to display a list of legacy members
+// This component is no longer used in the new design, but is kept for reference
 export default function LegacyMemberList({legacyName}) {
   const [isViewAll, setIsViewAll] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [members, setMembers] = useState([]);
-  const [userLocation, setUserLocation] = useState('');
-  const [localMembers, setLocalMembers] = useState([]);
-  const [nonLocalMembers, setNonLocalMembers] = useState([]);
+  const [cohortMembers, setCohortMembers] = useState([]);
+  const [notCohortMembers, setNotCohortMembers] = useState([]);
+  const [userCohort, setUserCohort] = useState('');
   const theme = useTheme();
   const { idToken } = useAuth();  
   
@@ -21,25 +23,24 @@ export default function LegacyMemberList({legacyName}) {
       setIsLoading(true);
       try {
         // Fetch data in parallel
-        const [fetchedMembers, userLocation] = await Promise.all([
+        const [fetchedMembers, userCohort] = await Promise.all([
           LegacyApi.getLegacyMembers(idToken),
-          UserApi.getUserLocation(idToken)
+          UserApi.getCohort(idToken),
         ]);
         
-        setUserLocation(userLocation);
+        console.log("Fetched members:", fetchedMembers);
+
         setMembers(fetchedMembers);
+        setUserCohort(userCohort);
         
-        // Sort the members first by location and then by cohort
+        // Sort the members by cohort
         fetchedMembers.sort((a, b) => {
-          if (a.location === b.location) {
-            return a.cohort.localeCompare(b.cohort);
-          }
-          return a.location.localeCompare(b.location);
+          return a.cohort.localeCompare(b.cohort);
         });
 
         // Filter members based on location
-        setLocalMembers(fetchedMembers.filter(member => member.location === userLocation));
-        setNonLocalMembers(fetchedMembers.filter(member => member.location !== userLocation));
+        setCohortMembers(fetchedMembers.filter(member => member.cohort === userCohort));
+        setNotCohortMembers(fetchedMembers.filter(member => member.cohort !== userCohort));
       } catch (error) {
         console.error("Error loading legacy members:", error);
       } finally {
@@ -60,6 +61,7 @@ export default function LegacyMemberList({legacyName}) {
       borderRadius: 2, 
       boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}`,
       maxHeight: '500px',
+      maxWidth: '360px',
     }}>
       {/* List header */}
       <Stack direction='row' sx={{
@@ -74,7 +76,7 @@ export default function LegacyMemberList({legacyName}) {
           onClick={toggleViewAll}
           disabled={isLoading}
         >
-          {isViewAll ? "View Local" : "View All"}
+          {isViewAll ? "View Cohort" : "View All"}
         </Button>
       </Stack>
       
@@ -83,7 +85,7 @@ export default function LegacyMemberList({legacyName}) {
         overflowY: 'auto',
         flexGrow: 1,
         maxHeight: '400px',
-        minHeight: '100px',
+        minHeight: '60px',
         display: 'flex',
         justifyContent: isLoading ? 'center' : 'flex-start',
         alignItems: isLoading ? 'center' : 'flex-start',
@@ -103,20 +105,19 @@ export default function LegacyMemberList({legacyName}) {
         ) : (
           <List sx={{ width: '100%', pt: 0 }}>
             {/* Local members are always visible */}
-            {localMembers.map((member, index) => (
+            {cohortMembers.map((member, index) => (
               <ListedUser 
                 key={`local-${index}`} 
                 userName={member.name} 
                 cohort={member.cohort} 
                 avatarUrl={member.avatarUrl} 
-                location={member.location}
               />
             ))}
             
             {/* Non-local members collapse based on isViewAll state */}
             <Collapse in={isViewAll} timeout="auto" unmountOnExit>
               <Box>
-                {nonLocalMembers.map((member, index) => (
+                {notCohortMembers.map((member, index) => (
                   <ListedUser 
                     key={`nonlocal-${index}`} 
                     userName={member.name} 
@@ -131,7 +132,7 @@ export default function LegacyMemberList({legacyName}) {
         )}
       </Box>
       
-      {/* Displays the location of the members */}
+      {/* A footer to display whether this is a list of all members or local members */}
       <Box sx={{
         p: 1, 
         textAlign: 'center',
@@ -140,9 +141,9 @@ export default function LegacyMemberList({legacyName}) {
       }}>
         {!isLoading && (
           <>
-            {!isViewAll && localMembers.length > 0 && (
+            {!isViewAll && cohortMembers.length > 0 && (
               <Typography variant="caption" color="text.secondary">
-                Showing <span style={{fontWeight: 800}}>{legacyName}</span> members in <span style={{fontWeight: 800}}>{userLocation}</span> 
+                Showing <span style={{fontWeight: 800}}>{userCohort} {legacyName}</span> members
               </Typography>
             )}
             

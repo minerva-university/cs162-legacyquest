@@ -7,6 +7,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ImageIcon from '@mui/icons-material/Image';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+// This component will no longer be used in the new design, but is kept for reference
 export default function FileUpload({ onFileUpload }) {
   const [files, setFiles] = useState([]);
 

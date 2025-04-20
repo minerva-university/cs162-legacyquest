@@ -33,6 +33,8 @@ export default function LegacyRankingList() {
   const [userLocation, setUserLocation] = useState('');
   const [userLegacy, setUserLegacy] = useState('');
   
+  // Function to get legacy icon URL based on legacy name
+  // This is no longer used in the new design, but is kept for reference
   const getLegacyIcon = (legacyName) => {
     const defaultIcon = 'https://mui.com/static/images/avatar/1.jpg';
 
@@ -87,14 +89,14 @@ export default function LegacyRankingList() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* Header with toggle button */}
+      {/* List title*/}
       <Stack direction='row' sx={{
         px: 4, 
         py: 0.5, 
         justifyContent: 'space-between', 
         alignItems: 'center',
       }}>
-        <Typography variant='h6' sx={{py: 1, fontWeight: 800}}>Legacy Ranking</Typography>
+        <Typography variant='h6' sx={{py: 1, fontWeight: 800}}>{isGlobal ? 'Global Ranking' : `${userLocation} Ranking`}</Typography>
         <Button 
           sx={{color: 'gray', fontWeight: 800, whiteSpace: 'nowrap', fontSize: 12}}
           onClick={toggleView}
@@ -104,12 +106,13 @@ export default function LegacyRankingList() {
         </Button>
       </Stack>
       
+      {/* Display the list of legacies, as a scrollable area */}
       <Box sx={{
         overflowY: 'auto',
         flexGrow: 1,
         px: 1,
         // Height to show approximately 10 items
-        maxHeight: '450px',
+        maxHeight: '400px',
         display: 'flex',
         justifyContent: isLoading ? 'center' : 'flex-start',
         alignItems: isLoading ? 'center' : 'flex-start',
@@ -130,7 +133,7 @@ export default function LegacyRankingList() {
             <Typography variant="body1" sx={{mt: 2}}>Loading ranking...</Typography>
           </Box>
         ) : (
-          <List sx={{ width: '100%', pt: 0, pb: 2 }}>
+          <List sx={{ width: '100%', pt: 0, pb: 1 }}>
             {legacies.map((legacy, index) => (
               <ListedLegacy
                 key={index}
@@ -145,7 +148,7 @@ export default function LegacyRankingList() {
         )}
       </Box>
       
-      {/* Footer showing current view */}
+      {/* Footer showing whether this is a global or local ranking */}
       <Box sx={{
         p: 1, 
         textAlign: 'center',

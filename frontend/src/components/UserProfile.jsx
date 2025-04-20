@@ -9,12 +9,13 @@ import UserApi from '@services/UserApi.jsx';
 import LegacyApi from '@services/LegacyApi.jsx';
 import { useEffect, useState } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
+import LegacyRankingList from './LegacyRankingList';
 
+// The user tab on the right of the screen that displays student/admin info
 export default function UserProfile({isAdmin}) {
   const navigate = useNavigate();
   const { currentUser, idToken } = useAuth();
 
-  // State for API data
   const [legacyName, setLegacyName] = useState('');
   const [cohortName, setCohortName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +40,7 @@ export default function UserProfile({isAdmin}) {
     }
     
     fetchUserData();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []); 
 
   const handleLogout = async () => {
     try {

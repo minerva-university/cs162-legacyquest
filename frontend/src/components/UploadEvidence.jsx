@@ -6,6 +6,7 @@ import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import TaskApi from '@services/TaskApi.jsx';
 import { useAuth } from '@services/AuthContext.jsx';
 
+// A dialog on student side to upload evidence for a task
 export default function UploadEvidence({ open, onClose, taskID, taskName, description, onSuccessfulSubmit }) {
   const { idToken } = useAuth();
   const [evidence, setEvidence] = useState('');
@@ -17,7 +18,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
-  // Fetch folder URL when the dialog opens
+  // Fetch file upload folder URL when the dialog opens
   useEffect(() => {
     async function fetchFolderUrl() {
       if (open && taskID) {
@@ -43,8 +44,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
       setSnackbarOpen(true);
     }
   };
-
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -65,10 +65,20 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
         
         onClose();
       } else {
-        // ...existing error handling code...
-      }
+        const errorMsg = 'Failed to upload evidence';
+        setError(errorMsg);
+        // Show error snackbar
+        setSnackbarMessage(errorMsg);
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);      }
     } catch (err) {
-      // ...existing error handling code...
+      const errorMsg = 'An error occurred while uploading evidence';
+      setError(errorMsg);
+      // Show error snackbar
+      setSnackbarMessage(errorMsg);
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+      console.error('Error submitting evidence:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +128,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
 
           </Stack>
 
-          {/* Form */}
+          {/* Evidence submission form */}
           <form onSubmit={handleSubmit}>
             <Stack sx={{px: 4, pb: 2, textAlign: 'center'}}>
               <Typography variant='h4' sx={{fontWeight: 800, mb: 2}}>Submit Evidence for {taskName}</Typography>
@@ -165,7 +175,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
                 sx={{mb: 2}}
               />
               
-              {/* Error message display inside form */}
+              {/* Error message display inside the form */}
               {error && (
                 <Typography color='error' sx={{mb: 2}}>
                   {error}

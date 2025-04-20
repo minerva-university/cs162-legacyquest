@@ -7,15 +7,16 @@ import TaskApi from '@services/TaskApi.jsx';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@services/AuthContext.jsx';
 
+// Student's dashboard, displays task progress and legacy rankings
 export default function DashboardContent() {
   const theme = useTheme();
-  const { idToken } = useAuth(); // Firebase ID token for authenticated requests
+  const { idToken } = useAuth();
 
-  const [tasks, setTasks] = useState([]);              // Task data from backend
-  const [loading, setLoading] = useState(true);        // Task loading state
-  const [error, setError] = useState(null);            // Error message from fetch
-  const [selectedTask, setSelectedTask] = useState(null); // Selected task for modal
-  const [isModalOpen, setIsModalOpen] = useState(false);  // Task modal visibility
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch tasks from backend and format for display
   const fetchTasks = async (token) => {
@@ -47,10 +48,11 @@ export default function DashboardContent() {
   // Calculate completion percentage based on "Approved" status
   const getCompletedPercentage = () => {
     if (tasks.length === 0) return 0;
-    const completed = tasks.filter((t) => t.status === 'Approved').length;
+    const completed = tasks.filter((t) => t.status === 'Approved' || t.status === 'Submitted').length;
     return Math.round((completed / tasks.length) * 100);
   };
 
+  // Handle task selection and modal open/close
   const handleOpenModal = (task) => {
     setSelectedTask(task);
     setIsModalOpen(true);
@@ -98,6 +100,7 @@ export default function DashboardContent() {
   return (
     <Container sx={{ mx: 'auto', py: 4 }} maxWidth='lg'>
       <Stack direction='row' spacing={{ xs: 1, sm: 2, md: 4, lg: 8, xl: 12 }} sx={{ justifyContent: 'space-between' }}>
+
         {/* Task Progress Panel */}
         <Stack sx={{ flexGrow: 3, borderRadius: 2, minWidth: '400px', p: 4, boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}` }}>
           <Typography variant='h6' sx={{ fontWeight: 800, mb: 4 }}>Task List</Typography>
@@ -121,8 +124,9 @@ export default function DashboardContent() {
         {/* Welcome Card + Legacy Rankings */}
         <Stack sx={{ flexGrow: 1, alignItems: 'center' }}>
           <WelcomeCard taskCompletedPercentage={getCompletedPercentage()} />
-          <LegacyRankingList highlightedLegacy={'Vista'} />
+          <LegacyRankingList/>
         </Stack>
+        
       </Stack>
     </Container>
   );

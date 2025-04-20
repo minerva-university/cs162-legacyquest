@@ -5,10 +5,12 @@ import { useState } from 'react';
 import taskIcon from '../assets/task-icon.svg';
 import Fade from '@mui/material/Fade';
 
+// The task listed in the task list
 export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate, rejectionReason, onRefreshTasks}) {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
 
+  // Function to get the color based on the task status
   const getStatusColor = (status) => {
     switch (status) {
       case 'Not Submitted':
@@ -35,6 +37,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
 
   return (
     <>
+      {/* Show a tooltip when the cursor hovers over the task */}
       <Tooltip title={['Rejected', 'Approved', 'Waiting Approval', 'Submitted'].includes(taskStatus) ? "Click To View Feedback" : "Click To Upload Evidence"} placement="right" arrow slotProps={{
           transition: { timeout: 5 },
         }}>
@@ -60,6 +63,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
               variant='rounded'
             />
             
+            {/* Task name, status, and due date */}
             <Stack sx={{minWidth: 0, flexGrow: 1}}>
               <Typography sx={{fontWeight: 600, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>{taskName}</Typography>
               <Stack direction='row' spacing={0.5} sx={{alignItems: 'center'}}>
@@ -85,6 +89,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
         </ListItem>
       </Tooltip>
 
+      {/* Component to upload evidence and view admin feedback*/}
       <UploadEvidence 
         open={openUploadDialog} 
         onClose={() => setOpenUploadDialog(false)} 
