@@ -6,15 +6,21 @@ import LegacyApi from "@services/LegacyApi.jsx";
 import UserApi from "@services/UserApi.jsx";
 import { useAuth } from '@services/AuthContext.jsx';
 
+// Extract base legacy name (first word)
+const getBaseLegacyName = (legacyName) => {
+  if (!legacyName) return '';
+  return legacyName.split(' ')[0];
+};
+
 // A component to display a list of legacy members
-// This component is no longer used in the new design, but is kept for reference
 export default function LegacyMemberList({legacyName}) {
   const [isViewAll, setIsViewAll] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [members, setMembers] = useState([]);
+  const [allMembers, setAllMembers] = useState([]);
   const [cohortMembers, setCohortMembers] = useState([]);
-  const [notCohortMembers, setNotCohortMembers] = useState([]);
+  const [otherMembers, setOtherMembers] = useState([]);
   const [userCohort, setUserCohort] = useState('');
+  const [baseLegacyName, setBaseLegacyName] = useState('');
   const theme = useTheme();
   const { idToken } = useAuth();  
   
@@ -23,22 +29,40 @@ export default function LegacyMemberList({legacyName}) {
       setIsLoading(true);
       try {
         // Fetch data in parallel
-        const [fetchedMembers, userCohort] = await Promise.all([
-          LegacyApi.getLegacyMembers(idToken),
+        const [userCohort, userLegacyName] = await Promise.all([
           UserApi.getCohort(idToken),
+          LegacyApi.getLegacyName(idToken)
         ]);
         
-        setMembers(fetchedMembers);
+        // Extract base legacy name
+        const baseName = getBaseLegacyName(userLegacyName);
+        setBaseLegacyName(baseName);
         setUserCohort(userCohort);
         
-        // Sort the members by cohort
-        fetchedMembers.sort((a, b) => {
-          return a.cohort.localeCompare(b.cohort);
-        });
-
-        // Filter members based on location
-        setCohortMembers(fetchedMembers.filter(member => member.cohort === userCohort));
-        setNotCohortMembers(fetchedMembers.filter(member => member.cohort !== userCohort));
+        console.log("Fetching members for base legacy name:", baseName);
+        
+        // Now fetch members with this base legacy name
+        const fetchedMembers = await LegacyApi.getLegacyMembers(idToken);
+        console.log("Fetched members:", fetchedMembers);
+        
+        if (Array.isArray(fetchedMembers)) {
+          setAllMembers(fetchedMembers);
+          
+          // Filter by cohort for the "View Cohort" mode
+          setCohortMembers(fetchedMembers.filter(member => 
+            member.cohort === userCohort
+          ));
+          
+          // All other members (different cohorts)
+          setOtherMembers(fetchedMembers.filter(member => 
+            member.cohort !== userCohort
+          ));
+        } else {
+          console.error("Invalid members data format:", fetchedMembers);
+          setAllMembers([]);
+          setCohortMembers([]);
+          setOtherMembers([]);
+        }
       } catch (error) {
         console.error("Error loading legacy members:", error);
       } finally {
@@ -47,7 +71,7 @@ export default function LegacyMemberList({legacyName}) {
     };
     
     fetchData();
-  }, [legacyName]); // Re-fetch if legacyName changes
+  }, [idToken]);
   
   const toggleViewAll = () => {
     setIsViewAll(!isViewAll);
@@ -102,30 +126,30 @@ export default function LegacyMemberList({legacyName}) {
           <CircularProgress color="primary" size={40} thickness={4} />
         ) : (
           <List sx={{ width: '100%', pt: 0 }}>
-            {/* Local members are always visible */}
-            {cohortMembers.map((member, index) => (
-              <ListedUser 
-                key={`local-${index}`} 
-                userName={member.name} 
-                cohort={member.cohort} 
-                avatarUrl={member.avatarUrl} 
-              />
-            ))}
+            {!isViewAll && (
+              // Show only cohort members when "View Cohort" is active
+              cohortMembers.map((member, index) => (
+                <ListedUser 
+                  key={`cohort-${index}`} 
+                  userName={member.name} 
+                  cohort={member.cohort} 
+                  avatarUrl={member.avatarUrl} 
+                />
+              ))
+            )}
             
-            {/* Non-local members collapse based on isViewAll state */}
-            <Collapse in={isViewAll} timeout="auto" unmountOnExit>
-              <Box>
-                {notCohortMembers.map((member, index) => (
-                  <ListedUser 
-                    key={`nonlocal-${index}`} 
-                    userName={member.name} 
-                    cohort={member.cohort} 
-                    avatarUrl={member.avatarUrl} 
-                    location={member.location}
-                  />
-                ))}
-              </Box>
-            </Collapse>
+            {isViewAll && (
+              // Show ALL members when "View All" is active
+              allMembers.map((member, index) => (
+                <ListedUser 
+                  key={`all-${index}`} 
+                  userName={member.name} 
+                  cohort={member.cohort} 
+                  avatarUrl={member.avatarUrl} 
+                  location={member.location}
+                />
+              ))
+            )}
           </List>
         )}
       </Box>
@@ -141,13 +165,19 @@ export default function LegacyMemberList({legacyName}) {
           <>
             {!isViewAll && cohortMembers.length > 0 && (
               <Typography variant="caption" color="text.secondary">
-                Showing <span style={{fontWeight: 800}}>{userCohort} {legacyName}</span> members
+                Showing <span style={{fontWeight: 800}}>{userCohort} {baseLegacyName}</span> members
               </Typography>
             )}
             
             {isViewAll && (
               <Typography variant="caption" color="text.secondary">
-                Showing all <span style={{fontWeight: 800}}>{legacyName}</span> members
+                Showing all <span style={{fontWeight: 800}}>{baseLegacyName}</span> members
+              </Typography>
+            )}
+            
+            {!isViewAll && cohortMembers.length === 0 && (
+              <Typography variant="caption" color="text.secondary">
+                No <span style={{fontWeight: 800}}>{userCohort} {baseLegacyName}</span> members found
               </Typography>
             )}
           </>
