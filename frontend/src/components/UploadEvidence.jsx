@@ -7,7 +7,7 @@ import TaskApi from '@services/TaskApi.jsx';
 import { useAuth } from '@services/AuthContext.jsx';
 
 // A dialog on student side to upload evidence for a task
-export default function UploadEvidence({ open, onClose, taskID, taskName, description, onSuccessfulSubmit }) {
+export default function UploadEvidence({ open, onClose, taskID, taskName, description, onSuccessfulSubmit, pointsOnApproval }) {
   const { idToken } = useAuth();
   const [evidence, setEvidence] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,6 +132,8 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
           <form onSubmit={handleSubmit}>
             <Stack sx={{px: 4, pb: 2, textAlign: 'center'}}>
               <Typography variant='h4' sx={{fontWeight: 800, mb: 2}}>Submit Evidence for {taskName}</Typography>
+              <Typography sx={{textAlign: 'center', fontWeight: 600, mb: 1}}>Points On Approval: {pointsOnApproval}</Typography>
+
               <Typography variant='h6' sx={{textAlign: 'left', fontWeight: 800, mb: 1}}>Description</Typography>
               <Box 
                 sx={{ 
