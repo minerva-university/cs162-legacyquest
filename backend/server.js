@@ -306,6 +306,132 @@ app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => 
   }
 });
 
+// GET /api/legacy/:baseLegacyName/members - Fetch all members with a legacy name starting with baseLegacyName
+app.get('/api/legacy/:baseLegacyName/members', authenticateToken, async (req, res) => {
+  try {
+    const baseLegacyName = req.params.baseLegacyName;
+    
+    if (!baseLegacyName) {
+      return res.status(400).json({ error: 'Invalid legacy name' });
+    }
+    
+    // First, get all legacies that start with the base name
+    const matchingLegacies = await prisma.legacy.findMany({
+      where: {
+        name: {
+          startsWith: baseLegacyName
+        }
+      },
+      select: {
+        legacy_id: true,
+        name: true
+      }
+    });
+    
+    // Extract the legacy IDs
+    const legacyIds = matchingLegacies.map(l => l.legacy_id);
+    
+    if (legacyIds.length === 0) {
+      return res.json([]);
+    }
+    
+    // Fetch all users with any of the matching legacy IDs
+    const legacyMembers = await prisma.user.findMany({
+      where: {
+        legacy_id: {
+          in: legacyIds
+        }
+      },
+      include: {
+        cohort: true,
+        legacy: true
+      }
+    });
+    
+    // Format the response
+    const formattedMembers = legacyMembers.map(member => ({
+      user_id: member.user_id,
+      name: member.full_name,
+      email: member.email,
+      profile_picture_url: member.profile_picture_url || "https://img.icons8.com/?size=100&id=u4U9G3tGGHu1&format=png&color=737373",
+      location: member.legacy?.location_filter,
+      cohort: member.cohort?.name || "Unknown Cohort",
+      legacy: member.legacy?.name || "Unknown Legacy"
+    }));
+    
+    res.json(formattedMembers);
+  } catch (error) {
+    console.error('Error fetching legacy members:', error);
+    res.status(500).json({ error: 'Failed to retrieve legacy members' });
+  }
+});
+
+// NEW endpoint with different path pattern
+app.get('/api/legacy/byname/:baseLegacyName/members', authenticateToken, async (req, res) => {
+  try {
+    const baseLegacyName = req.params.baseLegacyName;
+    
+    if (!baseLegacyName) {
+      return res.status(400).json({ error: 'Invalid legacy name' });
+    }
+    
+    console.log(`Looking for legacy members with base name: ${baseLegacyName}`);
+    
+    // First, get all legacies that start with the base name
+    const matchingLegacies = await prisma.legacy.findMany({
+      where: {
+        name: {
+          startsWith: baseLegacyName
+        }
+      },
+      select: {
+        legacy_id: true,
+        name: true
+      }
+    });
+    
+    console.log(`Found ${matchingLegacies.length} matching legacies:`, matchingLegacies);
+    
+    // Extract the legacy IDs
+    const legacyIds = matchingLegacies.map(l => l.legacy_id);
+    
+    if (legacyIds.length === 0) {
+      return res.json([]);
+    }
+    
+    // Fetch all users with any of the matching legacy IDs
+    const legacyMembers = await prisma.user.findMany({
+      where: {
+        legacy_id: {
+          in: legacyIds
+        }
+      },
+      include: {
+        cohort: true,
+        legacy: true
+      }
+    });
+    
+    console.log(`Found ${legacyMembers.length} members in these legacies`);
+    
+    // Format the response
+    const formattedMembers = legacyMembers.map(member => ({
+      user_id: member.user_id,
+      name: member.full_name,
+      email: member.email,
+      profile_picture_url: member.profile_picture_url || "https://img.icons8.com/?size=100&id=u4U9G3tGGHu1&format=png&color=737373",
+      location: member.legacy?.location_filter,
+      cohort: member.cohort?.name || "Unknown Cohort",
+      legacy: member.legacy?.name || "Unknown Legacy"
+    }));
+    
+    res.json(formattedMembers);
+  } catch (error) {
+    console.error('Error fetching legacy members by name:', error);
+    res.status(500).json({ error: 'Failed to retrieve legacy members' });
+  }
+});
+
 // GET /api/tasks - Fetch all tasks for current user
 app.get('/api/tasks', authenticateToken, async (req, res) => {
   try {
