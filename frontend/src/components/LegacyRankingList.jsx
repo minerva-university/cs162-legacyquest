@@ -77,7 +77,7 @@ export default function LegacyRankingList() {
 
   // Toggle between global and local view
   const toggleView = () => {
-    // setIsGlobal(!isGlobal);
+    setIsGlobal(!isGlobal);
   };
 
   return (
@@ -96,14 +96,14 @@ export default function LegacyRankingList() {
         justifyContent: 'space-between', 
         alignItems: 'center',
       }}>
-        <Typography variant='h6' sx={{py: 1, fontWeight: 800}}>{isGlobal ? 'Global Legacy Ranking' : 'Local Legacy Ranking'}</Typography>
-        {/* <Button 
+        <Typography variant='h6' sx={{py: 1, fontWeight: 800}}>{isGlobal ? 'Global Ranking' : `${userLocation} Ranking`}</Typography>
+        <Button 
           sx={{color: 'gray', fontWeight: 800, whiteSpace: 'nowrap', fontSize: 12}}
           onClick={toggleView}
           disabled={isLoading}
         >
           {isGlobal ? `View ${userLocation}` : "View Global"}
-        </Button> */}
+        </Button>
       </Stack>
       
       {/* Display the list of legacies, as a scrollable area */}
@@ -149,7 +149,7 @@ export default function LegacyRankingList() {
       </Box>
       
       {/* Footer showing whether this is a global or local ranking */}
-      {/* <Box sx={{
+      <Box sx={{
         p: 1, 
         textAlign: 'center',
         borderTop: '1px solid rgba(0, 0, 0, 0.05)',
@@ -160,7 +160,7 @@ export default function LegacyRankingList() {
             Showing <span style={{fontWeight: 800}}>{isGlobal ? "global" : userLocation} </span> rankings
           </Typography>
         )}
-      </Box> */}
+      </Box>
     </Stack>
   );
 }

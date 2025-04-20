@@ -124,7 +124,7 @@ export default function DashboardContent() {
         {/* Welcome Card + Legacy Rankings */}
         <Stack sx={{ flexGrow: 1, alignItems: 'center' }}>
           <WelcomeCard taskCompletedPercentage={getCompletedPercentage()} />
-          <LegacyRankingList isGlobal={true}/>
+          <LegacyRankingList/>
         </Stack>
         
       </Stack>

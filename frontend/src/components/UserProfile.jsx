@@ -80,8 +80,7 @@ export default function UserProfile({isAdmin}) {
             ) : (
               <>
                 <StudentInfo legacyName={legacyName} cohortName={cohortName} />
-                {/* <LegacyMemberList legacyName={legacyName}/> */}
-                <LegacyRankingList isGlobal={false} />
+                <LegacyMemberList legacyName={legacyName}/>
               </>
             )}
           </>
