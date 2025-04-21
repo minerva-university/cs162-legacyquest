@@ -30,7 +30,8 @@ export default function DashboardContent() {
     setError(null);
 
     try {
-      const fetchedTasks = await TaskApi.getAllTasks(token);
+      // Changed method name from getAllTasks to getTasks to match the actual API method
+      const fetchedTasks = await TaskApi.getTasks(token);
       setTasks(fetchedTasks);
     } catch (err) {
       setError(err.message || 'Failed to load tasks.');
