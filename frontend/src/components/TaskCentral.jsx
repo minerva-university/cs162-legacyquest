@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import { useState, useEffect, useCallback } from 'react';
 import AdminTaskDetails from './AdminTaskDetails';
-import AdminAPI from '@services/AdminApi.jsx';
+import AdminApi from '@services/AdminApi.jsx'; // Corrected capitalization
 import { getAuth } from 'firebase/auth';
 
 export default function TaskCentral() {
@@ -26,8 +26,27 @@ export default function TaskCentral() {
 
   // Fetch filtered task data from the backend
   const fetchTasks = useCallback(async () => {
-    const fetched = await AdminAPI.getAllTasks(legacyFilter, statusFilter);
-    setTasks(fetched);
+    try {
+      const user = getAuth().currentUser;
+      if (!user) return;
+      
+      const token = await user.getIdToken();
+      const fetched = await AdminApi.getTasks(token); // Using getTasks instead of getAllTasks
+      
+      // Apply filters on the client side if needed
+      let filtered = fetched;
+      if (legacyFilter !== 'All') {
+        filtered = filtered.filter(task => task.legacy_id === legacyFilter);
+      }
+      if (statusFilter !== 'All') {
+        filtered = filtered.filter(task => task.status === statusFilter);
+      }
+      
+      setTasks(filtered);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      setTasks([]);
+    }
   }, [legacyFilter, statusFilter]);
 
   // Re-fetch tasks whenever filters change
@@ -38,10 +57,29 @@ export default function TaskCentral() {
   // Fetch all legacy groups for the filter dropdown
   useEffect(() => {
     const fetchLegacies = async () => {
-      const user = getAuth().currentUser;
-      const token = await user.getIdToken();
-      const data = await AdminAPI.getAllLegacies(token);
-      setLegacyOptions([{ legacy_id: 'All', name: 'All' }, ...data]);
+      try {
+        const user = getAuth().currentUser;
+        if (!user) return;
+        
+        const token = await user.getIdToken();
+        // Using proper method name and capitalization
+        const response = await fetch('/api/admin/legacies', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch legacies');
+        }
+        
+        const data = await response.json();
+        setLegacyOptions([{ legacy_id: 'All', name: 'All' }, ...data]);
+      } catch (error) {
+        console.error('Error fetching legacies:', error);
+        // Keep the default option
+      }
     };
     fetchLegacies();
   }, []);
@@ -49,10 +87,29 @@ export default function TaskCentral() {
   // Fetch status options (from backend-defined enum)
   useEffect(() => {
     const fetchStatusOptions = async () => {
-      const user = getAuth().currentUser;
-      const token = await user.getIdToken();
-      const data = await AdminAPI.getStatusOptions(token);
-      setStatusOptions(['All', ...data]); // Add 'All' manually for default filter
+      try {
+        const user = getAuth().currentUser;
+        if (!user) return;
+        
+        const token = await user.getIdToken();
+        // Using direct API call since there's no such method in AdminApi
+        const response = await fetch('/api/admin/status-options', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch status options');
+        }
+        
+        const data = await response.json();
+        setStatusOptions(['All', ...data]); // Add 'All' manually for default filter
+      } catch (error) {
+        console.error('Error fetching status options:', error);
+        setStatusOptions(['All', 'Submitted', 'Approved', 'Rejected']); // Fallback options
+      }
     };
     fetchStatusOptions();
   }, []);
