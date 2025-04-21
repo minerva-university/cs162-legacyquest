@@ -51,6 +51,46 @@ export const UserApi = {
       console.error('Error updating user profile:', error);
       throw error;
     }
+  },
+
+  /**
+   * Get cohort information for the current user
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - User's cohort
+   */
+  getCohort: async (token) => {
+    try {
+      const userData = await UserApi.getProfile(token);
+      return userData.cohort || 'Unknown Cohort';
+    } catch (error) {
+      console.error('Error fetching user cohort:', error);
+      return 'Unknown Cohort';
+    }
+  },
+
+  /**
+   * Get profile photo URL from user object
+   * @param {Object} user - Firebase user object
+   * @returns {string} - URL of profile photo
+   */
+  getProfilePhoto: (user) => {
+    if (!user) return 'https://mui.com/static/images/avatar/1.jpg'; // Default avatar
+    return user.photoURL || 'https://mui.com/static/images/avatar/1.jpg';
+  },
+
+  /**
+   * Get display name from user object
+   * @param {Object} user - Firebase user object
+   * @returns {string} - User's display name
+   */
+  getUserName: (user) => {
+    if (!user) return 'Guest User';
+    // Extract first name from email if no display name
+    if (!user.displayName && user.email) {
+      const emailName = user.email.split('@')[0];
+      return emailName.charAt(0).toUpperCase() + emailName.slice(1);
+    }
+    return user.displayName || 'Anonymous User';
   }
 };
 
