@@ -73,17 +73,23 @@ export default function LegacyMemberList({legacyName}) {
     fetchData();
   }, [idToken]);
   
-  const toggleViewAll = () => {
+  // Fix: Use a function with e.preventDefault() to prevent page movement
+  const toggleViewAll = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setIsViewAll(!isViewAll);
   };
 
   return (
     <Stack sx={{
-      width: 1, 
+      width: '360px', // Use a fixed width instead of relative
       borderRadius: 2, 
       boxShadow: `0 0 10px 1px ${theme.palette.shadowBrown}`,
-      maxHeight: '500px',
-      maxWidth: '360px',
+      height: '450px', 
+      position: 'relative', // Add this to make positioning context stable
+      overflow: 'hidden' // Prevent content overflow
     }}>
       {/* List header */}
       <Stack direction='row' sx={{
@@ -93,8 +99,17 @@ export default function LegacyMemberList({legacyName}) {
         alignItems: 'center',
       }}>
         <Typography variant='h6' sx={{py: 1, fontWeight: 800}}>Legacy Members</Typography>          
+        {/* Fix: Match LegacyRankingList styling and behavior */}
         <Button 
-          sx={{color: 'gray', fontWeight: 800, fontSize: 12, width: '110px'}}
+          sx={{
+            color: 'gray', 
+            fontWeight: 800, 
+            whiteSpace: 'nowrap', // Prevent text wrapping
+            fontSize: 12,
+            minWidth: '85px', // Set a minimum width to prevent resizing
+            padding: '6px 8px'
+          }}
+          disableRipple // Prevent ripple effect which can cause movement
           onClick={toggleViewAll}
           disabled={isLoading}
         >
@@ -106,9 +121,10 @@ export default function LegacyMemberList({legacyName}) {
       <Box sx={{
         overflowY: 'auto',
         flexGrow: 1,
-        maxHeight: '400px',
-        minHeight: '60px',
+        height: '350px', // Use fixed height instead of maxHeight
         display: 'flex',
+        width: '100%', // Ensure full width
+        position: 'relative', // Fixed positioning
         justifyContent: isLoading ? 'center' : 'flex-start',
         alignItems: isLoading ? 'center' : 'flex-start',
         '&::-webkit-scrollbar': {
@@ -125,30 +141,53 @@ export default function LegacyMemberList({legacyName}) {
         {isLoading ? (
           <CircularProgress color="primary" size={40} thickness={4} />
         ) : (
-          <List sx={{ width: '100%', pt: 0 }}>
-            {!isViewAll && (
+          <List 
+            sx={{ 
+              width: '100%', 
+              pt: 0,
+              pb: 0, // Remove bottom padding
+              position: 'static',
+              overflow: 'visible'
+            }}
+          >
+            {!isViewAll ? (
               // Show only cohort members when "View Cohort" is active
-              cohortMembers.map((member, index) => (
-                <ListedUser 
-                  key={`cohort-${index}`} 
-                  userName={member.name} 
-                  cohort={member.cohort} 
-                  avatarUrl={member.avatarUrl} 
-                />
-              ))
-            )}
-            
-            {isViewAll && (
+              cohortMembers.length > 0 ? (
+                cohortMembers.map((member, index) => (
+                  <ListedUser 
+                    key={`cohort-${index}`} 
+                    userName={member.name} 
+                    cohort={member.cohort} 
+                    avatarUrl={member.avatarUrl} 
+                  />
+                ))
+              ) : (
+                <Box sx={{ py: 2, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No members found in your cohort
+                  </Typography>
+                </Box>
+              )
+            ) : (
               // Show ALL members when "View All" is active
-              allMembers.map((member, index) => (
-                <ListedUser 
-                  key={`all-${index}`} 
-                  userName={member.name} 
-                  cohort={member.cohort} 
-                  avatarUrl={member.avatarUrl} 
-                  location={member.location}
-                />
-              ))
+              allMembers.length > 0 ? (
+                allMembers.map((member, index) => (
+                  <ListedUser 
+                    key={`all-${index}`} 
+                    userName={member.name} 
+                    cohort={member.cohort} 
+                    avatarUrl={member.avatarUrl} 
+                    // Ensure location text doesn't cause layout shifts
+                    location={member.location}
+                  />
+                ))
+              ) : (
+                <Box sx={{ py: 2, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No members found
+                  </Typography>
+                </Box>
+              )
             )}
           </List>
         )}
@@ -157,9 +196,13 @@ export default function LegacyMemberList({legacyName}) {
       {/* A footer to display whether this is a list of all members or local members */}
       <Box sx={{
         p: 1, 
+        height: '40px', // Fixed height
         textAlign: 'center',
         borderTop: '1px solid rgba(0, 0, 0, 0.05)',
-        flexShrink: 0 // Prevent footer from shrinking
+        flexShrink: 0, // Prevent footer from shrinking
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
         {!isLoading && (
           <>
