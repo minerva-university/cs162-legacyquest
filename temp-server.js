@@ -193,8 +193,7 @@ const authenticateToken = async (req, res, next) => {
                  // If userRecord was already found via UID, this re-fetches the same data.
                  // A slightly more optimized way might be: userRecord = existingUserByEmail; but the update ensures freshness.
               }
-          }
-        } else {
+          } else {
             // 3. Not found by firebase_uid OR email - create a new user
             console.log(`Creating new user for firebase_uid: ${firebase_uid}, email: ${tokenEmailLower}`);
             userRecord = await prisma.user.create({
