@@ -1,7 +1,7 @@
 import {
   Typography, Box, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Chip, Stack, FormControl,
-  InputLabel, Select, MenuItem, Grid
+  InputLabel, Select, MenuItem, Grid, CircularProgress
 } from '@mui/material';
 import { useState, useEffect, useCallback } from 'react';
 import AdminTaskDetails from './AdminTaskDetails';
@@ -16,6 +16,8 @@ export default function TaskCentral() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [legacyOptions, setLegacyOptions] = useState([{ legacy_id: 'All', name: 'All' }]);
   const [statusOptions, setStatusOptions] = useState(['All']);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Maps backend enum status to user-friendly display text
   const statusLabelMap = {
@@ -26,26 +28,39 @@ export default function TaskCentral() {
 
   // Fetch filtered task data from the backend
   const fetchTasks = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
       const user = getAuth().currentUser;
-      if (!user) return;
+      if (!user) {
+        setTasks([]);
+        setError('User not authenticated');
+        return;
+      }
       
       const token = await user.getIdToken();
-      const fetched = await AdminApi.getTasks(token); // Using getTasks instead of getAllTasks
+      // Use the correct method name and handle errors properly
+      const fetchedTasks = await AdminApi.getTasks(token);
+      
+      console.log('Fetched tasks:', fetchedTasks);
       
       // Apply filters on the client side if needed
-      let filtered = fetched;
+      let filteredTasks = fetchedTasks;
       if (legacyFilter !== 'All') {
-        filtered = filtered.filter(task => task.legacy_id === legacyFilter);
+        filteredTasks = filteredTasks.filter(task => task.legacy_id === legacyFilter);
       }
       if (statusFilter !== 'All') {
-        filtered = filtered.filter(task => task.status === statusFilter);
+        filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
       }
       
-      setTasks(filtered);
+      setTasks(filteredTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
+      setError('Failed to load tasks. Please try again later.');
       setTasks([]);
+    } finally {
+      setIsLoading(false);
     }
   }, [legacyFilter, statusFilter]);
 
@@ -187,34 +202,55 @@ export default function TaskCentral() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tasks.map((task) => (
-                <TableRow
-                  key={`${task.taskID}-${task.userId}`}
-                  hover
-                  onClick={() => handleRowClick(task)}
-                  sx={{ cursor: 'pointer' }}
-                >
-                  <TableCell>{task.taskName}</TableCell>
-                  <TableCell>{task.legacyName}</TableCell>
-                  <TableCell>{task.submissionDate || '—'}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={statusLabelMap[task.status] || task.status}
-                      size="small"
-                      sx={{
-                        bgcolor:
-                          task.status === 'Needs Approval' ? '#F5B041' : // Needs Approval
-                          task.status === 'Approved' ? '#66BB6A' : // Green
-                          '#9E9E9E', // Grey fallback
-                        color: 'white',
-                        borderRadius: '16px',
-                        fontWeight: 'medium',
-                        px: 1
-                      }}
-                    />
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                    <CircularProgress size={40} thickness={4} />
+                    <Typography variant="body2" sx={{ mt: 1 }}>Loading tasks...</Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                    <Typography color="error">{error}</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : tasks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                    <Typography variant="body2">No tasks found matching the selected filters.</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tasks.map((task) => (
+                  <TableRow
+                    key={`${task.taskID}-${task.userId}`}
+                    hover
+                    onClick={() => handleRowClick(task)}
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    <TableCell>{task.taskName}</TableCell>
+                    <TableCell>{task.legacyName}</TableCell>
+                    <TableCell>{task.submissionDate || '—'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={statusLabelMap[task.status] || task.status}
+                        size="small"
+                        sx={{
+                          bgcolor:
+                            task.status === 'Needs Approval' ? '#F5B041' : // Needs Approval
+                            task.status === 'Approved' ? '#66BB6A' : // Green
+                            '#9E9E9E', // Grey fallback
+                          color: 'white',
+                          borderRadius: '16px',
+                          fontWeight: 'medium',
+                          px: 1
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
