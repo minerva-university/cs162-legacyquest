@@ -41,7 +41,7 @@ const LegacyApi = {
     if (!token) throw new Error('Authentication token is required for getLegacyMembers.');
     
     try {
-      // First, get the user's data to determine their legacy ID
+      // First, get the user's legacy name
       const res = await fetch(`${API_BASE_URL}/api/me`, {
         method: 'GET',
         headers: getAuthHeader(token),
@@ -53,46 +53,46 @@ const LegacyApi = {
       }
 
       const userData = await res.json();
-      const legacyId = userData.legacy?.legacy_id;
       const legacyName = userData.legacy?.name || 'Unknown Legacy';
       
-      if (!legacyId) {
-        console.warn('User does not have a legacy ID, cannot fetch legacy members');
+      // Extract base legacy name (first word)
+      const baseLegacyName = legacyName.split(' ')[0];
+      
+      if (!baseLegacyName) {
+        console.warn('Could not determine base legacy name');
         return [];
       }
       
-      // Fetch all users with the same legacy ID
-      const membersRes = await fetch(`${API_BASE_URL}/api/legacy/${legacyId}/members`, {
+      // Use the new endpoint
+      const membersRes = await fetch(`${API_BASE_URL}/api/legacy/byname/${baseLegacyName}/members`, {
         method: 'GET',
         headers: getAuthHeader(token),
       });
 
       if (!membersRes.ok) {
-        // If the endpoint doesn't exist or returns an error, log it and return empty array
         console.warn(`Failed to fetch legacy members: ${membersRes.status} ${membersRes.statusText}`);
         return [];
       }
 
       const membersData = await membersRes.json();
       
+      console.log("Members data from API:", membersData);
+      
       if (Array.isArray(membersData)) {
-        // Map the backend data to the expected format
-        const members = membersData.map(member => ({
-          name: member.full_name || member.name || 'Unknown',
-          cohort: member.cohort?.name || 'Unknown Cohort',
+        return membersData.map(member => ({
+          name: member.name || 'Unknown',
+          cohort: member.cohort || 'Unknown Cohort',
           location: member.location || 'Unknown Location',
           avatarUrl: member.profile_picture_url || 'https://mui.com/static/images/avatar/1.jpg',
-          legacy: legacyName
+          legacy: member.legacy || legacyName
         }));
-        return members;
       }
       
-      // If we reach here, the endpoint returned invalid data
       console.warn('Legacy members endpoint returned invalid data');
       return [];
     } catch (err) {
       console.error('Error in LegacyApi.getLegacyMembers:', err);
-      throw err;
+      return []; 
     }
   },
 
