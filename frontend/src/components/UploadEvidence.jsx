@@ -5,6 +5,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import TaskApi from '@services/TaskApi.jsx';
 import { useAuth } from '@services/AuthContext.jsx';
+import UserApi from '@services/UserApi.jsx';
 
 // A dialog on student side to upload evidence for a task
 export default function UploadEvidence({ open, onClose, taskID, taskName, description, onSuccessfulSubmit, pointsOnApproval }) {
@@ -23,7 +24,8 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
     async function fetchFolderUrl() {
       if (open && taskID) {
         try {
-          const url = TaskApi.getSubmissionFolderUrl(taskID, idToken);
+          const legacyName = await UserApi.getLegacy(idToken);
+          const url = TaskApi.getSubmissionFolderUrl(legacyName.split(' ')[0]);
           setFolderUrl(url);
         } catch (err) {
           console.error("Error fetching folder URL:", err);
