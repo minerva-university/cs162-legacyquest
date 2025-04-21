@@ -9,7 +9,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const admin = require('firebase-admin');
-const { PrismaClient } = require('@prisma/client'); // Use standard import
+const { PrismaClient } = require('./generated/prisma');
 
 // Load environment variables from .env file (DATABASE_URL, PORT, JWT_SECRET, etc.)
 dotenv.config();
@@ -182,6 +182,7 @@ const authenticateToken = async (req, res, next) => {
                  // If userRecord was already found via UID, this re-fetches the same data.
                  // A slightly more optimized way might be: userRecord = existingUserByEmail; but the update ensures freshness.
               }
+            }
           } else {
             // 3. Not found by firebase_uid OR email - create a new user
             console.log(`Creating new user for firebase_uid: ${firebase_uid}, email: ${tokenEmailLower}`);
