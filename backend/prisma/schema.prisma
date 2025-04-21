@@ -49,6 +49,7 @@ model Legacy {
   @@map("legacies") // Maps this model to the "legacies" table in the database
   @@index([points(sort: Desc)], name: "idx_legacies_points") // Index for efficient sorting/querying by points
   @@index([location_filter], name: "idx_legacies_location") // Index for filtering by location
+  @@index([name], name: "idx_legacies_name") // Index for filtering/searching by name
 }
 
 // =============================================================================
@@ -86,6 +87,7 @@ model Task {
 
   @@map("tasks")
   @@index([location], name: "idx_tasks_location")
+  @@index([due_date], name: "idx_tasks_due_date")
 }
 
 // =============================================================================
@@ -126,6 +128,8 @@ model User {
   @@map("users") // Maps to the "users" table
   // Unique index on email is automatically created by the @unique directive.
   // Unique index on firebase_uid is automatically created by the @unique directive.
+  @@index([legacy_id], name: "idx_users_legacy_id")
+  @@index([cohort_id], name: "idx_users_cohort_id")
 }
 
 // =============================================================================
