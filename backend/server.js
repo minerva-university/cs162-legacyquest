@@ -516,7 +516,12 @@ app.get('/api/admin/tasks', async (req, res) => {
         ...(statusFilter !== 'All' && { status: statusFilter }),
         user: {
           ...(legacyFilter !== 'All' && {
-            legacy_id: parseInt(legacyFilter)
+            legacy: {
+              name: {
+                startsWith: legacyFilter,
+                mode: 'insensitive'
+              }
+            }
           })
         }
       },
@@ -544,7 +549,7 @@ app.get('/api/admin/tasks', async (req, res) => {
       points: entry.task.points_on_approval,
       status: entry.status === 'Submitted' ? 'Needs Approval' : entry.status,
       userId: entry.user_id,
-      submissionId: entry.submission_id // Add this line to include the submission ID
+      submissionId: entry.submission_id
     }));
 
     res.json(result);
@@ -721,7 +726,6 @@ app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res)
 });
 
 // GET /api/admin/legacies - Admin Only
-// List all legacies
 app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
@@ -729,18 +733,31 @@ app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
 
   try {
     const legacies = await prisma.legacy.findMany({
-      select: {
-        legacy_id: true,
-        name: true
-      },
-      orderBy: { name: 'asc' }
+      select: { legacy_id: true, name: true }
     });
-    res.json(legacies);
+
+    // Group by base name (before the first space)
+    const baseLegacyMap = {};
+    for (const legacy of legacies) {
+      const baseName = legacy.name.split(' ')[0];
+      if (!baseLegacyMap[baseName]) {
+        baseLegacyMap[baseName] = {
+          name: baseName,
+          legacy_ids: []
+        };
+      }
+      baseLegacyMap[baseName].legacy_ids.push(legacy.legacy_id);
+    }
+
+    // Return base names for filter dropdown
+    const baseLegacyList = Object.values(baseLegacyMap);
+    res.json(baseLegacyList);
   } catch (err) {
     console.error('Error fetching legacies:', err);
     res.status(500).json({ error: 'Failed to fetch legacies' });
   }
 });
+
 
 // GET /api/admin/status-options - Admin Only
 // Fetches the available status options for task submissions.

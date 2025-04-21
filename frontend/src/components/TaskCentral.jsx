@@ -88,11 +88,11 @@ export default function TaskCentral() {
                   label="Legacy"
                   onChange={handleLegacyFilterChange}
                 >
-                  {legacyOptions.map((option) => (
-                    <MenuItem key={option.legacy_id} value={option.legacy_id}>
-                      {option.name}
-                    </MenuItem>
-                  ))}
+                {legacyOptions.map((option) => (
+                  <MenuItem key={option.name} value={option.name}>
+                    {option.name}
+                  </MenuItem>
+                ))}
                 </Select>
               </FormControl>
             </Grid>
