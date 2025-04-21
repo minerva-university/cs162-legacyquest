@@ -39,24 +39,34 @@ export default function LegacyMemberList({legacyName}) {
         setBaseLegacyName(baseName);
         setUserCohort(userCohort);
         
-        console.log("Fetching members for base legacy name:", baseName);
-        
         // Now fetch members with this base legacy name
         const fetchedMembers = await LegacyApi.getLegacyMembers(idToken);
-        console.log("Fetched members:", fetchedMembers);
+        
+        // Sort members by cohort
+        fetchedMembers.sort((a, b) => {
+          return a.cohort.localeCompare(b.cohort);
+        });
         
         if (Array.isArray(fetchedMembers)) {
-          setAllMembers(fetchedMembers);
-          
           // Filter by cohort for the "View Cohort" mode
-          setCohortMembers(fetchedMembers.filter(member => 
+          const cohort = fetchedMembers.filter(member => 
             member.cohort === userCohort
-          ));
+          );
+          setCohortMembers(cohort);
           
           // All other members (different cohorts)
-          setOtherMembers(fetchedMembers.filter(member => 
+          const other = fetchedMembers.filter(member =>
             member.cohort !== userCohort
-          ));
+          );
+          setOtherMembers(other);
+
+          // set all members to cohort members + other members, cohort members first, followed by other members
+          const all = [...cohort, ...other];
+          console.log(cohort);
+          console.log(otherMembers);
+          console.log(all);
+          setAllMembers(all);
+
         } else {
           console.error("Invalid members data format:", fetchedMembers);
           setAllMembers([]);
