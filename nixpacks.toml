@@ -2,11 +2,7 @@
 [phases.install]
 cmds = [
   "npm install",                     # Install root dependencies
-  "npm install --prefix backend",    # Install backend dependencies
-  "cd backend",                      # Change directory to backend
-  # Generate prisma client from within backend/, specifying schema relative to backend/
-  "npx prisma generate --schema=./prisma/schema.prisma",
-  "cd ..",                           # Change back to root directory (IMPORTANT!)
+  "npm install --prefix backend",    # Install backend dependencies (will trigger postinstall)
   "npm install --prefix frontend"    # Install frontend dependencies
 ]
 
