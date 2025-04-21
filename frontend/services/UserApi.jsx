@@ -83,6 +83,26 @@ export const UserApi = {
   },
 
   /**
+   * Get the user's current location
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - User's location
+   */
+  getUserLocation: async (token) => {
+    try {
+      const userData = await UserApi.getProfile(token);
+      
+      // Check if user data exists and has location information
+      if (!userData) return 'Global';
+      
+      // Return the user's location or a default value
+      return userData.location || userData.city || 'Global';
+    } catch (error) {
+      console.error('Error fetching user location:', error);
+      return 'Global'; // Default to global if error occurs
+    }
+  },
+
+  /**
    * Get profile photo URL from user object
    * @param {Object} user - Firebase user object
    * @returns {string} - URL of profile photo
