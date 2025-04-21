@@ -15,10 +15,36 @@ const { PrismaClient } = require('./generated/prisma'); // Adjust path if needed
 dotenv.config();
 
 // --- Firebase Admin SDK Initialization ---
-// Initializes Firebase Admin using the service account key.
-// IMPORTANT: Ensure './firebase-admin-sdk-key.json' exists, is correctly named,
-// belongs to the SAME Firebase project as the frontend config, and is in .gitignore.
-const serviceAccount = require('./firebase-admin-sdk-key.json');
+// Initializes Firebase Admin using the service account key from environment variable.
+// The service account key is stored as a Base64 encoded string in FIREBASE_ADMIN_SDK_BASE64.
+let serviceAccount;
+
+try {
+  // Check if the environment variable exists
+  const encodedServiceAccount = process.env.FIREBASE_ADMIN_SDK_BASE64;
+  
+  if (!encodedServiceAccount) {
+    console.error('FATAL ERROR: FIREBASE_ADMIN_SDK_BASE64 environment variable is not set.');
+    // Fall back to local file if in development
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Falling back to local firebase-admin-sdk-key.json file for development.');
+      serviceAccount = require('./firebase-admin-sdk-key.json');
+    } else {
+      // Exit if in production and no key provided
+      process.exit(1);
+    }
+  } else {
+    // Decode the Base64 string back into a JSON string
+    const decodedJsonString = Buffer.from(encodedServiceAccount, 'base64').toString('utf-8');
+    
+    // Parse the JSON string into an object
+    serviceAccount = JSON.parse(decodedJsonString);
+    console.log('Firebase Admin SDK credentials loaded from environment variable.');
+  }
+} catch (error) {
+  console.error('Failed to initialize Firebase Admin SDK:', error);
+  process.exit(1);
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
