@@ -122,25 +122,44 @@ export default function AdminTaskDetails({
       onClose={handleCloseDialog}
       maxWidth="md"
       fullWidth
+      scroll="paper"
       slotProps={{
         paper: {
           style: {
             borderRadius: 16,
             overflow: 'hidden',
+            height: '90vh', // Set maximum height to 90% of viewport height
+            display: 'flex',
+            flexDirection: 'column'
           },
         },
       }}
     >
-      <Stack sx={{ p: 1 }}>
+      <Stack sx={{ p: 1, height: '100%', overflow: 'hidden' }}>
         {/* Header */}
-        <Stack direction="row" sx={{ mb: 2 }}>
+        <Stack direction="row" sx={{ mb: 2, flexShrink: 0 }}>
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleCloseDialog} disabled={submitting}>
             <CloseRoundedIcon />
           </IconButton>
         </Stack>
 
-        <Stack sx={{ px: 4, pb: 2 }}>
+        {/* Scrollable Content Area */}
+        <Stack 
+          sx={{ 
+            px: 4, 
+            pb: 2, 
+            overflow: 'auto',
+            flexGrow: 1, 
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              borderRadius: '4px',
+              backgroundColor: 'rgba(0,0,0,0.2)',
+            },
+          }}
+        >
           <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>
             {taskName}
           </Typography>
@@ -192,10 +211,19 @@ export default function AdminTaskDetails({
               p: 3,
               bgcolor: '#f5f5f5',
               minHeight: '100px',
+              maxHeight: '250px',
               display: 'flex',
               justifyContent: loading ? 'center' : 'flex-start',
               alignItems: loading ? 'center' : 'flex-start',
               wordBreak: 'break-word',
+              overflow: 'auto',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                borderRadius: '4px',
+                backgroundColor: 'rgba(0,0,0,0.2)',
+              },
             }}
           >
             {loading ? <CircularProgress /> : (
@@ -249,7 +277,7 @@ export default function AdminTaskDetails({
 
           {/* Action Buttons */}
           {needsApproval && (
-            <Stack direction="row" spacing={2} justifyContent="center">
+            <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 'auto', flexShrink: 0 }}>
               <Button
                 variant="contained"
                 color="error"
