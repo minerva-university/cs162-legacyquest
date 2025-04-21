@@ -1,0 +1,7 @@
+# nixpacks.toml
+[phases.install]
+cmds = ["npm install --prefix backend"]
+
+# Optional: Explicitly define start phase if needed, though Procfile should still work
+# [phases.start]
+# cmd = "node backend/server.js" 
