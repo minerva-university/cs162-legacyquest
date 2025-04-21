@@ -28,6 +28,7 @@ export default function AdminTaskDetails({
   const [submitting, setSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState(null);
   const [folderLink, setFolderLink] = useState('');
+  const [baseLegacyName, setBaseLegacyName] = useState('');
 
   const isApproved = status === 'Approved';
   const isRejected = status === 'Rejected';
@@ -39,7 +40,12 @@ export default function AdminTaskDetails({
       setEvidence('');
       setFeedback('');
       setSubmissionError(null);
-      fetchTaskData();
+      
+      // Extract the base legacy name (text before any space)
+      const baseName = legacyName ? legacyName.split(' ')[0] : '';
+      setBaseLegacyName(baseName);
+      
+      fetchTaskData(baseName);
     } else {
       // Clear data on close to avoid stale state
       setEvidence('');
@@ -50,10 +56,10 @@ export default function AdminTaskDetails({
   }, [open, taskID, legacyName, submissionId]);
 
   // Fetch task evidence and optional feedback
-  const fetchTaskData = async () => {
+  const fetchTaskData = async (baseName) => {
     try {
-      // Use TaskAPI instead of AdminAPI for folder link
-      const folder = TaskAPI.getSubmissionFolderUrl(legacyName);
+      // Use TaskAPI with the base legacy name
+      const folder = TaskAPI.getSubmissionFolderUrl(baseName);
       setFolderLink(folder);
 
       // Get auth token from Firebase
@@ -200,7 +206,7 @@ export default function AdminTaskDetails({
                 },
               }}
             >
-              {legacyName} Folder
+              {baseLegacyName || legacyName} Folder
             </Button>
           </Box>
 
