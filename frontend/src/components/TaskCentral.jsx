@@ -88,7 +88,6 @@ export default function TaskCentral() {
                   label="Legacy"
                   onChange={handleLegacyFilterChange}
                 >
-                <MenuItem key="All" value="All">All</MenuItem>
                 {legacyOptions.map((option) => (
                   <MenuItem key={option.name} value={option.name}>
                     {option.name}
