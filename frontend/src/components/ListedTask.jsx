@@ -6,7 +6,7 @@ import taskIcon from '../assets/task-icon.svg';
 import Fade from '@mui/material/Fade';
 
 // The task listed in the task list
-export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate, rejectionReason, onRefreshTasks}) {
+export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate, rejectionReason, onRefreshTasks, pointsOnApproval}) {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
 
@@ -96,7 +96,8 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
         taskID={taskID} 
         taskName={taskName} 
         description={taskDescription}
-        onSuccessfulSubmit={onRefreshTasks}  // Pass the callback
+        onSuccessfulSubmit={onRefreshTasks}
+        pointsOnApproval={pointsOnApproval}
       />
       
       <TaskFeedback
@@ -107,7 +108,8 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
         taskName={taskName}
         description={taskDescription}
         statusColor={getStatusColor(taskStatus)}
-        onSuccessfulSubmit={onRefreshTasks}  // Also pass to TaskFeedback for resubmissions
+        onSuccessfulSubmit={onRefreshTasks}
+        pointsOnApproval={pointsOnApproval}
       />
     </>
   )

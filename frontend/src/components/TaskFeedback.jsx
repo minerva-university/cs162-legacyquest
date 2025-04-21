@@ -6,7 +6,7 @@ import TaskApi from "@services/TaskApi.jsx";
 import { useAuth } from '@services/AuthContext.jsx';
 
 // A dialog component to display task feedback from admin, including evidence and comments
-export default function TaskFeedback({ open, onClose, taskID, taskName, description, status, statusColor, onSuccessfulSubmit }) {
+export default function TaskFeedback({ open, onClose, taskID, taskName, description, status, statusColor, onSuccessfulSubmit, pointsOnApproval }) {
   const [uploadEvidenceOpen, setUploadEvidenceOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [evidence, setEvidence] = useState('');
@@ -157,6 +157,7 @@ export default function TaskFeedback({ open, onClose, taskID, taskName, descript
         taskName={taskName}
         description={description}
         onSuccessfulSubmit={onSuccessfulSubmit}
+        pointsOnApproval={pointsOnApproval}
       />
     </>
   );

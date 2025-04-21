@@ -28,8 +28,6 @@ export default function LegacyMemberList({legacyName}) {
           UserApi.getCohort(idToken),
         ]);
         
-        console.log("Fetched members:", fetchedMembers);
-
         setMembers(fetchedMembers);
         setUserCohort(userCohort);
         

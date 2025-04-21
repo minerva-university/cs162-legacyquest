@@ -39,6 +39,7 @@ export default function TaskList({tasks, onRefreshTasks}) {
               taskStatus={task.status} 
               dueDate={task.dueDate}
               onRefreshTasks={onRefreshTasks}
+              pointsOnApproval={task.points_on_approval}
             />
           ))}
         </List>
