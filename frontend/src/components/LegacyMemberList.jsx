@@ -36,7 +36,7 @@ export default function LegacyMemberList({legacyName}) {
       setAllMembers([]);
       
       try {
-        const userData = await UserApi.getMe(idToken);
+        const userData = await UserApi.getMe(idToken); 
         const userLegacyId = userData.legacy?.legacy_id;
         const userCohortId = userData.cohort?.cohort_id;
         const cohortName = userData.cohort?.name || 'Unknown Cohort';
