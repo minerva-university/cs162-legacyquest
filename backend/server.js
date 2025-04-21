@@ -34,12 +34,23 @@ try {
       process.exit(1);
     }
   } else {
-    // Decode the Base64 string back into a JSON string
-    const decodedJsonString = Buffer.from(encodedServiceAccount, 'base64').toString('utf-8');
-    
-    // Parse the JSON string into an object
-    serviceAccount = JSON.parse(decodedJsonString);
-    console.log('Firebase Admin SDK credentials loaded from environment variable.');
+    try {
+      // Decode the Base64 string, trim any whitespace that might have been added
+      const decodedJsonString = Buffer.from(encodedServiceAccount.trim(), 'base64').toString('utf-8');
+      
+      // Parse the JSON string into an object
+      serviceAccount = JSON.parse(decodedJsonString);
+      console.log('Firebase Admin SDK credentials loaded from environment variable.');
+    } catch (decodeError) {
+      console.error('Failed to decode or parse Firebase Admin SDK credentials:', decodeError);
+      // Fall back to local file if in development
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Falling back to local firebase-admin-sdk-key.json file for development after decode error.');
+        serviceAccount = require('./firebase-admin-sdk-key.json');
+      } else {
+        process.exit(1);
+      }
+    }
   }
 } catch (error) {
   console.error('Failed to initialize Firebase Admin SDK:', error);
@@ -182,7 +193,6 @@ const authenticateToken = async (req, res, next) => {
                  // If userRecord was already found via UID, this re-fetches the same data.
                  // A slightly more optimized way might be: userRecord = existingUserByEmail; but the update ensures freshness.
               }
-            }
           } else {
             // 3. Not found by firebase_uid OR email - create a new user
             console.log(`Creating new user for firebase_uid: ${firebase_uid}, email: ${tokenEmailLower}`);
