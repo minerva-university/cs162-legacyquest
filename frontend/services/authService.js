@@ -26,10 +26,18 @@ export const signInWithGoogle = async () => {
     const idToken = await user.getIdToken();
 
     // Construct the API URL robustly
-    const API_BASE_URL = import.meta.env.VITE_API_URL || ''; // Default to empty string if not set
-    const apiUrl = `${API_BASE_URL}/api/me`; // Should result in '/api/me' if VITE_API_URL is unset
+    let apiUrl = '/api/me'; // Default to relative path for deployment
+    const viteApiUrlFromEnv = import.meta.env.VITE_API_URL; // Get value once
 
-    console.log("Attempting to fetch from API URL:", apiUrl); // Log the URL
+    // Use explicit URL only if the env var is set *and not empty*
+    if (viteApiUrlFromEnv) {
+        const base = viteApiUrlFromEnv.replace(/\/$/, ''); // Remove trailing slash
+        const path = '/api/me'.replace(/^\//, '');      // Remove leading slash
+        apiUrl = `${base}/${path}`;
+    }
+
+    console.log("Value of VITE_API_URL during runtime:", viteApiUrlFromEnv);
+    console.log("Final API URL used for fetch:", apiUrl); // Log the final URL
 
     // Fetch role and profile info from backend
     const res = await fetch(apiUrl, { // Use the constructed apiUrl
@@ -61,8 +69,7 @@ export const signInWithGoogle = async () => {
     return { user, role, token: idToken };
   } catch (error) {
     console.error("Error during Google sign-in or profile fetch:", error);
-    // Display a more user-friendly error maybe?
-    throw error;
+    throw error; // Re-throw error
   }
 };
 
