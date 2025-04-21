@@ -11,7 +11,7 @@
 generator client {
   provider        = "prisma-client-js"   // Specifies Prisma Client for JavaScript/TypeScript
   previewFeatures = ["driverAdapters"] // Enables features like the Neon serverless driver adapter
-  output          = "../generated/prisma" // Output directory for the generated Prisma Client
+  // output          = "../generated/prisma" // REMOVED: Use default node_modules/.prisma/client location
 }
 
 datasource db {
