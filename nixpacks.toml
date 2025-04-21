@@ -1,10 +1,12 @@
 # nixpacks.toml
 [phases.install]
 cmds = [
-  "npm install", # Install root dependencies (like express)
-  "npm install --prefix backend",
-  "cd backend && npx prisma generate",
-  "npm install --prefix frontend" # Install frontend deps
+  "npm install",                     # Install root dependencies
+  "npm install --prefix backend",    # Install backend dependencies
+  "cd backend",                      # Change directory to backend
+  "npx prisma generate",             # Generate prisma client (now in backend dir)
+  "cd ..",                           # Change back to root directory (IMPORTANT!)
+  "npm install --prefix frontend"    # Install frontend dependencies
 ]
 
 [phases.build]
