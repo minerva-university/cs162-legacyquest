@@ -32,8 +32,27 @@ export default function DashboardContent() {
     try {
       // Changed method name from getAllTasks to getTasks to match the actual API method
       const fetchedTasks = await TaskApi.getTasks(token);
-      setTasks(fetchedTasks);
+      
+      // Log the raw tasks for debugging
+      console.log('Raw tasks from API:', fetchedTasks);
+      
+      // Transform task data to match the expected format in TaskList component
+      const formattedTasks = fetchedTasks.map(task => ({
+        taskID: task.taskID || task.task_id || task.id,
+        name: task.name || task.taskName || task.title,
+        description: task.description || task.taskDescription,
+        status: task.status || 'Pending',
+        dueDate: task.dueDate || task.due_date,
+        points_on_approval: task.points_on_approval || task.pointsOnApproval || 10,
+        // Add any other necessary fields
+      }));
+      
+      // Log the formatted tasks for debugging
+      console.log('Formatted tasks:', formattedTasks);
+      
+      setTasks(formattedTasks);
     } catch (err) {
+      console.error('Error fetching tasks:', err);
       setError(err.message || 'Failed to load tasks.');
       setTasks([]);
     } finally {
