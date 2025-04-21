@@ -9,7 +9,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const admin = require('firebase-admin');
-const { PrismaClient } = require('./generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 
 // Load environment variables from .env file (DATABASE_URL, PORT, JWT_SECRET, etc.)
 dotenv.config();
@@ -244,9 +244,9 @@ app.get('/', (req, res) => {
 // --- Protected API Routes ---
 // Routes below this point typically require authentication.
 
-// GET /api/me: Returns profile information for the currently authenticated user.
+// GET /me: Returns profile information for the currently authenticated user.
 // Uses `authenticateToken` middleware to get user data into `req.user`.
-app.get('/api/me', authenticateToken, async (req, res) => {
+app.get('/me', authenticateToken, async (req, res) => {
   try {
     // Get the user with related legacy and cohort information
     const userWithRelations = await prisma.user.findUnique({
@@ -303,8 +303,8 @@ app.get('/api/me', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/legacy/:legacyId/members - Fetch all members of a specific legacy
-app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => {
+// GET /legacy/:legacyId/members - Fetch all members of a specific legacy
+app.get('/legacy/:legacyId/members', authenticateToken, async (req, res) => {
   try {
     const legacyId = parseInt(req.params.legacyId);
     
@@ -345,7 +345,7 @@ app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => 
 
 
 // NEW endpoint connecting members with the same Legacy Name
-app.get('/api/legacy/byname/:baseLegacyName/members', authenticateToken, async (req, res) => {
+app.get('/legacy/byname/:baseLegacyName/members', authenticateToken, async (req, res) => {
   try {
     const baseLegacyName = req.params.baseLegacyName;
     
@@ -389,7 +389,7 @@ app.get('/api/legacy/byname/:baseLegacyName/members', authenticateToken, async (
 });
 
 // NEW endpoint for fetching members of a specific legacy AND cohort
-app.get('/api/legacy/:legacyId/cohort/:cohortId/members', authenticateToken, async (req, res) => {
+app.get('/legacy/:legacyId/cohort/:cohortId/members', authenticateToken, async (req, res) => {
   try {
     const legacyId = parseInt(req.params.legacyId, 10);
     const cohortId = parseInt(req.params.cohortId, 10);
@@ -433,8 +433,8 @@ app.get('/api/legacy/:legacyId/cohort/:cohortId/members', authenticateToken, asy
   }
 });
 
-// GET /api/tasks - Fetch all tasks for current user
-app.get('/api/tasks', authenticateToken, async (req, res) => {
+// GET /tasks - Fetch all tasks for current user
+app.get('/tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
 
@@ -473,8 +473,8 @@ app.get('/api/tasks', authenticateToken, async (req, res) => {
 });
 
 
-// POST /api/tasks/:taskId/submissions - Upload evidence for a task
-app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
+// POST /tasks/:taskId/submissions - Upload evidence for a task
+app.post('/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
     const taskId = parseInt(req.params.taskId, 10);
@@ -510,8 +510,8 @@ app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) =
   }
 });
 
-// GET /api/tasks/:taskId/submissions/latest
-app.get('/api/tasks/:taskId/submissions/latest', authenticateToken, async (req, res) => {
+// GET /tasks/:taskId/submissions/latest
+app.get('/tasks/:taskId/submissions/latest', authenticateToken, async (req, res) => {
   const taskId = parseInt(req.params.taskId, 10);
   const userId = req.user.user_id;
 
@@ -540,9 +540,9 @@ app.get('/api/tasks/:taskId/submissions/latest', authenticateToken, async (req, 
   }
 });
 
-// GET /api/admin/tasks - Admin only
+// GET /admin/tasks - Admin only
 // This route fetches all tasks for admin review.
-app.get('/api/admin/tasks', async (req, res) => {
+app.get('/admin/tasks', authenticateToken, async (req, res) => {
   const legacyFilter = req.query.legacy || 'All';
   const statusFilter = req.query.status || 'All';
 
@@ -591,9 +591,9 @@ app.get('/api/admin/tasks', async (req, res) => {
   }
 });
 
-// POST /api/admin/tasks - Admin only
+// POST /admin/tasks - Admin only
 // Create a new task
-app.post('/api/admin/tasks', authenticateToken, async (req, res) => {
+app.post('/admin/tasks', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -623,9 +623,9 @@ app.post('/api/admin/tasks', authenticateToken, async (req, res) => {
 });
 
 
-// GET /api/admin/tasks/:taskId/evidence - Admin only
+// GET /admin/tasks/:taskId/evidence - Admin only
 // This route fetches the evidence for a specific task submission.
-app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res) => {
+app.get('/admin/tasks/:taskId/evidence', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -666,9 +666,9 @@ app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res)
   }
 });
 
-// GET /api/admin/submissions/:submissionId - Admin only 
+// GET /admin/submissions/:submissionId - Admin only 
 // This route fetches a specific submission by ID
-app.get('/api/admin/submissions/:submissionId', authenticateToken, async (req, res) => {
+app.get('/admin/submissions/:submissionId', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -709,9 +709,9 @@ app.get('/api/admin/submissions/:submissionId', authenticateToken, async (req, r
   }
 });
 
-// PATCH /api/admin/tasks/:taskId/review - Admin-only 
+// PATCH /admin/tasks/:taskId/review - Admin-only 
 // Route to approve or reject a task
-app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res) => {
+app.patch('/admin/tasks/:taskId/review', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -757,9 +757,9 @@ app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res)
   }
 });
 
-// GET /api/admin/legacies - Admin Only
+// GET /admin/legacies - Admin Only
 // List all legacies
-app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
+app.get('/admin/legacies', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -779,9 +779,9 @@ app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/admin/status-options - Admin Only
+// GET /admin/status-options - Admin Only
 // Fetches the available status options for task submissions.
-app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
+app.get('/admin/status-options', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -794,8 +794,8 @@ app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch status options' });
   }
 });
-// GET /api/legacies/rankings/global - Get global legacy rankings with aggregation
-app.get('/api/legacies/rankings/global', async (req, res) => {
+// GET /legacies/rankings/global - Get global legacy rankings with aggregation
+app.get('/legacies/rankings/global', async (req, res) => {
   try {
     // Fetch all legacies from the database
     const allLegacies = await prisma.legacy.findMany({
@@ -843,8 +843,8 @@ app.get('/api/legacies/rankings/global', async (req, res) => {
   }
 });
 
-// GET /api/legacies/rankings/local/:location - Get local legacy rankings by location
-app.get('/api/legacies/rankings/local/:location', async (req, res) => {
+// GET /legacies/rankings/local/:location - Get local legacy rankings by location
+app.get('/legacies/rankings/local/:location', async (req, res) => {
   try {
     const location = req.params.location;
     
@@ -869,24 +869,5 @@ app.get('/api/legacies/rankings/local/:location', async (req, res) => {
   }
 });
 
-// --- Start Server ---
-// Starts the Express server listening on the configured PORT.
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
-
-// --- Graceful Shutdown Handling ---
-// Ensures Prisma client disconnects properly when the server process is stopped.
-process.on('SIGINT', async () => {
-  console.log('SIGINT signal received: closing HTTP server')
-  await prisma.$disconnect()
-  console.log('Prisma Client disconnected.')
-  process.exit(0)
-})
-
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM signal received: closing HTTP server')
-  await prisma.$disconnect()
-  console.log('Prisma Client disconnected.')
-  process.exit(0)
-})
+// Export the app instance to be used by the main server
+module.exports = app;
