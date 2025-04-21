@@ -7,6 +7,33 @@ const getAuthHeader = (token) => ({
 });
 
 const UserApi = {
+  // NEW function to fetch the full user object from /api/me
+  getMe: async (token) => {
+    if (!token) throw new Error('Authentication token is required for getMe.');
+    
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/me`, {
+        method: 'GET',
+        headers: getAuthHeader(token),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error(`Failed to fetch user data: ${res.status} ${res.statusText}`, errorData);
+        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const userData = await res.json();
+      // Returns the full object, including nested legacy and cohort details
+      // Example: { user_id: 1, email: '...', ..., legacy: { legacy_id: 5, name: 'Ocean SF', ... }, cohort: { cohort_id: 2, name: 'M24' } }
+      return userData;
+    } catch (err) {
+      console.error('Error in UserApi.getMe:', err);
+      // Re-throw the error so the calling component can handle it
+      throw err; 
+    }
+  },
+
   // Retrieve a user's cohort name from the server. The return format is the user's cohort name (string).
   // E.g., 'M24'
   getCohort: async (token) => {

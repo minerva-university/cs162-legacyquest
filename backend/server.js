@@ -318,54 +318,81 @@ app.get('/api/legacy/byname/:baseLegacyName/members', authenticateToken, async (
     
     console.log(`Looking for legacy members with base name: ${baseLegacyName}`);
     
-    // First, get all legacies that start with the base name
-    const matchingLegacies = await prisma.legacy.findMany({
-      where: {
-        name: {
-          startsWith: baseLegacyName
-        }
-      },
-      select: {
-        legacy_id: true,
-        name: true
-      }
-    });
-        
-    // Extract the legacy IDs
-    const legacyIds = matchingLegacies.map(l => l.legacy_id);
-    
-    if (legacyIds.length === 0) {
-      return res.json([]);
-    }
-    
-    // Fetch all users with any of the matching legacy IDs
+    // Fetch all users whose related legacy name starts with the base name in a single query
     const legacyMembers = await prisma.user.findMany({
       where: {
-        legacy_id: {
-          in: legacyIds
+        legacy: { // Filter directly on the related legacy record
+          name: {
+            startsWith: baseLegacyName,
+            mode: 'insensitive' // Optional: Add if case-insensitive matching is desired
+          }
         }
       },
       include: {
-        cohort: true,
-        legacy: true
+        cohort: true, // Include cohort details
+        legacy: true  // Include legacy details (name, location_filter, etc.)
+      },
+      orderBy: { // Optional: Add sorting if needed, e.g., by name
+        full_name: 'asc' 
       }
     });
-        
-    // Format the response
+    
+    // Format the response (remains the same)
     const formattedMembers = legacyMembers.map(member => ({
-      user_id: member.user_id,
       name: member.full_name,
-      email: member.email,
       profile_picture_url: member.profile_picture_url || "https://img.icons8.com/?size=100&id=u4U9G3tGGHu1&format=png&color=737373",
-      location: member.legacy?.location_filter,
       cohort: member.cohort?.name || "Unknown Cohort",
-      legacy: member.legacy?.name || "Unknown Legacy"
     }));
     
     res.json(formattedMembers);
   } catch (error) {
     console.error('Error fetching legacy members by name:', error);
     res.status(500).json({ error: 'Failed to retrieve legacy members' });
+  }
+});
+
+// NEW endpoint for fetching members of a specific legacy AND cohort
+app.get('/api/legacy/:legacyId/cohort/:cohortId/members', authenticateToken, async (req, res) => {
+  try {
+    const legacyId = parseInt(req.params.legacyId, 10);
+    const cohortId = parseInt(req.params.cohortId, 10);
+
+    if (isNaN(legacyId) || isNaN(cohortId)) {
+      return res.status(400).json({ error: 'Invalid Legacy or Cohort ID' });
+    }
+
+    // Optional: Add authorization check if needed, e.g.
+    // if (req.user.legacy_id !== legacyId || req.user.cohort_id !== cohortId) {
+    //   return res.status(403).json({ error: 'Unauthorized access' });
+    // }
+
+    console.log(`Fetching members for legacy ${legacyId} and cohort ${cohortId}`);
+
+    const cohortLegacyMembers = await prisma.user.findMany({
+      where: {
+        legacy_id: legacyId,
+        cohort_id: cohortId,
+      },
+      include: {
+        cohort: true, // Needed for cohort name
+      },
+      orderBy: { // Optional: Consistent sorting
+        full_name: 'asc'
+      }
+    });
+
+    // Format the response (minimal payload)
+    const formattedMembers = cohortLegacyMembers.map(member => ({
+      name: member.full_name,
+      profile_picture_url: member.profile_picture_url || "https://img.icons8.com/?size=100&id=u4U9G3tGGHu1&format=png&color=737373",
+      cohort: member.cohort?.name || "Unknown Cohort",
+    }));
+
+    res.json(formattedMembers);
+
+  } catch (error) {
+    console.error('Error fetching specific cohort legacy members:', error);
+    res.status(500).json({ error: 'Failed to retrieve cohort legacy members' });
   }
 });
 
