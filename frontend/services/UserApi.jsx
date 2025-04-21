@@ -56,12 +56,26 @@ export const UserApi = {
   /**
    * Get cohort information for the current user
    * @param {string} token - User's auth token
-   * @returns {Promise<string>} - User's cohort
+   * @returns {Promise<string>} - User's cohort name
    */
   getCohort: async (token) => {
     try {
       const userData = await UserApi.getProfile(token);
-      return userData.cohort || 'Unknown Cohort';
+      
+      // Handle different response formats
+      if (!userData) return 'Unknown Cohort';
+      
+      // If cohort is an object with a name property
+      if (userData.cohort && typeof userData.cohort === 'object' && userData.cohort.name) {
+        return userData.cohort.name;
+      }
+      
+      // If cohort is just a string
+      if (typeof userData.cohort === 'string') {
+        return userData.cohort;
+      }
+      
+      return 'Unknown Cohort';
     } catch (error) {
       console.error('Error fetching user cohort:', error);
       return 'Unknown Cohort';
