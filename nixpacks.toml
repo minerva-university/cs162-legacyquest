@@ -1,6 +1,9 @@
 # nixpacks.toml
 [phases.install]
-cmds = ["npm install --prefix backend"]
+cmds = [
+  "npm install --prefix backend",
+  "cd backend && npx prisma generate" 
+]
 
 # Optional: Explicitly define start phase if needed, though Procfile should still work
 # [phases.start]
