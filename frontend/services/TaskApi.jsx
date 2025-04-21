@@ -37,10 +37,16 @@ const TaskApi = {
           description: task.description || '',
           status: latest?.status || 'Not Submitted',
           dueDate: task.due_date
-            ? new Date(task.due_date).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-              })
+            ? (() => {
+                const d = new Date(task.due_date);
+                const year = d.getUTCFullYear();
+                const month = d.getUTCMonth();
+                const day = d.getUTCDate();
+                return new Date(Date.UTC(year, month, day)).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                });
+              })()
             : 'N/A',
           points_on_approval: task.points_on_approval,
           latest_submission: latest || null,
