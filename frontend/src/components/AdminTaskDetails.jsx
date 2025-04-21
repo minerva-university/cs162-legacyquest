@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import FolderIcon from '@mui/icons-material/Folder';
 import AdminAPI from "@services/AdminApi.jsx";
+import TaskAPI from "@services/TaskApi.jsx";
 import { getAuth } from 'firebase/auth';
 
 export default function AdminTaskDetails({
@@ -51,7 +52,8 @@ export default function AdminTaskDetails({
   // Fetch task evidence and optional feedback
   const fetchTaskData = async () => {
     try {
-      const folder = await AdminAPI.getLegacyFolderLink(legacyName);
+      // Use TaskAPI instead of AdminAPI for folder link
+      const folder = TaskAPI.getSubmissionFolderUrl(legacyName);
       setFolderLink(folder);
 
       // Get auth token from Firebase
