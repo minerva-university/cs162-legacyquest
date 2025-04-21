@@ -3,8 +3,10 @@
 cmds = [
   "npm install",                     # Install root dependencies
   "npm install --prefix backend",    # Install backend dependencies
-  # Generate prisma client, explicitly specifying schema path from root
-  "npx prisma generate --schema=./backend/prisma/schema.prisma",
+  "cd backend",                      # Change directory to backend
+  # Generate prisma client from within backend/, specifying schema relative to backend/
+  "npx prisma generate --schema=./prisma/schema.prisma",
+  "cd ..",                           # Change back to root directory (IMPORTANT!)
   "npm install --prefix frontend"    # Install frontend dependencies
 ]
 
