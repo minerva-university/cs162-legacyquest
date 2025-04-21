@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { onIdTokenChanged } from 'firebase/auth';
 import { auth } from './firebase';
+import { API_BASE_URL } from './apiConfig';
 
 const AuthContext = createContext();
 
@@ -25,7 +26,7 @@ export function AuthProvider({ children }) {
           setIdToken(token);
 
           // Fetch role from backend via /api/me
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/api/me`, {
+          const res = await fetch(`${API_BASE_URL}/api/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
 

@@ -41,7 +41,7 @@ mainApp.get('*', (req, res) => {
 
 
 // --- Start the main server ---
-const PORT = process.env.PORT || 3000; // Kinsta/Svella will provide PORT
+const PORT = process.env.PORT || 3001; // Kinsta/Svella will provide PORT
 mainApp.listen(PORT, () => {
   console.log(`Main server (Web Process) running on port ${PORT}`);
   console.log(`API routes mounted under /api`);

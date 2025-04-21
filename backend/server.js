@@ -67,7 +67,7 @@ const prisma = new PrismaClient();
 
 // --- Express App Initialization --- 
 const app = express();
-const PORT = process.env.PORT; // Use 3001 to avoid conflict with frontend dev server (often 3000)
+const PORT = process.env.PORT || 3001; // Use 3001 to avoid conflict with frontend dev server (often 3000)
 
 // --- Core Middleware ---
 // Enable Cross-Origin Resource Sharing. Allows requests from frontend origin.

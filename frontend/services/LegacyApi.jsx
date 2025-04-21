@@ -1,10 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+import { API_BASE_URL, getAuthHeader } from './apiConfig';
 
-// Adds token and content headers for authenticated requests
-const getAuthHeader = (token) => ({
-  Authorization: `Bearer ${token}`,
-  'Content-Type': 'application/json',
-});
+// No need to redefine these here as they're imported
+// const API_BASE_URL = import.meta.env.VITE_API_URL;
+// const getAuthHeader = (token) => ({...});
 
 const LegacyApi = {
   // Retrieve a user's legacy name from the server. The return format is a the user's legacy name (string).

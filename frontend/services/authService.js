@@ -26,8 +26,7 @@ export const signInWithGoogle = async () => {
     const idToken = await user.getIdToken();
 
     // Fetch role and profile info from backend
-    // TEMPORARY FIX: Hardcode path to diagnose env var issue
-    const res = await fetch(`/api/me`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/me`, {
       headers: {
         Authorization: `Bearer ${idToken}`,
       }
