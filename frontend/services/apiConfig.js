@@ -6,11 +6,13 @@
 export const getApiBaseUrl = () => {
   // If explicitly defined in the environment, use that value
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+    // Ensure the URL is well-formed (no trailing slash issues)
+    const url = import.meta.env.VITE_API_URL.trim();
+    return url.endsWith('/') ? url.slice(0, -1) : url;
   }
   
-  // Otherwise, use an empty string, which will make fetch use relative URLs
-  // This works because our server.js mounts the API at /api
+  // For Vercel deployment, use an empty string for relative URLs
+  // This works because the API is available at the same domain
   return '';
 };
 
@@ -21,4 +23,4 @@ export const API_BASE_URL = getApiBaseUrl();
 export const getAuthHeader = (token) => ({
   Authorization: `Bearer ${token}`,
   'Content-Type': 'application/json',
-}); 
+});

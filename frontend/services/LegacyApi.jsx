@@ -1,10 +1,104 @@
 import { API_BASE_URL, getAuthHeader } from './apiConfig';
 
-// No need to redefine these here as they're imported
-// const API_BASE_URL = import.meta.env.VITE_API_URL;
-// const getAuthHeader = (token) => ({...});
+/**
+ * LegacyApi - Service for legacy-related API calls
+ */
+export const LegacyApi = {
+  /**
+   * Get all legacies
+   * @param {string} token - User's auth token
+   * @returns {Promise<Array>} - Array of legacies
+   */
+  getLegacies: async (token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/legacies` : '/api/legacies';
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
 
-const LegacyApi = {
+      if (!response.ok) {
+        throw new Error('Failed to fetch legacies');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching legacies:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get a specific legacy by ID
+   * @param {string} token - User's auth token
+   * @param {string} legacyId - ID of the legacy to fetch
+   * @returns {Promise<Object>} - Legacy details
+   */
+  getLegacyById: async (token, legacyId) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/legacies/${legacyId}` : `/api/legacies/${legacyId}`;
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch legacy');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching legacy ${legacyId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Join a legacy
+   * @param {string} token - User's auth token
+   * @param {string} legacyId - ID of the legacy to join
+   * @returns {Promise<Object>} - Updated user profile with legacy info
+   */
+  joinLegacy: async (token, legacyId) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/legacies/${legacyId}/join` : `/api/legacies/${legacyId}/join`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: getAuthHeader(token),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to join legacy');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error joining legacy:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get legacy rankings
+   * @param {string} token - User's auth token
+   * @returns {Promise<Array>} - Array of legacies with rank info
+   */
+  getLegacyRankings: async (token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/legacies/rankings` : '/api/legacies/rankings';
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch legacy rankings');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching legacy rankings:', error);
+      throw error;
+    }
+  },
+
   // Retrieve a user's legacy name from the server. The return format is a the user's legacy name (string).
   // E.g., 'Vista'
   getLegacyName: async (token) => {

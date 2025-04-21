@@ -1,162 +1,182 @@
 import { API_BASE_URL, getAuthHeader } from './apiConfig';
 
-const AdminAPI = {
+/**
+ * AdminApi - Service for admin-related API calls
+ */
+export const AdminApi = {
   /**
-   * Get all active task submissions with optional filtering.
+   * Get all users for admin management
+   * @param {string} token - Admin's auth token
+   * @returns {Promise<Array>} - Array of users
    */
-  getAllTasks: async (legacyFilter = 'All', statusFilter = 'All') => {
+  getUsers: async (token) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/tasks?legacy=${legacyFilter}&status=${statusFilter}`);
-      if (!res.ok) throw new Error('Failed to fetch admin tasks');
-      return await res.json();
-    } catch (err) {
-      console.error('AdminAPI.getAllTasks failed:', err);
-      return [];
-    }
-  },
-
-  /**
-   * Create a new task to be shown to students.
-   */
-  createTask: async (taskName, description, dueDate, location = null, points, token) => {
-    if (!taskName || !description || !dueDate || !points) {
-      return { success: false, message: 'Missing required task information' };
-    }
-    if (isNaN(points) || points <= 0) {
-      return { success: false, message: 'Points must be a positive number' };
-    }
-  
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          title: taskName,
-          description,
-          due_date: dueDate,
-          location,
-          points_on_approval: Number(points)
-        })
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/admin/users` : '/api/admin/users';
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
       });
-  
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create task');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
       }
-  
-      return {
-        success: true,
-        message: 'Task created successfully',
-        task: data
-      };
-    } catch (err) {
-      console.error('AdminAPI.createTask failed:', err);
-      return {
-        success: false,
-        message: err.message
-      };
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
     }
   },
-  
-  
 
   /**
-   * Review a task submission (approve/reject). 
+   * Get all tasks for admin management
+   * @param {string} token - Admin's auth token
+   * @returns {Promise<Array>} - Array of tasks
    */
-  reviewTask: async (taskID, userID, action, comment, token) => {
-    const res = await fetch(`${API_BASE_URL}/api/admin/tasks/${taskID}/review`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ userId: userID, action, comment })
-    });
-  
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Failed to review task');
-    return result;
-  },  
+  getTasks: async (token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/admin/tasks` : '/api/admin/tasks';
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
 
-  /**
-   * Admin-specific function to fetch evidence for a specific submission.
-   */
-  getTaskSubmissionDetails: async (submissionId, token) => {
-    const res = await fetch(`${API_BASE_URL}/api/admin/submissions/${submissionId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-  
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Failed to fetch submission details');
-    return result;
-  },
-
-  /**
-   * Admin-specific function to fetch latest evidence for a given task.
-   */
-  getTaskEvidenceForAdmin: async (taskID, userId, token) => {
-    const res = await fetch(`${API_BASE_URL}/api/admin/tasks/${taskID}/evidence?userId=${userId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-  
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Failed to fetch admin evidence');
-    return result;
-  },  
-
-  getAllLegacies: async (token) => {
-    const res = await fetch(`${API_BASE_URL}/api/admin/legacies`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
       }
-    });
-  
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to fetch legacies');
-    return data;
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      throw error;
+    }
   },
 
   /**
-   * Get all status options for tasks.
-  */
-  getStatusOptions: async (token) => {
-    const res = await fetch(`${API_BASE_URL}/api/admin/status-options`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }
-    });
-  
-    if (!res.ok) throw new Error('Failed to fetch status options');
-    return res.json();
-  },
-  
-
-  /**
-   * Get folder link for legacy group.
+   * Create a new task
+   * @param {string} token - Admin's auth token
+   * @param {Object} taskData - Task data
+   * @returns {Promise<Object>} - Created task
    */
-  getLegacyFolderLink: async (legacyName) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const folderLinks = {
-      'Vista': 'https://drive.google.com/drive/folders/vista-legacy-folder',
-      'Tower': 'https://drive.google.com/drive/folders/tower-legacy-folder',
-      'Bridge': 'https://drive.google.com/drive/folders/bridge-legacy-folder',
-      'Chronicle': 'https://drive.google.com/drive/folders/chronicle-legacy-folder',
-      'Pulse': 'https://drive.google.com/drive/folders/pulse-legacy-folder',
-    };
-    return folderLinks[legacyName] || 'https://drive.google.com/drive/folders/default-folder';
+  createTask: async (token, taskData) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/admin/tasks` : '/api/admin/tasks';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: getAuthHeader(token),
+        body: JSON.stringify(taskData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating task:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update an existing task
+   * @param {string} token - Admin's auth token
+   * @param {string} taskId - ID of task to update
+   * @param {Object} taskData - Updated task data
+   * @returns {Promise<Object>} - Updated task
+   */
+  updateTask: async (token, taskId, taskData) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/admin/tasks/${taskId}` : `/api/admin/tasks/${taskId}`;
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: getAuthHeader(token),
+        body: JSON.stringify(taskData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating task:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Delete a task
+   * @param {string} token - Admin's auth token
+   * @param {string} taskId - ID of task to delete
+   * @returns {Promise<Object>} - Delete confirmation
+   */
+  deleteTask: async (token, taskId) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/admin/tasks/${taskId}` : `/api/admin/tasks/${taskId}`;
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: getAuthHeader(token),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get task submissions for review
+   * @param {string} token - Admin's auth token
+   * @returns {Promise<Array>} - Array of submissions
+   */
+  getSubmissions: async (token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/admin/submissions` : '/api/admin/submissions';
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch submissions');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Review a task submission
+   * @param {string} token - Admin's auth token
+   * @param {string} submissionId - ID of the submission
+   * @param {Object} reviewData - Review data (approval status, feedback)
+   * @returns {Promise<Object>} - Updated submission
+   */
+  reviewSubmission: async (token, submissionId, reviewData) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/admin/submissions/${submissionId}/review` : `/api/admin/submissions/${submissionId}/review`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: getAuthHeader(token),
+        body: JSON.stringify(reviewData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to review submission');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error reviewing submission:', error);
+      throw error;
+    }
   }
 };
 
-export default AdminAPI;
+export default AdminApi;
