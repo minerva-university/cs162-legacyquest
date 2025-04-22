@@ -83,6 +83,32 @@ export const UserApi = {
   },
 
   /**
+   * Get the user's legacy information
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - User's legacy name
+   */
+  getLegacy: async (token) => {
+    try {
+      if (!token) {
+        throw new Error('Authentication token is required');
+      }
+      
+      const userData = await UserApi.getProfile(token);
+      
+      // Check if user data exists and has legacy information
+      if (!userData || !userData.legacy) {
+        return 'Unknown Legacy';
+      }
+      
+      // Return the legacy name
+      return userData.legacy.name || 'Unknown Legacy';
+    } catch (error) {
+      console.error('Error fetching user legacy:', error);
+      return 'Unknown Legacy'; // Default if error occurs
+    }
+  },
+
+  /**
    * Get the user's current location
    * @param {string} token - User's auth token
    * @returns {Promise<string>} - User's location
