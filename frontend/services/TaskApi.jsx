@@ -82,6 +82,55 @@ export const TaskApi = {
       console.error('Error submitting task evidence:', error);
       throw error;
     }
+  },
+
+  /**
+   * Submit evidence for a task
+   * @param {string} taskId - ID of the task
+   * @param {Object} evidence - Evidence data including description and files
+   * @param {string} token - User's auth token
+   * @returns {Promise<Object>} - Submission result
+   */
+  uploadEvidence: async (taskId, evidence, token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/tasks/${taskId}/submit` : `/api/tasks/${taskId}/submit`;
+      
+      // Create FormData object to handle file uploads
+      const formData = new FormData();
+      
+      // Add description to form data
+      if (evidence.description) {
+        formData.append('description', evidence.description);
+      }
+      
+      // Add files to form data if they exist
+      if (evidence.files && evidence.files.length > 0) {
+        for (let i = 0; i < evidence.files.length; i++) {
+          formData.append('files', evidence.files[i]);
+        }
+      }
+      
+      // Special headers for form data (no Content-Type)
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to upload evidence');
+      }
+
+      return { success: true, message: 'Evidence uploaded successfully' };
+    } catch (error) {
+      console.error('Error submitting evidence:', error);
+      return { success: false, message: error.message || 'Failed to upload evidence' };
+    }
   }
 };
 

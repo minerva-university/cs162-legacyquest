@@ -255,6 +255,38 @@ export const LegacyApi = {
       console.error('Error in LegacyApi.getLocalRanking:', err);
       throw err; // Re-throw the error instead of using fallback data
     }
+  },
+
+  /**
+   * Get legacy data by name
+   * @param {string} token - User's auth token
+   * @param {string} name - Name of the legacy to fetch
+   * @returns {Promise<Object>} - Legacy details
+   */
+  getLegacy: async (token, name) => {
+    try {
+      if (!token) throw new Error('Authentication token is required');
+      if (!name) throw new Error('Legacy name is required');
+      
+      const endpoint = API_BASE_URL 
+        ? `${API_BASE_URL}/api/legacy/byname/${encodeURIComponent(name)}` 
+        : `/api/legacy/byname/${encodeURIComponent(name)}`;
+      
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(`Failed to fetch legacy by name (${name}):`, errorData.error || response.statusText);
+        throw new Error('Failed to fetch legacy');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching legacy by name (${name}):`, error);
+      return { name: name, icon_url: null }; // Return minimal data to prevent UI errors
+    }
   }
 };
 
