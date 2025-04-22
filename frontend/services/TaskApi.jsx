@@ -38,14 +38,20 @@ const TaskApi = {
           status: latest?.status || 'Not Submitted',
           dueDate: task.due_date
             ? (() => {
-                const d = new Date(task.due_date);
-                const year = d.getUTCFullYear();
-                const month = d.getUTCMonth();
-                const day = d.getUTCDate();
-                return new Date(Date.UTC(year, month, day)).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                });
+                // Parse the ISO date string
+                const [datePart] = task.due_date.split('T');
+                const [year, monthStr, dayStr] = datePart.split('-');
+                
+                // Convert to month names and date number
+                const month = parseInt(monthStr, 10) - 1;
+                const day = parseInt(dayStr, 10);
+                
+                const months = [
+                  'January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                return `${months[month]} ${day}`;
               })()
             : 'N/A',
           points_on_approval: task.points_on_approval,
