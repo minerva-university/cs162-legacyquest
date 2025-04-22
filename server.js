@@ -60,3 +60,37 @@ process.on('SIGINT', () => {
     // Perform any cleanup here if necessary before exiting
     process.exit(0);
 });
+
+// GET /api/admin/legacies - Admin Only
+// List all legacies
+app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  try {
+    const legacies = await prisma.legacy.findMany({
+      select: { legacy_id: true, name: true }
+    });
+
+    // Group by base name (before the first space)
+    const baseLegacyMap = {};
+    for (const legacy of legacies) {
+      const baseName = legacy.name.split(' ')[0];
+      if (!baseLegacyMap[baseName]) {
+        baseLegacyMap[baseName] = {
+          name: baseName,
+          legacy_ids: []
+        };
+      }
+      baseLegacyMap[baseName].legacy_ids.push(legacy.legacy_id);
+    }
+
+    // Return base names for filter dropdown
+    const baseLegacyList = Object.values(baseLegacyMap);
+    res.json(baseLegacyList);
+  } catch (err) {
+    console.error('Error fetching legacies:', err);
+    res.status(500).json({ error: 'Failed to fetch legacies' });
+  }
+});

@@ -76,6 +76,15 @@ app.use(cors());
 // Parse incoming requests with JSON payloads (e.g., POST/PUT requests).
 app.use(express.json());
 
+// --- API Prefix Compatibility Layer ---
+// Create a compatibility layer for routes that include /api prefix in the frontend
+// This ensures that requests to /api/... are forwarded to the correct handler
+app.use('/api', (req, res, next) => {
+  // Remove /api prefix from the URL before passing to other middleware
+  req.url = req.url; // Keep the URL as is for routing
+  next();
+});
+
 // --- Authentication Middleware (authenticateToken) ---
 // This middleware is applied to protected API routes.
 // 1. Extracts the Firebase ID token from the 'Authorization: Bearer <token>' header.
@@ -510,6 +519,43 @@ app.post('/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
   }
 });
 
+// POST /tasks/:taskId/submit - Compatibility route for frontend
+app.post('/tasks/:taskId/submit', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const taskId = parseInt(req.params.taskId, 10);
+    const { submitted_evidence } = req.body;
+
+    if (isNaN(taskId)) return res.status(400).json({ error: 'Invalid task ID.' });
+    if (!submitted_evidence || submitted_evidence.trim() === '') {
+      return res.status(400).json({ error: 'Evidence cannot be empty.' });
+    }
+
+    // Mark previous submissions as not latest
+    await prisma.taskSubmission.updateMany({
+      where: { task_id: taskId, user_id: userId, is_latest: true },
+      data: { is_latest: false }
+    });
+
+    // Create new submission
+    const submission = await prisma.taskSubmission.create({
+      data: {
+        task_id: taskId,
+        user_id: userId,
+        submitted_evidence,
+        is_latest: true,
+        submitted_at: new Date(),
+        status: 'Submitted'
+      }
+    });
+
+    res.status(201).json({ success: true, submission });
+  } catch (err) {
+    console.error('Upload failed:', err);
+    res.status(500).json({ error: 'Failed to upload submission.' });
+  }
+});
+
 // GET /tasks/:taskId/submissions/latest
 app.get('/tasks/:taskId/submissions/latest', authenticateToken, async (req, res) => {
   const taskId = parseInt(req.params.taskId, 10);
@@ -766,13 +812,25 @@ app.get('/admin/legacies', authenticateToken, async (req, res) => {
 
   try {
     const legacies = await prisma.legacy.findMany({
-      select: {
-        legacy_id: true,
-        name: true
-      },
-      orderBy: { name: 'asc' }
+      select: { legacy_id: true, name: true }
     });
-    res.json(legacies);
+
+    // Group by base name (before the first space)
+    const baseLegacyMap = {};
+    for (const legacy of legacies) {
+      const baseName = legacy.name.split(' ')[0];
+      if (!baseLegacyMap[baseName]) {
+        baseLegacyMap[baseName] = {
+          name: baseName,
+          legacy_ids: []
+        };
+      }
+      baseLegacyMap[baseName].legacy_ids.push(legacy.legacy_id);
+    }
+
+    // Return base names for filter dropdown
+    const baseLegacyList = Object.values(baseLegacyMap);
+    res.json(baseLegacyList);
   } catch (err) {
     console.error('Error fetching legacies:', err);
     res.status(500).json({ error: 'Failed to fetch legacies' });
