@@ -47,8 +47,7 @@ const TaskApi = {
                 const day = parseInt(dayStr, 10);
                 
                 const months = [
-                  'January', 'February', 'March', 'April', 'May', 'June',
-                  'July', 'August', 'September', 'October', 'November', 'December'
+                  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
                 ];
                 
                 return `${months[month]} ${day}`;
