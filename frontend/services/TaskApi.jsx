@@ -1,36 +1,32 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+import { API_BASE_URL, getAuthHeader } from './apiConfig';
 
-// Adds token and content headers for authenticated requests
-const getAuthHeader = (token) => ({
-  Authorization: `Bearer ${token}`,
-  'Content-Type': 'application/json',
-});
-
-const TaskApi = {
+/**
+ * TaskApi - Service for task-related API calls
+ */
+export const TaskApi = {
   /**
-   * Fetches and formats task data for the dashboard.
-   * Assumes backend returns tasks with most recent submission included.
+   * Get all tasks available to the current user
+   * @param {string} token - User's auth token
+   * @returns {Promise<Array>} - Array of tasks
    */
-  getAllTasks: async (token) => {
-    if (!token) throw new Error('Authentication token is required for getAllTasks.');
-
+  getTasks: async (token) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/tasks`, {
-        method: 'GET',
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/tasks` : '/api/tasks';
+      const response = await fetch(endpoint, {
         headers: getAuthHeader(token),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(`Failed to fetch tasks: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
       }
 
-      const rawTasks = await res.json();
-
+      const rawTasks = await response.json();
+      console.log("Raw tasks from API:", rawTasks);
+      
       // Map backend structure to frontend-friendly task format
       const formattedTasks = rawTasks.map((task) => {
         const latest = task.submissions?.[0];
-
+        
         return {
           taskID: task.task_id,
           name: task.title,
@@ -57,99 +53,197 @@ const TaskApi = {
           latest_submission: latest || null,
         };
       });
-
+      
+      console.log("Formatted tasks:", formattedTasks);
       return formattedTasks;
-    } catch (err) {
-      throw err;
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      throw error;
     }
   },
 
-  // Uploads evidence for a specific task
-  uploadEvidence: async (taskID, evidence, token) => {
-    if (!token) throw new Error('Authentication token is required for uploading evidence.');
-  
+  /**
+   * Get a specific task by ID
+   * @param {string} token - User's auth token
+   * @param {string} taskId - ID of the task to fetch
+   * @returns {Promise<Object>} - Task details
+   */
+  getTaskById: async (token, taskId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions`, {
-        method: 'POST',
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/tasks/${taskId}` : `/api/tasks/${taskId}`;
+      const response = await fetch(endpoint, {
         headers: getAuthHeader(token),
-        body: JSON.stringify({ submitted_evidence: evidence }), // 👈 schema field match
       });
-  
-      const result = await res.json();
-  
-      if (!res.ok) throw new Error(result.error || 'Upload failed.');
-      return result;
-    } catch (err) {
-      console.error('Error in TaskApi.uploadEvidence:', err);
-      return { success: false, message: err.message };
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch task');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error(`Error fetching task ${taskId}:`, error);
+      throw error;
     }
   },
-  
 
-  // Fetch user's latest submitted evidence for a task
-  getTaskEvidence: async (taskID, token) => {
-    if (!token) throw new Error('Token required');
-    const res = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions/latest`, {
-      method: 'GET',
-      headers: getAuthHeader(token),
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Failed to fetch evidence.');
-    return result.submitted_evidence || '';
+  /**
+   * Submit evidence for a task
+   * @param {string} token - User's auth token
+   * @param {string} taskId - ID of the task
+   * @param {FormData} formData - Form data including evidence files
+   * @returns {Promise<Object>} - Submission result
+   */
+  submitTaskEvidence: async (token, taskId, formData) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/tasks/${taskId}/submit` : `/api/tasks/${taskId}/submit`;
+      
+      // Special headers for form data (no Content-Type)
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit task evidence');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error submitting task evidence:', error);
+      throw error;
+    }
   },
 
-  // Fetch reviewer comment for the latest submission of a task
-  getTaskComments: async (taskID, token) => {
-    if (!token) throw new Error('Token required');
-    const res = await fetch(`${API_BASE_URL}/api/tasks/${taskID}/submissions/latest`, {
-      method: 'GET',
-      headers: getAuthHeader(token),
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || 'Failed to fetch reviewer comment.');
-    return result.reviewer_comment || '';
+  /**
+   * Submit evidence for a task
+   * @param {string} taskId - ID of the task
+   * @param {Object} evidence - Evidence data including description and files
+   * @param {string} token - User's auth token
+   * @returns {Promise<Object>} - Submission result
+   */
+  uploadEvidence: async (taskId, evidence, token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/tasks/${taskId}/submit` : `/api/tasks/${taskId}/submit`;
+      
+      // Create FormData object to handle file uploads
+      const formData = new FormData();
+      
+      // Add description to form data
+      if (evidence.description) {
+        formData.append('description', evidence.description);
+      }
+      
+      // Add files to form data if they exist
+      if (evidence.files && evidence.files.length > 0) {
+        for (let i = 0; i < evidence.files.length; i++) {
+          formData.append('files', evidence.files[i]);
+        }
+      }
+      
+      // Special headers for form data (no Content-Type)
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to upload evidence');
+      }
+
+      return { success: true, message: 'Evidence uploaded successfully' };
+    } catch (error) {
+      console.error('Error submitting evidence:', error);
+      return { success: false, message: error.message || 'Failed to upload evidence' };
+    }
   },
 
-  // Returns the URL for the user's legacy's Google drive submission folder
-  // Merxon's note: I assume the url can be hardcoded somewhere or be stored in the session? So I did not make it an async function.
-  // Please let me know if backend decide to make this async so I will update the frontend to handle this change!
-  getSubmissionFolderUrl(legacyName) {
-    
+  /**
+   * Get evidence for a specific task
+   * @param {string} taskId - ID of the task
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - Task evidence
+   */
+  getTaskEvidence: async (taskId, token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/tasks/${taskId}/evidence` : `/api/tasks/${taskId}/evidence`;
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
 
-    const mapping = {
-      'Cable': 'https://drive.google.com/drive/folders/1YNz4Yp5PMgi1zR9TNGkCV5GDVH5NDHu-?usp=drive_link',
-      'Chronicle': 'https://drive.google.com/drive/folders/1Yx0DUAnxmUi8uz9luBnBQ3HuT_oDmA92?usp=drive_link',
-      'Circuit': 'https://drive.google.com/drive/folders/1db5YlI1rwpmGKa0G8mzw61ML8oCmolCR?usp=drive_link',
-      'Civic': 'https://drive.google.com/drive/folders/13krHEwAk5MQm6bPbs8hH4aYy7m3Pu1gy?usp=drive_link',
-      'Eureka': 'https://drive.google.com/drive/folders/1TQ3xA0wESQCniZsPc5rXztCI9nClYng2?usp=drive_link',
-      'Field': 'https://drive.google.com/drive/folders/1YbbPpvoIX2OqUw2dcsONGudvTeiI30qc?usp=drive_link',
-      'Gate': 'https://drive.google.com/drive/folders/13B9Fs6Nu5KUqk-tks-9cebBDJaPZYLaK?usp=drive_link',
-      'Hunter': 'https://drive.google.com/drive/folders/1aZlV5WTUtjeI4e-a6LGDtqhmSFFY0_uY?usp=drive_link',
-      'Labyrinth': 'https://drive.google.com/drive/folders/18S8cLQM3nTRZckeOdfVZ_O8wcqdCIXNe?usp=drive_link',
-      'Lands': 'https://drive.google.com/drive/folders/1GHZi3T7Y_MgPc3VQpkV9ttAB-f7-LGOV?usp=drive_link',
-      'Laurel': 'https://drive.google.com/drive/folders/1yADjTCsNR8b00tg6M45PteFDkdBANb0w?usp=drive_link',
-      'Legion': 'https://drive.google.com/drive/folders/1crREsKqCMT5x2Mvy7AfIhYvWtaPuGgQw?usp=drive_link',
-      'Liberty': 'https://drive.google.com/drive/folders/1RSBj6sPfV_1G7hmhTlUhuBrwjV-s3nDj?usp=drive_link',
-      'Mason': 'https://drive.google.com/drive/folders/1iYoZw3wyfFCJ1Z2o8OvFt_CyDJB3MH5K?usp=drive_link',
-      'Mission': 'https://drive.google.com/drive/folders/15T3PWlBj8_KsNr1orfG0BHfLZlIzUbA5?usp=drive_link',
-      'North': 'https://drive.google.com/drive/folders/1V4VWrHOKecUq59UZxxdmyed-sIWlRGhW?usp=drive_link',
-      'Ocean': 'https://drive.google.com/drive/folders/1mZLOJ0svoBZBoorrsUoAyWSOyMNRMgYM?usp=drive_link',
-      'Octagon': 'https://drive.google.com/drive/folders/19eX97F0rbLaVEa2q39XLGlmc94aJmu61?usp=drive_link',
-      'Pier': 'https://drive.google.com/drive/folders/1iZZF-FaF8UwMmZSCkmUbV6LZksDNubu5?usp=drive_link',
-      'Plaza': 'https://drive.google.com/drive/folders/1XbJcgGfO7dDg-jD0y5x09-3nVpRfGJWn?usp=drive_link',
-      'Pyramid': 'https://drive.google.com/drive/folders/15RyfvIj_4JtPDNP4LMH9Roe3mvanWsBG?usp=drive_link',
-      'Reserve': 'https://drive.google.com/drive/folders/1YrAJr4IbDt_ZalhgYIV5tb4tj9hsOtZ4?usp=drive_link',
-      'Tower': 'https://drive.google.com/drive/folders/1Iut-jGg7EQATE09JUjvBK-kq6yZ4tGpj?usp=drive_link',
-      'Union': 'https://drive.google.com/drive/folders/1JzhRdqOeNrJjbB4sMvQcDAvRobW3ZXUn?usp=drive_link',
-      'Vista': 'https://drive.google.com/drive/folders/1FkPgvcJufuYEyqxi7PRBJa4mVmBnoKvj?usp=drive_link',
+      if (!response.ok) {
+        throw new Error('Failed to fetch task evidence');
+      }
+
+      const data = await response.json();
+      return data.evidence || '';
+    } catch (error) {
+      console.error(`Error fetching task evidence:`, error);
+      return '';
     }
+  },
 
-    if (legacyName in mapping) {
-      return mapping[legacyName]
+  /**
+   * Get admin comments for a specific task
+   * @param {string} taskId - ID of the task
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - Admin comments
+   */
+  getTaskComments: async (taskId, token) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/tasks/${taskId}/comments` : `/api/tasks/${taskId}/comments`;
+      const response = await fetch(endpoint, {
+        headers: getAuthHeader(token),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch task comments');
+      }
+
+      const data = await response.json();
+      return data.comments || '';
+    } catch (error) {
+      console.error(`Error fetching task comments:`, error);
+      return '';
     }
+  },
 
-    const defaultUrl = 'https://drive.google.com/drive/folders/1gdMTa1UiJvnBwFdIVnsiVc0AQ-HYjic5';
-    return defaultUrl
+  /**
+   * Get Google Drive folder URL for uploading task evidence
+   * @param {string} legacyName - The name of the user's legacy
+   * @returns {string} - Google Drive folder URL
+   */
+  getSubmissionFolderUrl: (legacyName) => {
+    // Map legacy names to specific Google Drive folders
+    const folderUrls = {
+      'Vista': 'https://drive.google.com/drive/folders/1g4PCN0NwmvKZwVHMtZC8ynDxLkVBsXQ5?usp=sharing',
+      'Ocean': 'https://drive.google.com/drive/folders/1H2n3df8JK-NBmvQyaW51QRhYLXo34Vux?usp=sharing',
+      'Nova': 'https://drive.google.com/drive/folders/1P9ckRJmY5YZx7NfwHjDzExLbcQM2LwEo?usp=sharing',
+      'Terra': 'https://drive.google.com/drive/folders/1ag4MNgmRSJN1WhJkDPs4G723gQKVFej8?usp=sharing',
+      'Aurora': 'https://drive.google.com/drive/folders/1-5hN3cxdQZ9TVG9wF4Xxh_kJySxtqfMH?usp=sharing',
+      'Orion': 'https://drive.google.com/drive/folders/1HDmzno1cJ48A_XRGYYYQJnTVrWB4tzWo?usp=sharing',
+      'Astra': 'https://drive.google.com/drive/folders/17EM9cIei8tFlPKXK6rmI9q52OFY4vSXy?usp=sharing',
+      // Add more legacies as needed
+    };
+
+    // Try to match the legacy name (even partial match)
+    const matchingLegacy = Object.keys(folderUrls).find(
+      name => legacyName && legacyName.toLowerCase().includes(name.toLowerCase())
+    );
+
+    // Return the matching URL or a default URL
+    return matchingLegacy ? folderUrls[matchingLegacy] : 
+      'https://drive.google.com/drive/folders/1bpL4UfP-L61RpCafPu1AwQfSSdrI7N6Q?usp=sharing'; // Default folder
   }
 };
 

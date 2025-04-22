@@ -6,6 +6,11 @@ export default function StudentInfo({legacyName, cohortName}) {
   // Extract only the first word from the legacy name
   const displayLegacy = legacyName ? legacyName.split(' ')[0] : 'Unknown';
   
+  // Handle cohort name safely - ensure we're displaying a string
+  const displayCohort = typeof cohortName === 'object' && cohortName?.name 
+    ? cohortName.name 
+    : (typeof cohortName === 'string' ? cohortName : 'Unknown Cohort');
+  
   return (
     <Stack direction='column' spacing={1} sx={{width: 1, alignContent: 'center'}}>
       <Stack direction='row' sx={{justifyContent: 'center'}}>
@@ -25,7 +30,7 @@ export default function StudentInfo({legacyName, cohortName}) {
           />
         </Box>
         <Typography sx={{fontWeight: 800, mr: 1}}>Cohort:</Typography>
-        <Typography sx={{fontWeight: 700, color: 'GrayText'}}>{cohortName}</Typography>
+        <Typography sx={{fontWeight: 700, color: 'GrayText'}}>{displayCohort}</Typography>
       </Stack>
     </Stack>
   )

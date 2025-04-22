@@ -1,154 +1,156 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+import { API_BASE_URL, getAuthHeader } from './apiConfig';
 
-// Adds token and content headers for authenticated requests
-const getAuthHeader = (token) => ({
-  Authorization: `Bearer ${token}`,
-  'Content-Type': 'application/json',
-});
-
-const UserApi = {
-  // NEW function to fetch the full user object from /api/me
-  getMe: async (token) => {
-    if (!token) throw new Error('Authentication token is required for getMe.');
-    
+/**
+ * UserApi - Service for user-related API calls
+ */
+export const UserApi = {
+  /**
+   * Get the current user's profile
+   * @param {string} token - User's auth token
+   * @returns {Promise<Object>} - User profile data
+   */
+  getProfile: async (token) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/me`, {
-        method: 'GET',
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/me` : '/api/me';
+      const response = await fetch(endpoint, {
         headers: getAuthHeader(token),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        console.error(`Failed to fetch user data: ${res.status} ${res.statusText}`, errorData);
-        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
       }
 
-      const userData = await res.json();
-      // Returns the full object, including nested legacy and cohort details
-      // Example: { user_id: 1, email: '...', ..., legacy: { legacy_id: 5, name: 'Ocean SF', ... }, cohort: { cohort_id: 2, name: 'M24' } }
-      return userData;
-    } catch (err) {
-      console.error('Error in UserApi.getMe:', err);
-      // Re-throw the error so the calling component can handle it
-      throw err; 
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
     }
   },
 
-  // Retrieve a user's cohort name from the server. The return format is the user's cohort name (string).
-  // E.g., 'M24'
+  /**
+   * Update the current user's profile
+   * @param {string} token - User's auth token
+   * @param {Object} profileData - Profile data to update
+   * @returns {Promise<Object>} - Updated user profile
+   */
+  updateProfile: async (token, profileData) => {
+    try {
+      const endpoint = API_BASE_URL ? `${API_BASE_URL}/api/profile` : '/api/profile';
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: getAuthHeader(token),
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get cohort information for the current user
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - User's cohort name
+   */
   getCohort: async (token) => {
-    if (!token) throw new Error('Authentication token is required for getCohort.');
-    
     try {
-      const res = await fetch(`${API_BASE_URL}/api/me`, {
-        method: 'GET',
-        headers: getAuthHeader(token),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      const userData = await UserApi.getProfile(token);
+      
+      // Handle different response formats
+      if (!userData) return 'Unknown Cohort';
+      
+      // If cohort is an object with a name property
+      if (userData.cohort && typeof userData.cohort === 'object' && userData.cohort.name) {
+        return userData.cohort.name;
       }
-
-      const userData = await res.json();
-      return userData.cohort?.name || 'Unknown Cohort';
-    } catch (err) {
-      console.error('Error in UserApi.getCohort:', err);
-      throw err;
+      
+      // If cohort is just a string
+      if (typeof userData.cohort === 'string') {
+        return userData.cohort;
+      }
+      
+      return 'Unknown Cohort';
+    } catch (error) {
+      console.error('Error fetching user cohort:', error);
+      return 'Unknown Cohort';
     }
   },
-  
-  // Retrieve a user's legacy name from the server. The return format is the legacy name (string).
-  // E.g., 'Turing'
+
+  /**
+   * Get the user's legacy information
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - User's legacy name
+   */
   getLegacy: async (token) => {
-    if (!token) throw new Error('Authentication token is required for getLegacy.');
-    
     try {
-      const res = await fetch(`${API_BASE_URL}/api/me`, {
-        method: 'GET',
-        headers: getAuthHeader(token),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
+      if (!token) {
+        throw new Error('Authentication token is required');
       }
-
-      const userData = await res.json();
-      return userData.legacy?.name || 'Unknown Legacy';
-    } catch (err) {
-      console.error('Error in UserApi.getLegacy:', err);
-      throw err;
+      
+      const userData = await UserApi.getProfile(token);
+      
+      // Check if user data exists and has legacy information
+      if (!userData || !userData.legacy) {
+        return 'Unknown Legacy';
+      }
+      
+      // Return the legacy name
+      return userData.legacy.name || 'Unknown Legacy';
+    } catch (error) {
+      console.error('Error fetching user legacy:', error);
+      return 'Unknown Legacy'; // Default if error occurs
     }
   },
 
-  // Retrieve a user's location from the server. The return format is a city name (string).
-  // E.g., 'San Francisco'
+  /**
+   * Get the user's current location
+   * @param {string} token - User's auth token
+   * @returns {Promise<string>} - User's location
+   */
   getUserLocation: async (token) => {
-    if (!token) throw new Error('Authentication token is required for getUserLocation.');
-    
     try {
-      const res = await fetch(`${API_BASE_URL}/api/me`, {
-        method: 'GET',
-        headers: getAuthHeader(token),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(`Failed to fetch user data: ${res.status} ${res.statusText} - ${errorData.error || 'Unknown error'}`);
-      }
-
-      const userData = await res.json();
+      const userData = await UserApi.getProfile(token);
       
-      // Check if legacy data exists and has a location_filter property
-      if (userData.legacy && userData.legacy.location_filter) {
-        return userData.legacy.location_filter;
-      }
+      // Check if user data exists and has location information
+      if (!userData) return 'Global';
       
-      return 'Unknown Location';
-    } catch (err) {
-      console.error('Error in UserApi.getUserLocation:', err);
-      throw err;
+      // Return the user's location or a default value
+      return userData.location || userData.city || 'Global';
+    } catch (error) {
+      console.error('Error fetching user location:', error);
+      return 'Global'; // Default to global if error occurs
     }
   },
 
-  // Get username from current user data
-  getUserName: (currentUser) => {
-    if (currentUser) {
-      if (currentUser.displayName) {
-        return currentUser.displayName;
-      } else if (currentUser.email) {
-        // Extract the name part from the email (before @)
-        const emailName = currentUser.email.split('@')[0];
-        // Convert to title case (first letter capitalized)
-        return emailName.charAt(0).toUpperCase() + emailName.slice(1);
-      }
-    }
-    return "User";
+  /**
+   * Get profile photo URL from user object
+   * @param {Object} user - Firebase user object
+   * @returns {string} - URL of profile photo
+   */
+  getProfilePhoto: (user) => {
+    if (!user) return 'https://mui.com/static/images/avatar/1.jpg'; // Default avatar
+    return user.photoURL || 'https://mui.com/static/images/avatar/1.jpg';
   },
 
-  // Get profile photo URL from current user
-  getProfilePhoto: (currentUser) => {
-    if (currentUser) {
-      // Check for photoURL from Google account
-      if (currentUser.photoURL) {
-        return currentUser.photoURL;
-      }
-      
-      // If using Firebase Auth with Google, try to get from providerData
-      if (currentUser.providerData && currentUser.providerData.length > 0) {
-        const googleProvider = currentUser.providerData.find(
-          provider => provider.providerId === 'google.com'
-        );
-        
-        if (googleProvider && googleProvider.photoURL) {
-          return googleProvider.photoURL;
-        }
-      }
+  /**
+   * Get display name from user object
+   * @param {Object} user - Firebase user object
+   * @returns {string} - User's display name
+   */
+  getUserName: (user) => {
+    if (!user) return 'Guest User';
+    // Extract first name from email if no display name
+    if (!user.displayName && user.email) {
+      const emailName = user.email.split('@')[0];
+      return emailName.charAt(0).toUpperCase() + emailName.slice(1);
     }
-    
-    // Fallback to a default avatar if no photo is available
-    return 'https://img.icons8.com/?size=100&id=114140&format=png&color=000000';
+    return user.displayName || 'Anonymous User';
   }
 };
 

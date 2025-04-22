@@ -9,16 +9,53 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const admin = require('firebase-admin');
-const { PrismaClient } = require('./generated/prisma'); // Adjust path if needed
+const { PrismaClient } = require('@prisma/client');
 
 // Load environment variables from .env file (DATABASE_URL, PORT, JWT_SECRET, etc.)
 dotenv.config();
 
 // --- Firebase Admin SDK Initialization ---
-// Initializes Firebase Admin using the service account key.
-// IMPORTANT: Ensure './firebase-admin-sdk-key.json' exists, is correctly named,
-// belongs to the SAME Firebase project as the frontend config, and is in .gitignore.
-const serviceAccount = require('./firebase-admin-sdk-key.json');
+// Initializes Firebase Admin using the service account key from environment variable.
+// The service account key is stored as a Base64 encoded string in FIREBASE_ADMIN_SDK_BASE64.
+let serviceAccount;
+
+try {
+  // Check if the environment variable exists
+  const encodedServiceAccount = process.env.FIREBASE_ADMIN_SDK_BASE64;
+  
+  if (!encodedServiceAccount) {
+    console.error('FATAL ERROR: FIREBASE_ADMIN_SDK_BASE64 environment variable is not set.');
+    // Fall back to local file if in development
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Falling back to local firebase-admin-sdk-key.json file for development.');
+      serviceAccount = require('./firebase-admin-sdk-key.json');
+    } else {
+      // Exit if in production and no key provided
+      process.exit(1);
+    }
+  } else {
+    try {
+      // Decode the Base64 string, trim any whitespace that might have been added
+      const decodedJsonString = Buffer.from(encodedServiceAccount.trim(), 'base64').toString('utf-8');
+      
+      // Parse the JSON string into an object
+      serviceAccount = JSON.parse(decodedJsonString);
+      console.log('Firebase Admin SDK credentials loaded from environment variable.');
+    } catch (decodeError) {
+      console.error('Failed to decode or parse Firebase Admin SDK credentials:', decodeError);
+      // Fall back to local file if in development
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Falling back to local firebase-admin-sdk-key.json file for development after decode error.');
+        serviceAccount = require('./firebase-admin-sdk-key.json');
+      } else {
+        process.exit(1);
+      }
+    }
+  }
+} catch (error) {
+  console.error('Failed to initialize Firebase Admin SDK:', error);
+  process.exit(1);
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -38,6 +75,15 @@ const PORT = process.env.PORT || 3001; // Use 3001 to avoid conflict with fronte
 app.use(cors());
 // Parse incoming requests with JSON payloads (e.g., POST/PUT requests).
 app.use(express.json());
+
+// --- API Prefix Compatibility Layer ---
+// Create a compatibility layer for routes that include /api prefix in the frontend
+// This ensures that requests to /api/... are forwarded to the correct handler
+app.use('/api', (req, res, next) => {
+  // Remove /api prefix from the URL before passing to other middleware
+  req.url = req.url; // Keep the URL as is for routing
+  next();
+});
 
 // --- Authentication Middleware (authenticateToken) ---
 // This middleware is applied to protected API routes.
@@ -156,8 +202,8 @@ const authenticateToken = async (req, res, next) => {
                  // If userRecord was already found via UID, this re-fetches the same data.
                  // A slightly more optimized way might be: userRecord = existingUserByEmail; but the update ensures freshness.
               }
-            }
-          } else {
+          }
+        } else {
             // 3. Not found by firebase_uid OR email - create a new user
             console.log(`Creating new user for firebase_uid: ${firebase_uid}, email: ${tokenEmailLower}`);
             userRecord = await prisma.user.create({
@@ -207,9 +253,9 @@ app.get('/', (req, res) => {
 // --- Protected API Routes ---
 // Routes below this point typically require authentication.
 
-// GET /api/me: Returns profile information for the currently authenticated user.
+// GET /me: Returns profile information for the currently authenticated user.
 // Uses `authenticateToken` middleware to get user data into `req.user`.
-app.get('/api/me', authenticateToken, async (req, res) => {
+app.get('/me', authenticateToken, async (req, res) => {
   try {
     // Get the user with related legacy and cohort information
     const userWithRelations = await prisma.user.findUnique({
@@ -266,8 +312,8 @@ app.get('/api/me', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/legacy/:legacyId/members - Fetch all members of a specific legacy
-app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => {
+// GET /legacy/:legacyId/members - Fetch all members of a specific legacy
+app.get('/legacy/:legacyId/members', authenticateToken, async (req, res) => {
   try {
     const legacyId = parseInt(req.params.legacyId);
     
@@ -308,7 +354,7 @@ app.get('/api/legacy/:legacyId/members', authenticateToken, async (req, res) => 
 
 
 // NEW endpoint connecting members with the same Legacy Name
-app.get('/api/legacy/byname/:baseLegacyName/members', authenticateToken, async (req, res) => {
+app.get('/legacy/byname/:baseLegacyName/members', authenticateToken, async (req, res) => {
   try {
     const baseLegacyName = req.params.baseLegacyName;
     
@@ -352,7 +398,7 @@ app.get('/api/legacy/byname/:baseLegacyName/members', authenticateToken, async (
 });
 
 // NEW endpoint for fetching members of a specific legacy AND cohort
-app.get('/api/legacy/:legacyId/cohort/:cohortId/members', authenticateToken, async (req, res) => {
+app.get('/legacy/:legacyId/cohort/:cohortId/members', authenticateToken, async (req, res) => {
   try {
     const legacyId = parseInt(req.params.legacyId, 10);
     const cohortId = parseInt(req.params.cohortId, 10);
@@ -396,8 +442,8 @@ app.get('/api/legacy/:legacyId/cohort/:cohortId/members', authenticateToken, asy
   }
 });
 
-// GET /api/tasks - Fetch all tasks for current user
-app.get('/api/tasks', authenticateToken, async (req, res) => {
+// GET /tasks - Fetch all tasks for current user
+app.get('/tasks', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
 
@@ -436,8 +482,8 @@ app.get('/api/tasks', authenticateToken, async (req, res) => {
 });
 
 
-// POST /api/tasks/:taskId/submissions - Upload evidence for a task
-app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
+// POST /tasks/:taskId/submissions - Upload evidence for a task
+app.post('/tasks/:taskId/submissions', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
     const taskId = parseInt(req.params.taskId, 10);
@@ -473,8 +519,45 @@ app.post('/api/tasks/:taskId/submissions', authenticateToken, async (req, res) =
   }
 });
 
-// GET /api/tasks/:taskId/submissions/latest
-app.get('/api/tasks/:taskId/submissions/latest', authenticateToken, async (req, res) => {
+// POST /tasks/:taskId/submit - Compatibility route for frontend
+app.post('/tasks/:taskId/submit', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const taskId = parseInt(req.params.taskId, 10);
+    const { submitted_evidence } = req.body;
+
+    if (isNaN(taskId)) return res.status(400).json({ error: 'Invalid task ID.' });
+    if (!submitted_evidence || submitted_evidence.trim() === '') {
+      return res.status(400).json({ error: 'Evidence cannot be empty.' });
+    }
+
+    // Mark previous submissions as not latest
+    await prisma.taskSubmission.updateMany({
+      where: { task_id: taskId, user_id: userId, is_latest: true },
+      data: { is_latest: false }
+    });
+
+    // Create new submission
+    const submission = await prisma.taskSubmission.create({
+      data: {
+        task_id: taskId,
+        user_id: userId,
+        submitted_evidence,
+        is_latest: true,
+        submitted_at: new Date(),
+        status: 'Submitted'
+      }
+    });
+
+    res.status(201).json({ success: true, submission });
+  } catch (err) {
+    console.error('Upload failed:', err);
+    res.status(500).json({ error: 'Failed to upload submission.' });
+  }
+});
+
+// GET /tasks/:taskId/submissions/latest
+app.get('/tasks/:taskId/submissions/latest', authenticateToken, async (req, res) => {
   const taskId = parseInt(req.params.taskId, 10);
   const userId = req.user.user_id;
 
@@ -503,9 +586,9 @@ app.get('/api/tasks/:taskId/submissions/latest', authenticateToken, async (req, 
   }
 });
 
-// GET /api/admin/tasks - Admin only
+// GET /admin/tasks - Admin only
 // This route fetches all tasks for admin review.
-app.get('/api/admin/tasks', async (req, res) => {
+app.get('/admin/tasks', authenticateToken, async (req, res) => {
   const legacyFilter = req.query.legacy || 'All';
   const statusFilter = req.query.status || 'All';
 
@@ -559,9 +642,9 @@ app.get('/api/admin/tasks', async (req, res) => {
   }
 });
 
-// POST /api/admin/tasks - Admin only
+// POST /admin/tasks - Admin only
 // Create a new task
-app.post('/api/admin/tasks', authenticateToken, async (req, res) => {
+app.post('/admin/tasks', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -591,9 +674,9 @@ app.post('/api/admin/tasks', authenticateToken, async (req, res) => {
 });
 
 
-// GET /api/admin/tasks/:taskId/evidence - Admin only
+// GET /admin/tasks/:taskId/evidence - Admin only
 // This route fetches the evidence for a specific task submission.
-app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res) => {
+app.get('/admin/tasks/:taskId/evidence', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -634,9 +717,9 @@ app.get('/api/admin/tasks/:taskId/evidence', authenticateToken, async (req, res)
   }
 });
 
-// GET /api/admin/submissions/:submissionId - Admin only 
+// GET /admin/submissions/:submissionId - Admin only 
 // This route fetches a specific submission by ID
-app.get('/api/admin/submissions/:submissionId', authenticateToken, async (req, res) => {
+app.get('/admin/submissions/:submissionId', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -677,9 +760,9 @@ app.get('/api/admin/submissions/:submissionId', authenticateToken, async (req, r
   }
 });
 
-// PATCH /api/admin/tasks/:taskId/review - Admin-only 
+// PATCH /admin/tasks/:taskId/review - Admin-only 
 // Route to approve or reject a task
-app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res) => {
+app.patch('/admin/tasks/:taskId/review', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -725,8 +808,11 @@ app.patch('/api/admin/tasks/:taskId/review', authenticateToken, async (req, res)
   }
 });
 
-// GET /api/admin/legacies - Admin Only
-app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
+
+// GET /admin/legacies - Admin Only
+// List all legacies
+app.get('/admin/legacies', authenticateToken, async (req, res) => {
+
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -759,9 +845,10 @@ app.get('/api/admin/legacies', authenticateToken, async (req, res) => {
 });
 
 
-// GET /api/admin/status-options - Admin Only
+// GET /admin/status-options - Admin Only
+
 // Fetches the available status options for task submissions.
-app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
+app.get('/admin/status-options', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -774,8 +861,8 @@ app.get('/api/admin/status-options', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch status options' });
   }
 });
-// GET /api/legacies/rankings/global - Get global legacy rankings with aggregation
-app.get('/api/legacies/rankings/global', async (req, res) => {
+// GET /legacies/rankings/global - Get global legacy rankings with aggregation
+app.get('/legacies/rankings/global', async (req, res) => {
   try {
     // Fetch all legacies from the database
     const allLegacies = await prisma.legacy.findMany({
@@ -823,8 +910,8 @@ app.get('/api/legacies/rankings/global', async (req, res) => {
   }
 });
 
-// GET /api/legacies/rankings/local/:location - Get local legacy rankings by location
-app.get('/api/legacies/rankings/local/:location', async (req, res) => {
+// GET /legacies/rankings/local/:location - Get local legacy rankings by location
+app.get('/legacies/rankings/local/:location', async (req, res) => {
   try {
     const location = req.params.location;
     
@@ -849,24 +936,5 @@ app.get('/api/legacies/rankings/local/:location', async (req, res) => {
   }
 });
 
-// --- Start Server ---
-// Starts the Express server listening on the configured PORT.
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
-
-// --- Graceful Shutdown Handling ---
-// Ensures Prisma client disconnects properly when the server process is stopped.
-process.on('SIGINT', async () => {
-  console.log('SIGINT signal received: closing HTTP server')
-  await prisma.$disconnect()
-  console.log('Prisma Client disconnected.')
-  process.exit(0)
-})
-
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM signal received: closing HTTP server')
-  await prisma.$disconnect()
-  console.log('Prisma Client disconnected.')
-  process.exit(0)
-})
+// Export the app instance to be used by the main server
+module.exports = app;

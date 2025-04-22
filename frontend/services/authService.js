@@ -4,6 +4,7 @@ import {
   signOut
 } from 'firebase/auth';
 import { auth } from './firebase';
+import { getApiBaseUrl, getAuthHeader } from './apiConfig';
 
 /**
  * Signs in a user with Google and retrieves their role from the backend
@@ -25,8 +26,14 @@ export const signInWithGoogle = async () => {
     // Get Firebase ID token
     const idToken = await user.getIdToken();
 
+    // Get base URL and construct API endpoint
+    const baseUrl = getApiBaseUrl();
+    const apiEndpoint = baseUrl ? `${baseUrl}/api/me` : '/api/me';
+    
+    console.log('API endpoint:', apiEndpoint);
+
     // Fetch role and profile info from backend
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/me`, {
+    const res = await fetch(apiEndpoint, {
       headers: {
         Authorization: `Bearer ${idToken}`,
       }

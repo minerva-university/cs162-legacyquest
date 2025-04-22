@@ -5,6 +5,31 @@ import { useState } from 'react';
 import taskIcon from '../assets/task-icon.svg';
 import Fade from '@mui/material/Fade';
 
+// Helper function to format dates properly
+const formatDate = (dateString) => {
+  if (!dateString) return 'No due date';
+  
+  try {
+    // Try to parse the date string
+    const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original if invalid
+    }
+    
+    // Format the date as Month Day, Year
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return dateString; // Return the original string if any error occurs
+  }
+};
+
 // The task listed in the task list
 export default function ListedTask({taskID, taskName, taskDescription, taskStatus, dueDate, rejectionReason, onRefreshTasks, pointsOnApproval}) {
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
@@ -34,6 +59,9 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
       setOpenUploadDialog(true);
     }
   };
+
+  // Format the due date for display
+  const formattedDueDate = formatDate(dueDate);
 
   return (
     <>
@@ -84,7 +112,7 @@ export default function ListedTask({taskID, taskName, taskDescription, taskStatu
               </Stack>
             </Stack>
             
-            <Typography>Due {dueDate}</Typography>
+            <Typography>Due {formattedDueDate}</Typography>
           </Stack>
         </ListItem>
       </Tooltip>

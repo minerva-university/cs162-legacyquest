@@ -14,6 +14,8 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [folderUrl, setFolderUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [legacyName, setLegacyName] = useState('');
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -24,12 +26,23 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
     async function fetchFolderUrl() {
       if (open && taskID) {
         try {
-          const legacyName = await UserApi.getLegacy(idToken);
-          const url = TaskApi.getSubmissionFolderUrl(legacyName.split(' ')[0]);
+          setLoading(true);
+          // Get user's legacy name using the UserApi
+          const legacy = await UserApi.getLegacy(idToken);
+          console.log("Got legacy name:", legacy);
+          setLegacyName(legacy);
+          
+          // Get the Google Drive folder URL based on legacy name
+          const url = TaskApi.getSubmissionFolderUrl(legacy);
+          console.log("Got folder URL:", url);
+          
           setFolderUrl(url);
         } catch (err) {
           console.error("Error fetching folder URL:", err);
-          setFolderUrl('');
+          // Set a default folder URL if there's an error
+          setFolderUrl('https://drive.google.com/drive/folders/1bpL4UfP-L61RpCafPu1AwQfSSdrI7N6Q?usp=sharing');
+        } finally {
+          setLoading(false);
         }
       }
     }
@@ -39,21 +52,35 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
 
   const handleOpenFolder = () => {
     if (folderUrl) {
-      window.open(folderUrl, '_blank');
+      window.open(folderUrl, '_blank', 'noopener,noreferrer');
     } else {
-      setSnackbarMessage('Folder URL is not available');
-      setSnackbarSeverity('error');
+      setSnackbarMessage('Opening default Google Drive folder');
+      setSnackbarSeverity('info');
       setSnackbarOpen(true);
+      // Open default folder if specific one isn't available
+      window.open('https://drive.google.com/drive/folders/1bpL4UfP-L61RpCafPu1AwQfSSdrI7N6Q?usp=sharing', '_blank', 'noopener,noreferrer');
     }
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate input
+    if (!evidence.trim()) {
+      setError("Please provide evidence description");
+      return;
+    }
+    
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const response = await TaskApi.uploadEvidence(taskID, evidence, idToken);
+      // Create evidence object with the description text
+      const evidenceObj = { description: evidence };
+      
+      // Call the API to upload evidence
+      const response = await TaskApi.uploadEvidence(taskID, evidenceObj, idToken);
+      
       if (response.success) {
         setEvidence('');
         setSnackbarMessage('Evidence uploaded successfully!');
@@ -67,14 +94,15 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
         
         onClose();
       } else {
-        const errorMsg = 'Failed to upload evidence';
+        const errorMsg = response.message || 'Failed to upload evidence';
         setError(errorMsg);
         // Show error snackbar
         setSnackbarMessage(errorMsg);
         setSnackbarSeverity('error');
-        setSnackbarOpen(true);      }
+        setSnackbarOpen(true);
+      }
     } catch (err) {
-      const errorMsg = 'An error occurred while uploading evidence';
+      const errorMsg = err.message || 'An error occurred while uploading evidence';
       setError(errorMsg);
       // Show error snackbar
       setSnackbarMessage(errorMsg);
@@ -161,14 +189,29 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
                 <Button 
                   startIcon={<DriveFolderUploadIcon/>}
                   onClick={handleOpenFolder}
-                  disabled={!folderUrl}
-                  sx={{textTransform: 'none', px: 2, borderRadius: '10px'}}>
-                    Upload Files Here
-                  </Button>
+                  variant="outlined"
+                  color="primary"
+                  sx={{
+                    textTransform: 'none', 
+                    px: 2, 
+                    borderRadius: '10px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)'
+                    }
+                  }}>
+                    {loading ? 'Loading...' : 'Upload Files to Google Drive'}
+                </Button>
               </Stack>
+              
+              <Typography variant="body2" sx={{ textAlign: 'left', mb: 2, color: 'text.secondary' }}>
+                1. Click the button above to upload your files to Google Drive<br />
+                2. After uploading, copy the link(s) to your file(s)<br />
+                3. Paste the link(s) in the description field below along with your evidence details
+              </Typography>
+              
               <TextField
                 margin='dense'
-                label='Description'
+                label='Your Evidence Description (include Google Drive links)'
                 fullWidth
                 multiline
                 rows={8}
@@ -176,6 +219,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
                 onChange={(e) => setEvidence(e.target.value)}
                 required
                 disabled={isSubmitting}
+                placeholder="Describe what you did to complete this task. Include Google Drive links to any evidence files you uploaded."
                 sx={{mb: 2}}
               />
               
@@ -202,10 +246,10 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
                 >
                   {isSubmitting ? (
                     <Stack direction='row' spacing={1} alignItems='center'>
-                      <CircularProgress size={20} color='primary'/>
+                      <CircularProgress size={20} color='inherit'/>
                       <span style={{color: 'white'}}>Submitting...</span>
                     </Stack>
-                  ) : 'Submit'}
+                  ) : 'Submit Evidence'}
                 </Button>
               </DialogActions>
             </Stack>
