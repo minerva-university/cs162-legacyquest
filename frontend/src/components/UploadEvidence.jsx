@@ -15,6 +15,7 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
   const [error, setError] = useState(null);
   const [folderUrl, setFolderUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [legacyName, setLegacyName] = useState('');
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -26,12 +27,13 @@ export default function UploadEvidence({ open, onClose, taskID, taskName, descri
       if (open && taskID) {
         try {
           setLoading(true);
-          // Get user's legacy name
-          const legacyName = await UserApi.getLegacy(idToken);
-          console.log("Got legacy name:", legacyName);
+          // Get user's legacy name using the UserApi
+          const legacy = await UserApi.getLegacy(idToken);
+          console.log("Got legacy name:", legacy);
+          setLegacyName(legacy);
           
           // Get the Google Drive folder URL based on legacy name
-          const url = TaskApi.getSubmissionFolderUrl(legacyName);
+          const url = TaskApi.getSubmissionFolderUrl(legacy);
           console.log("Got folder URL:", url);
           
           setFolderUrl(url);

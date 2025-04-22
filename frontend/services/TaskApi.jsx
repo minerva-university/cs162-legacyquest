@@ -20,7 +20,42 @@ export const TaskApi = {
         throw new Error('Failed to fetch tasks');
       }
 
-      return await response.json();
+      const rawTasks = await response.json();
+      console.log("Raw tasks from API:", rawTasks);
+      
+      // Map backend structure to frontend-friendly task format
+      const formattedTasks = rawTasks.map((task) => {
+        const latest = task.submissions?.[0];
+        
+        return {
+          taskID: task.task_id,
+          name: task.title,
+          description: task.description || '',
+          status: latest?.status || 'Not Submitted',
+          dueDate: task.due_date
+            ? (() => {
+                // Parse the ISO date string
+                const [datePart] = task.due_date.split('T');
+                const [year, monthStr, dayStr] = datePart.split('-');
+                
+                // Convert to month names and date number
+                const month = parseInt(monthStr, 10) - 1;
+                const day = parseInt(dayStr, 10);
+                
+                const months = [
+                  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+                ];
+                
+                return `${months[month]} ${day}`;
+              })()
+            : 'N/A',
+          points_on_approval: task.points_on_approval,
+          latest_submission: latest || null,
+        };
+      });
+      
+      console.log("Formatted tasks:", formattedTasks);
+      return formattedTasks;
     } catch (error) {
       console.error('Error fetching tasks:', error);
       throw error;
