@@ -599,7 +599,12 @@ app.get('/admin/tasks', authenticateToken, async (req, res) => {
         ...(statusFilter !== 'All' && { status: statusFilter }),
         user: {
           ...(legacyFilter !== 'All' && {
-            legacy_id: parseInt(legacyFilter)
+            legacy: {
+              name: {
+                startsWith: legacyFilter,
+                mode: 'insensitive'
+              }
+            }
           })
         }
       },
@@ -627,7 +632,7 @@ app.get('/admin/tasks', authenticateToken, async (req, res) => {
       points: entry.task.points_on_approval,
       status: entry.status === 'Submitted' ? 'Needs Approval' : entry.status,
       userId: entry.user_id,
-      submissionId: entry.submission_id // Add this line to include the submission ID
+      submissionId: entry.submission_id
     }));
 
     res.json(result);
@@ -803,9 +808,11 @@ app.patch('/admin/tasks/:taskId/review', authenticateToken, async (req, res) => 
   }
 });
 
+
 // GET /admin/legacies - Admin Only
 // List all legacies
 app.get('/admin/legacies', authenticateToken, async (req, res) => {
+
   if (req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied' });
   }
@@ -837,7 +844,9 @@ app.get('/admin/legacies', authenticateToken, async (req, res) => {
   }
 });
 
+
 // GET /admin/status-options - Admin Only
+
 // Fetches the available status options for task submissions.
 app.get('/admin/status-options', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') {
